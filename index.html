@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Narrador Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0a0a0f;
+  --surface:  #111118;
+  --card:     #16161f;
+  --border:   #252535;
+  --accent:   #7c3aed;
+  --accent2:  #a855f7;
+  --gold:     #f59e0b;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --text:     #e8e8f0;
+  --muted:    #6b6b85;
+  --radius:   12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden}
+
+/* ── Background grain ── */
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+
+/* ── Glow orb ── */
+.orb{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.15) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;z-index:0}
+
+.container{max-width:1100px;margin:0 auto;padding:32px 20px;position:relative;z-index:1}
+
+/* ── Header ── */
+.header{display:flex;align-items:center;gap:16px;margin-bottom:40px}
+.logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 30px rgba(124,58,237,.4)}
+.logo-text{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.5px}
+.logo-text span{color:var(--accent2)}
+.badge{margin-left:auto;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--accent2);font-size:11px;padding:4px 10px;border-radius:20px;letter-spacing:1px}
+
+/* ── Grid layout ── */
+.grid{display:grid;grid-template-columns:1fr 340px;gap:20px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px}
+
+/* ── Textarea ── */
+textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;line-height:1.7;padding:14px;resize:vertical;min-height:260px;transition:.2s;outline:none}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+textarea::placeholder{color:var(--muted)}
+
+.char-counter{font-size:11px;color:var(--muted);text-align:right;margin-top:6px}
+.char-counter.warn{color:var(--gold)}
+
+/* ── Modo tabs ── */
+.mode-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--surface);padding:4px;border-radius:10px;border:1px solid var(--border)}
+.mode-tab{flex:1;padding:8px 12px;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:.2s;color:var(--muted);background:transparent}
+.mode-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(124,58,237,.3)}
+
+/* ── Vozes grid ── */
+.voices-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.voice-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.voice-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.voice-card.selected{border-color:var(--accent);background:rgba(124,58,237,.08)}
+.voice-card.selected::after{content:'✓';position:absolute;top:6px;right:8px;color:var(--accent2);font-size:12px;font-weight:700}
+.voice-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.voice-meta{font-size:10px;color:var(--muted);margin-top:2px;display:flex;gap:6px}
+.voice-gender{padding:1px 6px;border-radius:4px;font-weight:700}
+.voice-gender.F{background:rgba(168,85,247,.15);color:var(--accent2)}
+.voice-gender.M{background:rgba(16,185,129,.12);color:var(--green)}
+
+/* ── Sliders ── */
+.control-row{margin-bottom:14px}
+.control-label{font-size:11px;color:var(--muted);letter-spacing:.5px;display:flex;justify-content:space-between;margin-bottom:6px}
+.control-label span{color:var(--text);font-weight:700}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:var(--border);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 8px rgba(124,58,237,.4)}
+
+/* ── Clone section ── */
+.clone-zone{border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.clone-zone:hover{border-color:var(--accent);background:rgba(124,58,237,.04)}
+.clone-zone.has-file{border-color:var(--green);background:rgba(16,185,129,.04);border-style:solid}
+.clone-icon{font-size:28px;margin-bottom:8px}
+.clone-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:4px}
+.clone-sub{font-size:11px;color:var(--muted)}
+.clone-filename{font-size:11px;color:var(--green);margin-top:6px;font-weight:700}
+.xtts-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:7px;font-size:11px;margin-top:12px}
+.xtts-status.ok{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green)}
+.xtts-status.nok{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);color:#f87171}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.nok{background:var(--red)}
+
+/* ── Buttons ── */
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;padding:13px 16px;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-preview{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.btn-preview:hover{border-color:var(--accent);color:var(--text)}
+.btn-gerar{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.btn-gerar:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,58,237,.4)}
+.btn-gerar:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-gerar.loading{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 4px 16px rgba(124,58,237,.3)}50%{box-shadow:0 4px 24px rgba(124,58,237,.6)}}
+
+/* ── Preview partes ── */
+.preview-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:16px;display:none}
+.preview-box.show{display:block}
+.preview-header{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
+.preview-header span{color:var(--accent2)}
+.parte-item{font-size:11px;line-height:1.5;padding:8px 10px;border-radius:6px;margin-bottom:6px;background:var(--card);border-left:2px solid var(--accent);color:var(--muted)}
+.parte-item strong{color:var(--text);display:block;font-size:10px;margin-bottom:3px;font-family:'Syne',sans-serif;letter-spacing:.5px}
+
+/* ── Progress ── */
+.progress-section{margin-top:20px;display:none}
+.progress-section.show{display:block}
+.progress-bar-wrap{background:var(--surface);border-radius:20px;height:8px;overflow:hidden;margin:10px 0;border:1px solid var(--border)}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px;transition:width .4s ease;width:0%}
+.progress-log{font-size:11px;color:var(--muted);margin-top:6px}
+
+/* ── Resultado ── */
+.result-card{background:linear-gradient(135deg,rgba(16,185,129,.06),rgba(124,58,237,.06));border:1px solid rgba(16,185,129,.25);border-radius:var(--radius);padding:20px;margin-top:16px;display:none}
+.result-card.show{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.result-title{font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.dl-list{display:flex;flex-direction:column;gap:6px}
+.dl-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:7px;padding:8px 12px;font-size:12px}
+.dl-item span{color:var(--muted)}
+.dl-btn{background:var(--accent);color:#fff;border:none;border-radius:5px;padding:4px 12px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;text-decoration:none}
+.dl-btn:hover{background:var(--accent2)}
+.dl-btn.gold{background:var(--gold);color:#000}
+
+/* ── Region select ── */
+select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;padding:9px 12px;outline:none;cursor:pointer;margin-bottom:12px}
+select:focus{border-color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="orb"></div>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-icon">🎙</div>
+    <div class="logo-text">Narrador <span>Studio</span></div>
+    <div class="badge">EDGE-TTS + XTTS</div>
+  </div>
+
+  <div class="grid">
+    <!-- Coluna principal -->
+    <div>
+      <!-- Roteiro -->
+      <div class="card">
+        <div class="card-title">Roteiro</div>
+        <textarea id="roteiro" placeholder="Cole ou digite seu roteiro aqui...&#10;&#10;Qualquer tamanho — o sistema segmenta automaticamente em partes de até 2.400 caracteres." oninput="updateCounter()"></textarea>
+        <div class="char-counter" id="counter">0 caracteres · 0 partes estimadas</div>
+
+        <div class="btn-row">
+          <button class="btn btn-preview" onclick="previewPartes()">🔍 Ver partes</button>
+          <button class="btn btn-gerar" id="btnGerar" onclick="gerarAudio()">▶ Gerar narração</button>
+        </div>
+
+        <!-- Preview partes -->
+        <div class="preview-box" id="previewBox">
+          <div class="preview-header">SEGMENTAÇÃO <span id="previewCount">0 partes</span></div>
+          <div id="previewList"></div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-section" id="progressSection">
+          <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="progress-log" id="progressLog">Preparando...</div>
+        </div>
+
+        <!-- Resultado -->
+        <div class="result-card" id="resultCard">
+          <div class="result-title">✅ Narração gerada!</div>
+          <div class="dl-list" id="dlList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna lateral -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <!-- Modo -->
+      <div class="card">
+        <div class="card-title">Modo</div>
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tab-edge" onclick="setModo('edge')">🗣 Vozes Edge</button>
+          <button class="mode-tab" id="tab-xtts" onclick="setModo('xtts')">🧬 Clonar Voz</button>
+        </div>
+
+        <!-- Painel Edge -->
+        <div id="painel-edge">
+          <select id="regiao" onchange="filtrarVozes()" style="margin-bottom:12px">
+            <option value="pt-BR">🇧🇷 Português Brasil</option>
+            <option value="pt-PT">🇵🇹 Português Portugal</option>
+          </select>
+          <div class="voices-grid" id="voicesGrid"></div>
+
+          <div class="control-row">
+            <div class="control-label">Velocidade <span id="rateVal">Normal</span></div>
+            <input type="range" id="rate" min="-50" max="50" value="0" oninput="updateRate()">
+          </div>
+          <div class="control-row">
+            <div class="control-label">Tom <span id="pitchVal">Normal</span></div>
+            <input type="range" id="pitch" min="-20" max="20" value="0" oninput="updatePitch()">
+          </div>
+        </div>
+
+        <!-- Painel XTTS -->
+        <div id="painel-xtts" style="display:none">
+          <div class="xtts-status nok" id="xttsStatus">
+            <div class="dot nok"></div>
+            Verificando XTTS...
+          </div>
+
+          <div style="margin-top:16px">
+            <div class="card-title" style="margin-bottom:10px">Áudio de referência</div>
+            <div class="clone-zone" id="cloneZone" onclick="document.getElementById('fileInput').click()">
+              <div class="clone-icon">🎤</div>
+              <div class="clone-title">Clique para selecionar</div>
+              <div class="clone-sub">MP3 ou WAV · 15–30 segundos<br>sem ruído, sem música</div>
+              <div class="clone-filename" id="cloneFilename" style="display:none"></div>
+            </div>
+            <input type="file" id="fileInput" accept=".mp3,.wav" style="display:none" onchange="selecionarVoz()">
+            <div style="font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6">
+              💡 Você pode baixar um clip da sua voz do LMNT e usar como referência aqui.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Config -->
+      <div class="card">
+        <div class="card-title">Configuração</div>
+        <div style="margin-bottom:12px">
+          <div class="control-label" style="margin-bottom:6px">Nome do projeto</div>
+          <input type="text" id="nomeProjeto" value="narracao" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;padding:9px 12px;outline:none">
+        </div>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;color:var(--muted)">
+          <input type="checkbox" id="unirPartes" checked style="accent-color:var(--accent)">
+          Unir partes em arquivo único
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let modo = 'edge';
+let vozSelecionada = 'pt-BR-FranciscaNeural';
+let vozRefPath = '';
+const voiceData = {{ voices|tojson }};
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  filtrarVozes();
+  verificarXTTS();
+});
+
+function filtrarVozes() {
+  const regiao = document.getElementById('regiao').value;
+  const grid = document.getElementById('voicesGrid');
+  const lista = voiceData[regiao] || [];
+  grid.innerHTML = lista.map(v => `
+    <div class="voice-card ${vozSelecionada===v.id?'selected':''}" onclick="selecionarVozEdge('${v.id}',this)">
+      <div class="voice-name">${v.name}</div>
+      <div class="voice-meta">
+        <span class="voice-gender ${v.gender}">${v.gender==='F'?'♀':'♂'}</span>
+        <span>${v.style}</span>
+      </div>
+    </div>`).join('');
+}
+
+function selecionarVozEdge(id, el) {
+  vozSelecionada = id;
+  document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function setModo(m) {
+  modo = m;
+  document.getElementById('tab-edge').classList.toggle('active', m==='edge');
+  document.getElementById('tab-xtts').classList.toggle('active', m==='xtts');
+  document.getElementById('painel-edge').style.display = m==='edge'?'block':'none';
+  document.getElementById('painel-xtts').style.display = m==='xtts'?'block':'none';
+}
+
+// ── XTTS ──────────────────────────────────────────────────────────────────────
+async function verificarXTTS() {
+  const res = await fetch('/api/xtts-status');
+  const data = await res.json();
+  const el = document.getElementById('xttsStatus');
+  if (data.disponivel) {
+    el.className = 'xtts-status ok';
+    el.innerHTML = `<div class="dot ok"></div> XTTS v${data.versao} disponível — clonagem ativa`;
+  } else {
+    el.className = 'xtts-status nok';
+    el.innerHTML = `<div class="dot nok"></div> XTTS não instalado<br><span style="font-size:10px;margin-top:4px;display:block;opacity:.7">Execute: py -3.11 -m pip install TTS torch</span>`;
+  }
+}
+
+function selecionarVoz() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) return;
+  vozRefPath = file.path || file.name;
+  const zone = document.getElementById('cloneZone');
+  zone.classList.add('has-file');
+  document.getElementById('cloneFilename').style.display = 'block';
+  document.getElementById('cloneFilename').textContent = '✓ ' + file.name;
+  // Envia para o servidor salvar temporariamente
+  const fd = new FormData();
+  fd.append('voz', file);
+  fetch('/api/upload-voz', {method:'POST', body: fd})
+    .then(r => r.json())
+    .then(d => { if(d.path) vozRefPath = d.path; });
+}
+
+// ── Counter ───────────────────────────────────────────────────────────────────
+function updateCounter() {
+  const txt = document.getElementById('roteiro').value;
+  const len = txt.length;
+  const partes = Math.ceil(len / 2400) || 0;
+  const el = document.getElementById('counter');
+  el.textContent = `${len.toLocaleString()} caracteres · ~${partes} parte${partes!==1?'s':''}`;
+  el.className = 'char-counter' + (len > 3000 ? ' warn' : '');
+}
+
+function updateRate() {
+  const v = parseInt(document.getElementById('rate').value);
+  document.getElementById('rateVal').textContent = v===0?'Normal': v>0?`+${v}% mais rápido`:`${v}% mais lento`;
+}
+function updatePitch() {
+  const v = parseInt(document.getElementById('pitch').value);
+  document.getElementById('pitchVal').textContent = v===0?'Normal': v>0?`+${v}Hz mais agudo`:`${v}Hz mais grave`;
+}
+
+// ── Preview ───────────────────────────────────────────────────────────────────
+async function previewPartes() {
+  const texto = document.getElementById('roteiro').value.trim();
+  if (!texto) return;
+  const res = await fetch('/api/preview', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({texto})});
+  const data = await res.json();
+  document.getElementById('previewCount').textContent = data.total + ' parte' + (data.total!==1?'s':'');
+  document.getElementById('previewList').innerHTML = data.partes.map((p,i) => `
+    <div class="parte-item"><strong>PARTE ${i+1} — ${p.length} chars</strong>${p.substring(0,120)}${p.length>120?'…':''}</div>`).join('');
+  document.getElementById('previewBox').classList.add('show');
+}
+
+// ── Gerar ─────────────────────────────────────────────────────────────────────
+async function gerarAudio() {
+  const texto = document.getElementById('roteiro').value.trim();
+  if (!texto) { alert('Cole o roteiro primeiro!'); return; }
+  if (modo === 'xtts' && !vozRefPath) { alert('Selecione um arquivo de voz de referência!'); return; }
+
+  const btn = document.getElementById('btnGerar');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = '⏳ Gerando...';
+
+  const prog = document.getElementById('progressSection');
+  prog.classList.add('show');
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('progressBar').style.width = '5%';
+  document.getElementById('progressLog').textContent = 'Iniciando geração...';
+
+  const rateV = document.getElementById('rate').value;
+  const pitchV = document.getElementById('pitch').value;
+  const rate = rateV === '0' ? '+0%' : (rateV > 0 ? `+${rateV}%` : `${rateV}%`);
+  const pitch = pitchV === '0' ? '+0Hz' : (pitchV > 0 ? `+${pitchV}Hz` : `${pitchV}Hz`);
+
+  const payload = {
+    modo, texto,
+    voz: vozSelecionada,
+    voz_ref: vozRefPath,
+    rate, pitch,
+    unir: document.getElementById('unirPartes').checked,
+    nome: document.getElementById('nomeProjeto').value || 'narracao'
+  };
+
+  // Simula progresso enquanto aguarda
+  let prog_val = 10;
+  const ticker = setInterval(() => {
+    prog_val = Math.min(prog_val + Math.random() * 8, 85);
+    document.getElementById('progressBar').style.width = prog_val + '%';
+    document.getElementById('progressLog').textContent = `Processando... ${Math.round(prog_val)}%`;
+  }, 800);
+
+  try {
+    const res = await fetch('/api/gerar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const data = await res.json();
+    clearInterval(ticker);
+
+    if (data.erro) {
+      document.getElementById('progressLog').textContent = '❌ Erro: ' + data.erro;
+      document.getElementById('progressBar').style.background = '#ef4444';
+    } else {
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('progressLog').textContent = '✅ Concluído!';
+      mostrarResultado(data);
+    }
+  } catch(e) {
+    clearInterval(ticker);
+    document.getElementById('progressLog').textContent = '❌ Erro: ' + e.message;
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+  btn.innerHTML = '▶ Gerar narração';
+}
+
+function mostrarResultado(data) {
+  const card = document.getElementById('resultCard');
+  const lista = document.getElementById('dlList');
+
+  const items = [];
+  if (data.arquivo_final && data.partes.length > 1) {
+    const nome = data.arquivo_final.split(/[\\/]/).pop();
+    items.push(`<div class="dl-item">
+      <span>🎵 ${nome} <em style="color:var(--green)">(completo)</em></span>
+      <a class="dl-btn gold" href="/api/baixar/${nome}" download>⬇ Baixar</a>
+    </div>`);
+  }
+  data.partes.forEach((p, i) => {
+    const nome = p.split(/[\\/]/).pop();
+    items.push(`<div class="dl-item">
+      <span>🎵 Parte ${i+1}</span>
+      <a class="dl-btn" href="/api/baixar/${nome}" download>⬇</a>
+    </div>`);
+  });
+
+  lista.innerHTML = items.join('');
+  card.classList.add('show');
+}
+</script>
+</body>
+</html>
