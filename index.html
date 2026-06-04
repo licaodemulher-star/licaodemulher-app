@@ -6,7 +6,17 @@
   <meta name="theme-color" content="#0f0a08">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Lição de Mulher — Finanças</title>
+  <title>Lição de Mulher — Finanças: Controle seus Gastos com Carinho</title>
+  <meta name="description" content="App financeiro gratuito para mulheres. Controle gastos, crie metas, use envelopes digitais e converse com Sofia, sua conselheira de IA. Disponível em PT, EN, ES e FR.">
+  <meta name="keywords" content="controle financeiro feminino, app de gastos, envelopes digitais, metas financeiras, educação financeira mulher, finanças pessoais">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Lição de Mulher — Finanças">
+  <meta property="og:description" content="Controle seus gastos, defina metas, use envelopes digitais e tenha uma conselheira de IA no bolso. Grátis para começar.">
+  <meta property="og:url" content="https://www.licaodemulher.com.br">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Lição de Mulher — Finanças">
+  <meta name="twitter:description" content="App financeiro gratuito para mulheres. Controle gastos, metas e muito mais.">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-title" content="Lição de Mulher">
@@ -33,6 +43,12 @@
     @keyframes coinBounce { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-6px) scale(1.1);} }
     @keyframes shimmer { 0%{background-position:-200% 0;} 100%{background-position:200% 0;} }
   </style>
+  <noscript>
+    <style>body{background:#0f0a08;color:#c8a090;font-family:sans-serif;text-align:center;padding:40px 20px;}</style>
+    <h1 style="color:#d4a847;font-size:24px;">Lição de Mulher — Finanças</h1>
+    <p>App financeiro gratuito para mulheres. Controle gastos, defina metas, use envelopes digitais e converse com Sofia, sua conselheira financeira com IA.</p>
+    <p>Para usar o app, ative o JavaScript no seu navegador.</p>
+  </noscript>
 </head>
 <body>
 <div id="root"></div>
@@ -544,7 +560,7 @@
   };
 
   /* ============================================================ AUTH SCREEN ============================================================ */
-  const AuthScreen=({onLogin,onOpenLang,langChosen})=>{
+  const AuthScreen=({onLogin,onOpenLang,langChosen,onBack})=>{
     const {lang,t}=useLang();
     const [modo,setModo]=useState('login');const [nome,setNome]=useState('');const [email,setEmail]=useState('');const [senha,setSenha]=useState('');const [loading,setLoading]=useState(false);const [erro,setErro]=useState('');const [msg,setMsg]=useState('');const [showSenha,setShowSenha]=useState(false);
     const handleEsqueciSenha=async()=>{setErro('');setMsg('');if(!email){setErro(t.digiteEmail);return;}setLoading(true);try{const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;setMsg(t.emailSent(email));}catch(e){setErro(t.erroPadrao);}setLoading(false);};
@@ -552,7 +568,7 @@
     const iS={width:'100%',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'13px 16px',color:'#e8d4c8',fontSize:15,outline:'none',fontFamily:'Nunito',marginBottom:12};
     return(
       <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#0f0a08',padding:'0 0 40px'}}>
-        <div style={{position:'absolute',top:14,right:16,zIndex:10}}><button onClick={onOpenLang} style={{display:'flex',alignItems:'center',gap:5,background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:20,padding:'4px 10px',cursor:'pointer',fontSize:13}}><span>{LANGS[lang].flag}</span><Icon n="globe" s={13} c="#7a5545"/></button></div>
+        <div style={{position:'absolute',top:14,left:16,zIndex:10}}>{onBack&&<button onClick={onBack} style={{background:'rgba(212,168,71,0.06)',border:'1px solid rgba(212,168,71,0.15)',borderRadius:20,padding:'5px 12px',cursor:'pointer',fontSize:12,color:'#7a5545'}}>← Voltar</button>}</div><div style={{position:'absolute',top:14,right:16,zIndex:10}}><button onClick={onOpenLang} style={{display:'flex',alignItems:'center',gap:5,background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:20,padding:'4px 10px',cursor:'pointer',fontSize:13}}><span>{LANGS[lang].flag}</span><Icon n="globe" s={13} c="#7a5545"/></button></div>
         <div style={{padding:'60px 24px 40px',textAlign:'center'}}>
           <div style={{width:72,height:72,borderRadius:'50%',background:'linear-gradient(135deg,#d4a847,#8b5e14)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',boxShadow:'0 0 40px rgba(212,168,71,0.2)'}}><Icon n="wallet" s={32} c="#0f0a08"/></div>
           <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,color:'#d4a847',letterSpacing:'-0.5px',marginBottom:4}}>Lição de Mulher</div>
@@ -1044,12 +1060,255 @@
   };
 
   /* ============================================================ MAIN APP ============================================================ */
-  const App=()=>{
+  
+  /* ============================================================
+     LANDING PAGE — multilingual content
+  ============================================================ */
+  const LANDING_T={
+    pt:{
+      hero_title:'Controle seu dinheiro com carinho',
+      hero_sub:'O app financeiro feito para mulheres que querem mais paz, mais controle e mais liberdade.',
+      cta_entrar:'Entrar',cta_criar:'Criar conta grátis',
+      features_title:'Tudo que você precisa',
+      feats:[
+        {icon:'📊',title:'Controle de Gastos',desc:'Registre entradas e saídas e veja para onde vai cada real.',badge:'Grátis'},
+        {icon:'✉️',title:'Envelopes Digitais',desc:'Divida seu orçamento em categorias e nunca estoure o limite.',badge:'⭐ Premium'},
+        {icon:'💫',title:'Metas e Sonhos',desc:'Defina objetivos, acompanhe a evolução e comemore cada conquista.',badge:'⭐ Premium'},
+        {icon:'🤖',title:'Sofia — IA Financeira',desc:'Sua conselheira pessoal disponível 24h para tirar dúvidas.',badge:'⭐ Premium'},
+        {icon:'📖',title:'Histórias Inspiradoras',desc:'Séries de mulheres reais que transformaram suas vidas financeiras.',badge:'Grátis'},
+        {icon:'💡',title:'Dica Financeira Diária',desc:'Uma nova sabedoria toda manhã para manter o foco.',badge:'Grátis'},
+      ],
+      pricing_title:'Simples e transparente',
+      free_title:'Gratuito',free_price:'R$ 0',
+      free_feats:['Dashboard mensal','Controle de gastos','Dica diária','15 créditos de boas-vindas','2 créditos por login diário'],
+      prem_title:'Premium',prem_price:'R$ 19,90',prem_period:'/mês',
+      prem_feats:['Tudo do plano gratuito','Metas e sonhos ilimitados','Envelopes digitais','Sofia — IA pessoal 24h','100 créditos mensais','Séries completas'],
+      prem_cta:'Assinar Premium',
+      faq_title:'Perguntas frequentes',
+      faq:[
+        {q:'O app é seguro?',a:'Sim. Todos os dados são criptografados e armazenados com segurança usando infraestrutura de nível empresarial (Supabase). Seus dados nunca são vendidos.'},
+        {q:'Posso cancelar o Premium quando quiser?',a:'Sim, sem multa e sem complicação. Você cancela a qualquer momento e mantém o acesso até o fim do período pago.'},
+        {q:'Funciona no celular?',a:'Sim! O app foi criado para mobile. Você pode instalar na tela inicial do seu celular como um aplicativo nativo.'},
+        {q:'O que são os créditos?',a:'Créditos são usados para desbloquear histórias e séries inspiradoras. Você ganha créditos ao criar conta, ao fazer login diário e comprando pacotes.'},
+        {q:'Existe versão em outros idiomas?',a:'Sim! O app está disponível em Português, Inglês, Espanhol e Francês. Escolha seu idioma ao criar a conta.'},
+      ],
+      footer_privacy:'Política de Privacidade',footer_terms:'Termos de Uso',
+      footer_rights:'© 2025 Lição de Mulher · Todos os direitos reservados',
+      tagline_quote:'"Dinheiro guardado é liberdade. Dinheiro gasto é só memória."',
+    },
+    en:{
+      hero_title:'Take control of your money',
+      hero_sub:'The financial app made for women who want more peace, more control, and more freedom.',
+      cta_entrar:'Sign In',cta_criar:'Create free account',
+      features_title:'Everything you need',
+      feats:[
+        {icon:'📊',title:'Expense Tracker',desc:'Log income and expenses and see where every dollar goes.',badge:'Free'},
+        {icon:'✉️',title:'Digital Envelopes',desc:'Divide your budget into categories and never go over the limit.',badge:'⭐ Premium'},
+        {icon:'💫',title:'Goals and Dreams',desc:'Set goals, track your progress, and celebrate every milestone.',badge:'⭐ Premium'},
+        {icon:'🤖',title:'Sofia — AI Advisor',desc:'Your personal financial advisor available 24/7.',badge:'⭐ Premium'},
+        {icon:'📖',title:'Inspiring Stories',desc:'Series of real women who transformed their financial lives.',badge:'Free'},
+        {icon:'💡',title:'Daily Financial Tip',desc:'New wisdom every morning to keep you focused.',badge:'Free'},
+      ],
+      pricing_title:'Simple and transparent',
+      free_title:'Free',free_price:'US$ 0',
+      free_feats:['Monthly dashboard','Expense tracking','Daily tip','15 welcome credits','2 credits per daily login'],
+      prem_title:'Premium',prem_price:'US$ 9.90',prem_period:'/month',
+      prem_feats:['Everything in Free','Unlimited goals','Digital envelopes','Sofia AI 24/7','100 monthly credits','Full series access'],
+      prem_cta:'Go Premium',
+      faq_title:'Frequently asked questions',
+      faq:[
+        {q:'Is the app secure?',a:'Yes. All data is encrypted and stored securely using enterprise-grade infrastructure (Supabase). Your data is never sold.'},
+        {q:'Can I cancel Premium anytime?',a:'Yes, no penalties. Cancel anytime and keep access until the end of your paid period.'},
+        {q:'Does it work on mobile?',a:'Yes! Built for mobile. You can install it on your home screen as a native app.'},
+        {q:'What are credits?',a:'Credits unlock inspiring stories and series. Earn credits when you sign up, daily login, and by purchasing packages.'},
+        {q:'Is it available in other languages?',a:'Yes! Available in Portuguese, English, Spanish, and French.'},
+      ],
+      footer_privacy:'Privacy Policy',footer_terms:'Terms of Use',
+      footer_rights:'© 2025 Lição de Mulher · All rights reserved',
+      tagline_quote:'"Money saved is freedom. Money spent is just a memory."',
+    },
+    es:{
+      hero_title:'Toma el control de tu dinero',
+      hero_sub:'La app financiera hecha para mujeres que quieren más paz, más control y más libertad.',
+      cta_entrar:'Iniciar sesión',cta_criar:'Crear cuenta gratis',
+      features_title:'Todo lo que necesitas',
+      feats:[
+        {icon:'📊',title:'Control de Gastos',desc:'Registra ingresos y gastos y ve a dónde va cada peso.',badge:'Gratis'},
+        {icon:'✉️',title:'Sobres Digitales',desc:'Divide tu presupuesto en categorías y nunca excedas el límite.',badge:'⭐ Premium'},
+        {icon:'💫',title:'Metas y Sueños',desc:'Define objetivos, sigue tu progreso y celebra cada logro.',badge:'⭐ Premium'},
+        {icon:'🤖',title:'Sofia — IA Financiera',desc:'Tu asesora personal disponible 24h.',badge:'⭐ Premium'},
+        {icon:'📖',title:'Historias Inspiradoras',desc:'Series de mujeres reales que transformaron sus vidas financieras.',badge:'Gratis'},
+        {icon:'💡',title:'Consejo Financiero Diario',desc:'Nueva sabiduría cada mañana para mantenerte enfocada.',badge:'Gratis'},
+      ],
+      pricing_title:'Simple y transparente',
+      free_title:'Gratuito',free_price:'$ 0',
+      free_feats:['Panel mensual','Control de gastos','Consejo diario','15 créditos de bienvenida','2 créditos por login diario'],
+      prem_title:'Premium',prem_price:'US$ 9.90',prem_period:'/mes',
+      prem_feats:['Todo del plan gratuito','Metas ilimitadas','Sobres digitales','Sofia IA 24h','100 créditos mensuales','Series completas'],
+      prem_cta:'Suscribirse Premium',
+      faq_title:'Preguntas frecuentes',
+      faq:[
+        {q:'La app es segura?',a:'Sí. Todos los datos están cifrados y almacenados de forma segura (Supabase). Tus datos nunca se venden.'},
+        {q:'Puedo cancelar Premium cuando quiera?',a:'Sí, sin penalizaciones. Cancela cuando quieras y mantén el acceso hasta el fin del período pagado.'},
+        {q:'Funciona en el móvil?',a:'Sí! Creada para móvil. Puedes instalarla en la pantalla de inicio como una app nativa.'},
+        {q:'Qué son los créditos?',a:'Los créditos desbloquean historias y series. Ganas créditos al registrarte, al iniciar sesión diariamente y comprando paquetes.'},
+        {q:'Está disponible en otros idiomas?',a:'Sí! Disponible en Portugués, Inglés, Español y Francés.'},
+      ],
+      footer_privacy:'Política de Privacidad',footer_terms:'Términos de Uso',
+      footer_rights:'© 2025 Lição de Mulher · Todos los derechos reservados',
+      tagline_quote:'"Dinero guardado es libertad. Dinero gastado es solo un recuerdo."',
+    },
+    fr:{
+      hero_title:'Prenez le contrôle de votre argent',
+      hero_sub:"L'application financière faite pour les femmes qui veulent plus de paix, plus de contrôle et plus de liberté.",
+      cta_entrar:'Se connecter',cta_criar:'Créer un compte gratuit',
+      features_title:'Tout ce dont vous avez besoin',
+      feats:[
+        {icon:'📊',title:'Suivi des Dépenses',desc:'Enregistrez revenus et dépenses et voyez où va chaque euro.',badge:'Gratuit'},
+        {icon:'✉️',title:'Enveloppes Numériques',desc:'Divisez votre budget en catégories et ne dépassez plus jamais la limite.',badge:'⭐ Premium'},
+        {icon:'💫',title:'Objectifs et Rêves',desc:'Définissez des objectifs, suivez votre progression et célébrez chaque victoire.',badge:'⭐ Premium'},
+        {icon:'🤖',title:'Sofia — IA Financière',desc:'Votre conseillère personnelle disponible 24h.',badge:'⭐ Premium'},
+        {icon:'📖',title:'Histoires Inspirantes',desc:'Séries de vraies femmes qui ont transformé leur vie financière.',badge:'Gratuit'},
+        {icon:'💡',title:'Conseil Quotidien',desc:'Une nouvelle sagesse chaque matin pour rester motivée.',badge:'Gratuit'},
+      ],
+      pricing_title:'Simple et transparent',
+      free_title:'Gratuit',free_price:'0 €',
+      free_feats:['Tableau de bord mensuel','Suivi des dépenses','Conseil quotidien','15 crédits de bienvenue','2 crédits par connexion quotidienne'],
+      prem_title:'Premium',prem_price:'9,90 €',prem_period:'/mois',
+      prem_feats:['Tout du plan gratuit','Objectifs illimités','Enveloppes numériques','Sofia IA 24h','100 crédits mensuels','Séries complètes'],
+      prem_cta:"S'abonner Premium",
+      faq_title:'Questions fréquentes',
+      faq:[
+        {q:"L'application est-elle sécurisée ?",a:"Oui. Toutes les données sont chiffrées et stockées en toute sécurité (Supabase). Vos données ne sont jamais vendues."},
+        {q:'Puis-je annuler Premium à tout moment ?',a:"Oui, sans pénalités. Annulez à tout moment et gardez l'accès jusqu'à la fin de la période payée."},
+        {q:'Fonctionne-t-il sur mobile ?',a:"Oui ! Conçu pour mobile. Installez-le sur l'écran d'accueil comme une app native."},
+        {q:'Que sont les crédits ?',a:"Les crédits débloquent des histoires et séries. Gagnez des crédits en créant un compte, en vous connectant quotidiennement et en achetant des paquets."},
+        {q:'Est-il disponible dans d'autres langues ?',a:'Oui ! Disponible en Portugais, Anglais, Espagnol et Français.'},
+      ],
+      footer_privacy:'Politique de Confidentialité',footer_terms:"Conditions d'Utilisation",
+      footer_rights:'© 2025 Lição de Mulher · Tous droits réservés',
+      tagline_quote:""L'argent économisé est liberté. L'argent dépensé n'est qu'un souvenir."",
+    },
+  };
+
+  const LandingScreen=({onEntrar,onOpenLang})=>{
+    const {lang}=useLang();
+    const lt=LANDING_T[lang]||LANDING_T.pt;
+    const ld=LANGS[lang];
+    const [faqOpen,setFaqOpen]=useState(null);
+    const isPt=lang==='pt';
+    const stripeUrl=isPt?STRIPE_LINK:STRIPE_LINK_INTL;
+    const sBtn={background:'linear-gradient(135deg,#c8784a,#a05830)',border:'none',borderRadius:14,padding:'14px 24px',cursor:'pointer',fontSize:15,fontWeight:700,color:'white',width:'100%',boxShadow:'0 4px 20px rgba(200,120,74,0.3)'};
+    const oBtn={background:'transparent',border:'1px solid rgba(212,168,71,0.25)',borderRadius:14,padding:'12px 24px',cursor:'pointer',fontSize:14,color:'#c8a090',width:'100%'};
+
+    return(
+      <div style={{background:'#0f0a08',minHeight:'100vh',color:'#c8a090',fontFamily:"'Nunito',sans-serif"}}>
+        <nav style={{position:'sticky',top:0,zIndex:100,background:'rgba(15,10,8,0.96)',backdropFilter:'blur(10px)',borderBottom:'1px solid rgba(212,168,71,0.1)',padding:'12px 20px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,color:'#d4a847',fontWeight:600}}>Lição de Mulher</div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <button onClick={onOpenLang} style={{background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:20,padding:'5px 11px',cursor:'pointer',fontSize:15,color:'#c8a090'}}>{ld.flag}</button>
+            <button onClick={onEntrar} style={{background:'linear-gradient(135deg,#c8784a,#a05830)',border:'none',borderRadius:20,padding:'7px 18px',cursor:'pointer',fontSize:13,fontWeight:700,color:'white'}}>{lt.cta_entrar}</button>
+          </div>
+        </nav>
+
+        <section style={{padding:'52px 24px 44px',textAlign:'center',background:'radial-gradient(ellipse at 50% 0%,rgba(212,168,71,0.05) 0%,transparent 70%)'}}>
+          <div style={{width:78,height:78,borderRadius:'50%',background:'linear-gradient(135deg,#d4a847,#8b5e14)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 22px',boxShadow:'0 0 60px rgba(212,168,71,0.2)'}}>
+            <Icon n="wallet" s={34} c="#0f0a08"/>
+          </div>
+          <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:28,color:'#e8d4c8',lineHeight:1.35,marginBottom:14,letterSpacing:'-0.3px'}}>{lt.hero_title}</h1>
+          <p style={{fontSize:14,color:'#a08070',lineHeight:1.75,maxWidth:300,margin:'0 auto 30px'}}>{lt.hero_sub}</p>
+          <div style={{display:'flex',flexDirection:'column',gap:12,maxWidth:290,margin:'0 auto'}}>
+            <button onClick={onEntrar} style={sBtn}>{lt.cta_criar}</button>
+            <button onClick={onEntrar} style={oBtn}>{lt.cta_entrar}</button>
+          </div>
+          <p style={{marginTop:22,fontSize:12,color:'#7a5545',fontStyle:'italic',lineHeight:1.6,maxWidth:280,margin:'22px auto 0'}}>{lt.tagline_quote}</p>
+        </section>
+
+        <section style={{padding:'40px 20px',background:'rgba(255,255,255,0.012)'}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847',textAlign:'center',marginBottom:24,fontWeight:600}}>{lt.features_title}</h2>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:11}}>
+            {lt.feats.map((f,i)=>{
+              const isPrem=f.badge.includes('Premium');
+              return(<div key={i} style={{background:'#1a1210',borderRadius:13,padding:15,border:'1px solid rgba(212,168,71,0.1)'}}>
+                <div style={{fontSize:24,marginBottom:7}}>{f.icon}</div>
+                <div style={{fontSize:12,fontWeight:700,color:'#e8d4c8',marginBottom:5,lineHeight:1.3}}>{f.title}</div>
+                <div style={{fontSize:11,color:'#a08070',lineHeight:1.5,marginBottom:9}}>{f.desc}</div>
+                <span style={{fontSize:9,fontWeight:700,background:isPrem?'rgba(212,168,71,0.12)':'rgba(46,168,78,0.1)',color:isPrem?'#d4a847':'#4dd67a',border:'1px solid '+(isPrem?'rgba(212,168,71,0.3)':'rgba(46,168,78,0.3)'),borderRadius:4,padding:'2px 7px'}}>{f.badge}</span>
+              </div>);
+            })}
+          </div>
+        </section>
+
+        <section style={{padding:'36px 24px',textAlign:'center',borderTop:'1px solid rgba(212,168,71,0.06)',borderBottom:'1px solid rgba(212,168,71,0.06)'}}>
+          <div style={{fontSize:34,marginBottom:12}}>🌸</div>
+          <blockquote style={{fontFamily:"'Playfair Display',serif",fontSize:16,color:'#d4a847',lineHeight:1.7,margin:'0 auto',fontStyle:'italic',maxWidth:310}}>
+            "Plante suas sementes no silêncio, confie no tempo de Deus e transforme sua dor em sabedoria."
+          </blockquote>
+        </section>
+
+        <section style={{padding:'44px 20px'}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847',textAlign:'center',marginBottom:24,fontWeight:600}}>{lt.pricing_title}</h2>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+            <div style={{background:'#1a1210',borderRadius:16,padding:18,border:'1px solid rgba(212,168,71,0.15)'}}>
+              <div style={{fontSize:11,fontWeight:700,color:'#7a5545',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em'}}>{lt.free_title}</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:24,color:'#e8d4c8',marginBottom:16}}>{lt.free_price}</div>
+              <ul style={{listStyle:'none',padding:0,margin:'0 0 14px'}}>
+                {lt.free_feats.map((f,i)=>(
+                  <li key={i} style={{fontSize:11,color:'#a08070',padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.04)',display:'flex',alignItems:'flex-start',gap:5}}>
+                    <span style={{color:'#4dd67a',fontSize:10,marginTop:1,flexShrink:0}}>✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={onEntrar} style={{...oBtn,padding:'9px',fontSize:12}}>Começar grátis</button>
+            </div>
+            <div style={{background:'linear-gradient(135deg,#1e1408,#2a1c10)',borderRadius:16,padding:18,border:'1px solid rgba(212,168,71,0.4)',boxShadow:'0 0 30px rgba(212,168,71,0.07)'}}>
+              <div style={{fontSize:11,fontWeight:700,color:'#d4a847',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em'}}>⭐ {lt.prem_title}</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847',marginBottom:16}}>{lt.prem_price}<span style={{fontSize:10,color:'#a08070'}}>{lt.prem_period}</span></div>
+              <ul style={{listStyle:'none',padding:0,margin:'0 0 14px'}}>
+                {lt.prem_feats.map((f,i)=>(
+                  <li key={i} style={{fontSize:11,color:'#c8a090',padding:'5px 0',borderBottom:'1px solid rgba(212,168,71,0.08)',display:'flex',alignItems:'flex-start',gap:5}}>
+                    <span style={{color:'#d4a847',fontSize:10,marginTop:1,flexShrink:0}}>⭐</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={()=>window.open(stripeUrl,'_blank')} style={{...sBtn,padding:'9px',fontSize:12}}>{lt.prem_cta}</button>
+            </div>
+          </div>
+        </section>
+
+        <section style={{padding:'40px 20px',background:'rgba(255,255,255,0.012)'}}>
+          <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847',textAlign:'center',marginBottom:22,fontWeight:600}}>{lt.faq_title}</h2>
+          {lt.faq.map((item,i)=>(
+            <div key={i} style={{marginBottom:8,background:'#1a1210',borderRadius:12,border:'1px solid rgba(212,168,71,0.1)',overflow:'hidden'}}>
+              <button onClick={()=>setFaqOpen(faqOpen===i?null:i)} style={{width:'100%',background:'none',border:'none',padding:'14px 16px',textAlign:'left',color:'#e8d4c8',fontSize:13,fontWeight:600,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8,fontFamily:"'Nunito',sans-serif"}}>
+                <span style={{flex:1}}>{item.q}</span>
+                <span style={{color:'#d4a847',fontSize:18,flexShrink:0,lineHeight:1}}>{faqOpen===i?'−':'+'}</span>
+              </button>
+              {faqOpen===i&&<div style={{padding:'0 16px 14px',fontSize:12,color:'#a08070',lineHeight:1.75}}>{item.a}</div>}
+            </div>
+          ))}
+        </section>
+
+        <footer style={{padding:'32px 20px 52px',textAlign:'center',borderTop:'1px solid rgba(212,168,71,0.08)'}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#d4a847',marginBottom:6,fontWeight:600}}>Lição de Mulher</div>
+          <div style={{fontSize:12,color:'#7a5545',marginBottom:18}}>Finanças + Histórias</div>
+          <div style={{display:'flex',justifyContent:'center',gap:20,marginBottom:14}}>
+            <a href="/privacy.html" style={{fontSize:12,color:'#7a5545',textDecoration:'none'}}>{lt.footer_privacy}</a>
+            <a href="/termos.html" style={{fontSize:12,color:'#7a5545',textDecoration:'none'}}>{lt.footer_terms}</a>
+          </div>
+          <div style={{fontSize:10,color:'#3a2820'}}>{lt.footer_rights}</div>
+        </footer>
+      </div>
+    );
+  };
+
+const App=()=>{
     const [lang,setLangState]=useState(()=>{const s=localStorage.getItem('ldm_lang');return(s&&LANGS[s])?s:'pt';});
     const [langChosen,setLangChosen]=useState(()=>!!localStorage.getItem('ldm_lang_chosen'));
     const [showLangModal,setShowLangModal]=useState(false);
     const setLang=key=>{if(!LANGS[key])return;setLangState(key);localStorage.setItem('ldm_lang',key);setLangChosen(true);localStorage.setItem('ldm_lang_chosen','1');if(user?.id)sb.from('profiles').update({lang:key}).eq('id',user.id).then(()=>{});};
     const t=LANGS[lang];
+    const [showLanding,setShowLanding]=useState(true);
     const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [tab,setTab]=useState('home');
     const [transacoes,setTransacoes]=useState([]);const [metas,setMetas]=useState([]);const [envelopes,setEnvelopes]=useState([]);const [dividas,setDividas]=useState([]);
     const [loading,setLoading]=useState(true);const [deferredPrompt,setDeferredPrompt]=useState(null);const [showInstall,setShowInstall]=useState(false);
@@ -1148,7 +1407,7 @@
 
     if(recoveryMode)return(<LangCtx.Provider value={ctxValue}><div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px',background:'#0f0a08'}}><div style={{width:'100%',maxWidth:'400px',background:'#1a1210',borderRadius:'20px',padding:'32px',border:'1px solid #3a2820'}}><div style={{textAlign:'center',marginBottom:'28px'}}><div style={{fontSize:'40px',marginBottom:'12px'}}>🔐</div><h2 style={{fontFamily:'Playfair Display',color:'#e8c4a0',fontSize:'22px',marginBottom:'8px'}}>{t.novaSenhaTitle}</h2><p style={{color:'#a08070',fontSize:'14px'}}>{t.novaSenhaSub}</p></div><div style={{position:'relative',marginBottom:'16px'}}><input type={showSenha?'text':'password'} placeholder={t.novaSenhaPh} value={novaSenha} onChange={e=>setNovaSenha(e.target.value)} style={{width:'100%',padding:'14px 44px 14px 16px',background:'#251815',border:'1px solid #3a2820',borderRadius:'12px',color:'#e8c4a0',fontSize:'16px',outline:'none'}}/><button onClick={()=>setShowSenha(s=>!s)} type="button" style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'18px',padding:'4px'}}>{showSenha?'🙈':'👁️'}</button></div>{novaSenhaErro&&<p style={{color:'#e07070',fontSize:'13px',marginBottom:'12px',textAlign:'center'}}>{novaSenhaErro}</p>}{novaSenhaMsg&&<p style={{color:'#70c070',fontSize:'13px',marginBottom:'12px',textAlign:'center'}}>{novaSenhaMsg}</p>}<button onClick={handleAtualizarSenha} disabled={novaSenhaLoading} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#c8784a,#a05830)',border:'none',borderRadius:'12px',color:'white',fontSize:'16px',fontWeight:'700',cursor:'pointer'}}>{novaSenhaLoading?t.salvandoSenha:t.salvarSenha}</button></div></div></LangCtx.Provider>);
 
-    if(!user)return(<LangCtx.Provider value={ctxValue}>{showLangModal&&<LangPickerModal onClose={()=>setShowLangModal(false)}/>}<AuthScreen onLogin={u=>{setUser(u);loadAll(u.id);}} onOpenLang={()=>setShowLangModal(true)} langChosen={langChosen}/></LangCtx.Provider>);
+    if(!user)return(<LangCtx.Provider value={ctxValue}>{showLangModal&&<LangPickerModal onClose={()=>setShowLangModal(false)}/>}{showLanding?<LandingScreen onEntrar={()=>setShowLanding(false)} onOpenLang={()=>setShowLangModal(true)}/>:<AuthScreen onLogin={u=>{setUser(u);loadAll(u.id);}} onOpenLang={()=>setShowLangModal(true)} langChosen={langChosen} onBack={()=>setShowLanding(true)}/>}</LangCtx.Provider>);
 
     return(<LangCtx.Provider value={ctxValue}>
       <div style={{background:'#0f0a08',minHeight:'100vh'}}>
