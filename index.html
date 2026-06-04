@@ -10,6 +10,7 @@
   <meta name="description" content="App financeiro gratuito para mulheres. Controle gastos, crie metas, use envelopes digitais e converse com Sofia, sua conselheira de IA. Disponível em PT, EN, ES e FR.">
   <meta name="keywords" content="controle financeiro feminino, app de gastos, envelopes digitais, metas financeiras, educação financeira mulher, finanças pessoais">
   <meta name="robots" content="index, follow">
+  <meta name="google-site-verification" content="TjektAUFY1xMl8vecPhaBbyednWlYIalTsbpOfLpxig">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Lição de Mulher — Finanças">
   <meta property="og:description" content="Controle seus gastos, defina metas, use envelopes digitais e tenha uma conselheira de IA no bolso. Grátis para começar.">
@@ -94,6 +95,8 @@
   const SUPABASE_KEY     = 'sb_publishable_S6ZlCNYHCm89Ok6Mhqy3fw_wv9JdHO2';
   const STRIPE_LINK      = 'https://buy.stripe.com/9B6eVd8WWfZ48Gm2uIfjG00';
   const STRIPE_LINK_INTL = 'https://buy.stripe.com/3cI5kD6OO28eg8OedqfjG01';
+  const STRIPE_LINK_ANUAL = 'https://buy.stripe.com/dRm3cv1uudQWg8O5GUfjG07';
+  const PRECO_ANUAL       = 'R$99/ano';
   const PRECO            = 'R$19,90/mês';
   const PRECO_INTL       = 'US$9,90/month';
   const R2_BASE          = 'https://pub-030583a8cc43472c981d3cd5f7e29755.r2.dev';
@@ -169,8 +172,33 @@
       contaCriada:'Conta criada! Verifique seu e-mail.', preenchaAll:'Preencha todos os campos.', digiteNome:'Digite seu nome.', digiteEmail:'Digite seu e-mail acima primeiro.', erroPadrao:'Algo deu errado. Tente novamente.',
       erros:{'Invalid login credentials':'E-mail ou senha incorretos.','User already registered':'Este e-mail já tem uma conta.','Password should be at least 6 characters':'Senha: mínimo 6 caracteres.','Unable to validate email address: invalid format':'E-mail inválido.','Email not confirmed':'Confirme seu e-mail antes de entrar.'},
       premium:'⭐ Premium', gratuito:'Gratuito',
-      navInicio:'Início', navGastos:'Gastos', navMetas:'Sonhos', navEnvelopes:'Envelopes', navHistorias:'Histórias', navSofia:'Sofia IA', navPerfil:'Perfil',
+      navInicio:'Início', navGastos:'Gastos', navMetas:'Sonhos', navEnvelopes:'Envelopes', navHistorias:'Histórias', navSofia:'Sofia IA', navPerfil:'Perfil', navDesafio:'Desafio',
       bomDia:'Bom dia', boaTarde:'Boa tarde', boaNoite:'Boa noite',
+      desafioTitle:'Desafio das 52 Semanas',
+      desafioSub:'Guarde R$1 na 1ª semana, R$2 na 2ª... e acumule R$1.378 em 1 ano!',
+      desafioGuardado:'Guardado até agora',
+      desafioMeta:'Meta total: R$ 1.378,00',
+      desafioCompartilhar:'Compartilhar no WhatsApp 💬',
+      desafioSemana:'Sem.',
+      desafioZerar:'Reiniciar desafio',
+      desafioParabens:'Parabéns! Desafio concluído! 🎉',
+      calcTitle:'Calculadora de Dívida',
+      calcSub:'Descubra quanto você vai pagar no total',
+      calcDivida:'Valor da dívida',
+      calcJuros:'Juros ao mês (%)',
+      calcParcelas:'Nº de parcelas',
+      calcBtnCalc:'Calcular',
+      calcBtnLimpar:'Limpar',
+      calcTotalPagar:'Total a pagar',
+      calcTotalJuros:'Total em juros',
+      calcValorParcela:'Valor da parcela',
+      calcAviso:'⚠️ Dívidas com juros altos custam muito mais do que parecem.',
+      whatsappMeta:n=>`Acabei de bater minha meta "${n}" no app Lição de Mulher! 💰🌸 https://www.licaodemulher.com.br`,
+      whatsappDesafio:(s,v)=>`Já completei ${s} semanas do Desafio 52 Semanas e guardei R$${v}! 🎯 #LicaoDeMulher https://www.licaodemulher.com.br`,
+      planoAnual:'Plano Anual',
+      precoAnual:'R$ 99/ano',
+      economiaCom:'Equivale a R$8,25/mês — 58% de desconto!',
+      assinarAnual:'Assinar Plano Anual',
       saldoMes:'Saldo do mês', entradas:'↑ Entradas', saidas:'↓ Saídas', gasto:'Gasto',
       dicaDia:'Dica do dia', ondeGastouMais:'Onde gastou mais', ultimosLanc:'Últimos lançamentos',
       nenhumLanc:'Nenhum lançamento ainda.', toqueComec:'Toque aqui para começar!', adicionarLanc:'Adicionar lançamento',
@@ -420,7 +448,7 @@
   const Loading=()=>{const {t}=useLang();return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'#0f0a08',gap:16}}><div style={{width:44,height:44,borderRadius:'50%',border:'3px solid rgba(212,168,71,0.15)',borderTopColor:'#d4a847',animation:'spin 0.9s linear infinite'}}/><div style={{fontSize:13,color:'#7a5545'}}>{t.loading}</div></div>);};
 
   /* ============================================================ PREMIUM WALL ============================================================ */
-  const PremiumWall=({onUpgrade})=>{const {t,preco}=useLang();return(<div style={{padding:'40px 24px',textAlign:'center',animation:'fadeIn 0.3s ease'}}><div style={{width:64,height:64,borderRadius:'50%',background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.3)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px'}}><Icon n="lock" s={28} c="#d4a847"/></div><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8',marginBottom:10}}>{t.recursoPremi}</div><div style={{fontSize:14,color:'#7a5545',lineHeight:1.7,marginBottom:28,maxWidth:280,margin:'0 auto 28px'}}>{t.recursoDesc(preco)}</div><button onClick={onUpgrade} style={{background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:14,padding:'14px 32px',fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}><Icon n="star" s={16} c="#0f0a08" filled/>{t.assinarBtn(preco)}</button><div style={{fontSize:11,color:'#7a5545',marginTop:12}}>{t.semMulta}</div></div>);};
+  const PremiumWall=({onUpgrade})=>{const {t,preco,lang}=useLang();const isPt=lang==='pt';return(<div style={{padding:'40px 24px',textAlign:'center',animation:'fadeIn 0.3s ease'}}><div style={{width:64,height:64,borderRadius:'50%',background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.3)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px'}}><Icon n="lock" s={28} c="#d4a847"/></div><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8',marginBottom:10}}>{t.recursoPremi}</div><div style={{fontSize:14,color:'#7a5545',lineHeight:1.7,marginBottom:28,maxWidth:280,margin:'0 auto 28px'}}>{t.recursoDesc(preco)}</div><button onClick={onUpgrade} style={{background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:14,padding:'14px 32px',fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}><Icon n="star" s={16} c="#0f0a08" filled/>{t.assinarBtn(preco)}</button><div style={{fontSize:11,color:'#7a5545',marginTop:12}}>{t.semMulta}</div></div>);};
 
   /* ============================================================ MODAL CONFIRM ============================================================ */
   const ModalConfirm=({msg,onConfirm,onCancel})=>{const {t}=useLang();return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}><div style={{background:'#1e1208',borderRadius:20,border:'1px solid rgba(212,168,71,0.2)',padding:24,width:'100%',maxWidth:320,animation:'slideUp 0.25s ease'}}><div style={{fontSize:15,color:'#e8d4c8',marginBottom:20,textAlign:'center',lineHeight:1.6}}>{msg}</div><div style={{display:'flex',gap:10}}><button onClick={onCancel} style={{flex:1,background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:12,padding:'12px',color:'#7a5545',fontSize:14,fontWeight:600,cursor:'pointer'}}>{t.cancelar}</button><button onClick={onConfirm} style={{flex:1,background:'rgba(212,71,71,0.15)',border:'1px solid rgba(212,71,71,0.3)',borderRadius:12,padding:'12px',color:'#d44747',fontSize:14,fontWeight:700,cursor:'pointer'}}>{t.excluir}</button></div></div></div>);};
@@ -644,7 +672,7 @@
   };
 
   /* ============================================================ DASHBOARD ============================================================ */
-  const Dashboard=({profile,transacoes,dividas,onAdd,creditos,sequencia,onOpenLoja,onOpenMemoria})=>{
+  const Dashboard=({profile,transacoes,dividas,onAdd,creditos,sequencia,onOpenLoja,onOpenMemoria,onDesafio})=>{
     const {lang,t,preco,stripeLink}=useLang();
     const cur=LANGS[lang].currency;
     const fmt=v=>fmtMoney(v,cur);const fmtS=v=>fmtShort(v,cur);
@@ -734,6 +762,16 @@
           <div style={{fontSize:14,color:'#c8a090',lineHeight:1.7,fontStyle:'italic'}}>"{dicaDoDia}"</div>
         </div>
 
+        {/* Desafio 52 Semanas card */}
+        {onDesafio&&<div onClick={onDesafio} style={{background:'linear-gradient(135deg,rgba(200,120,74,0.15),rgba(212,168,71,0.08))',borderRadius:16,border:'1px solid rgba(212,168,71,0.25)',padding:'14px 16px',marginBottom:14,cursor:'pointer',display:'flex',alignItems:'center',gap:14,active:{opacity:0.85}}}>
+          <div style={{width:44,height:44,borderRadius:'50%',background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.3)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:22}}>🎯</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:13,fontWeight:700,color:'#d4a847',marginBottom:3}}>Desafio das 52 Semanas</div>
+            <div style={{fontSize:11,color:'#7a5545',lineHeight:1.4}}>Guarde R$1 por semana e acumule R$1.378 em 1 ano</div>
+          </div>
+          <div style={{fontSize:18,color:'#d4a847'}}>›</div>
+        </div>}
+
         {/* Top categorias */}
         {topCats.length>0&&(<div style={{background:'#1a1008',borderRadius:16,border:'1px solid rgba(212,168,71,0.12)',padding:'14px 16px',marginBottom:14}}><div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:12,textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.ondeGastouMais}</div>{topCats.map(([cat,val])=>(<div key={cat} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}><div style={{fontSize:13,color:'#c8a090'}}>{cat}</div><div style={{display:'flex',alignItems:'center',gap:10}}><div style={{width:60,height:5,background:'rgba(212,168,71,0.1)',borderRadius:5,overflow:'hidden'}}><div style={{height:'100%',background:'#d4a847',borderRadius:5,width:`${Math.min(100,(val/gas)*100)}%`}}/></div><div style={{fontSize:13,fontWeight:600,color:'#d44747',minWidth:70,textAlign:'right'}}>{fmt(val)}</div></div></div>))}</div>)}
 
@@ -762,9 +800,9 @@
   };
 
   /* ============================================================ GASTOS SCREEN — com dívidas recorrentes ============================================================ */
-  const GastosScreen=({transacoes,dividas,onAdd,onDelete,onEdit,onAddDivida,onDeleteDivida,onQuitarDivida})=>{
+  const GastosScreen=({transacoes,dividas,onAdd,onDelete,onEdit,onAddDivida,onDeleteDivida,onQuitarDivida,onCalc})=>{
     const {lang,t}=useLang();const cur=LANGS[lang].currency;const fmt=v=>fmtMoney(v,cur);
-    const [showForm,setShowForm]=useState(false);const [tipo,setTipo]=useState('gasto');const [valor,setValor]=useState('');const [categoria,setCategoria]=useState('');const [descricao,setDescricao]=useState('');const [data,setData]=useState(hoje());const [loading,setLoading]=useState(false);
+    const [showForm,setShowForm]=useState(false);const [tipo,setTipo]=useState('gasto');const [valor,setValor]=useState('');const [categoria,setCategoria]=useState('');const [showCalcBtn,setShowCalcBtn]=useState(false);const [descricao,setDescricao]=useState('');const [data,setData]=useState(hoje());const [loading,setLoading]=useState(false);
     const [filtro,setFiltro]=useState('todos');const [confirmId,setConfirmId]=useState(null);const [editTx,setEditTx]=useState(null);
     const [showDivForm,setShowDivForm]=useState(false);const [divNome,setDivNome]=useState('');const [divValor,setDivValor]=useState('');const [divParcelas,setDivParcelas]=useState('');const [divVenc,setDivVenc]=useState('');const [divCat,setDivCat]=useState('');const [savingDiv,setSavingDiv]=useState(false);
     const [confirmDivId,setConfirmDivId]=useState(null);
@@ -785,6 +823,7 @@
           <button onClick={()=>{setShowForm(!showForm);setShowDivForm(false);}} style={{background:showForm?'rgba(212,71,71,0.15)':'rgba(212,168,71,0.12)',border:`1px solid ${showForm?'rgba(212,71,71,0.3)':'rgba(212,168,71,0.25)'}`,borderRadius:10,padding:'8px 14px',color:showForm?'#d44747':'#d4a847',fontSize:13,fontWeight:600,cursor:'pointer'}}>
             {showForm?t.fechar:t.novo}
           </button>
+          {onCalc&&<button onClick={onCalc} style={{background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:10,padding:'8px 12px',color:'#d4a847',fontSize:12,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>🧮 Calcular</button>}
         </div>
 
         {/* FORM DE LANÇAMENTO NORMAL */}
@@ -947,7 +986,7 @@
         </div>
         {showForm&&(<div style={{background:'#1a1008',borderRadius:18,border:'1px solid rgba(212,168,71,0.2)',padding:18,marginBottom:16,animation:'slideUp 0.3s ease'}}><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.qualSonho}</div><input style={iS} placeholder={t.sonhoPh} value={titulo} onChange={e=>setTitulo(e.target.value)}/><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.quantoCusta} ({cur})</div><input style={iS} type="number" inputMode="decimal" placeholder="0,00" value={valorTotal} onChange={e=>setValorTotal(e.target.value)}/><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.prazoLabel}</div><input style={iS} type="date" value={prazo} onChange={e=>setPrazo(e.target.value)}/>{valorTotal&&prazo&&(()=>{const sim=calcSim(parseFloat(valorTotal),0,prazo);if(!sim)return null;return(<div style={{background:'rgba(212,168,71,0.06)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'12px 14px',marginBottom:14}}><div style={{fontSize:11,color:'#d4a847',fontWeight:700,marginBottom:6,textTransform:'uppercase'}}>{t.simulLabel}</div><div style={{fontSize:13,color:'#c8a090',lineHeight:1.8}}>{t.simulPre} <strong style={{color:'#d4a847'}}>{sim.dias} {t.simulDias}</strong>{t.simulPos}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginTop:'10px'}}>{[[t.porDia,sim.porDia],[t.porSemana,sim.porSemana],[t.porMes,sim.porMes],[t.porAno,sim.porAno]].map(([label,val])=>(<div key={label} style={{background:'rgba(0,0,0,0.2)',borderRadius:'10px',padding:'8px 10px',textAlign:'center'}}><div style={{fontSize:'11px',color:'#7a5545',marginBottom:'2px'}}>{label}</div><div style={{fontSize:'15px',fontWeight:'700',color:'#5cba7d'}}>{fmt(val)}</div></div>))}</div></div>);})()}<button onClick={handleAdd} disabled={loading||!titulo||!valorTotal} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:13,padding:'13px',fontSize:15,fontWeight:700,cursor:'pointer'}}>{t.criarMeta}</button></div>)}
         {metas.length===0&&!showForm&&(<div style={{textAlign:'center',padding:40,color:'#5a3525'}}><div style={{fontSize:32,marginBottom:12}}>🌟</div><div style={{fontSize:14}}>{t.nenhumaMeta}</div><div style={{fontSize:13,marginTop:4,color:'#d4a847',cursor:'pointer'}} onClick={()=>setShowForm(true)}>{t.proxSonho}</div></div>)}
-        {metas.map(m=>{const pct=m.valor_total>0?Math.min(100,Math.round((m.valor_atual/m.valor_total)*100)):0;const concluida=pct>=100;const falta=Math.max(0,m.valor_total-m.valor_atual);const sim=calcSim(m.valor_total,m.valor_atual,m.prazo);return(<div key={m.id} style={{background:'#1a1008',borderRadius:18,border:`1px solid ${concluida?'rgba(92,186,125,0.3)':'rgba(212,168,71,0.12)'}`,padding:16,marginBottom:12}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}><div style={{flex:1}}><div style={{fontSize:16,fontWeight:700,color:concluida?'#5cba7d':'#e8d4c8'}}>{concluida?'✅ ':'🌟 '}{m.titulo}</div>{m.prazo&&<div style={{fontSize:11,color:'#7a5545',marginTop:2}}>{t.prazoInfo} {fmtDate(m.prazo,LANGS[lang].locale)}</div>}</div><button onClick={()=>setConfirmId(m.id)} style={{background:'rgba(212,71,71,0.08)',border:'1px solid rgba(212,71,71,0.15)',borderRadius:8,cursor:'pointer',padding:'5px 8px',color:'#d44747',marginLeft:8}}><Icon n="trash" s={13} c="#d44747"/></button></div><div style={{display:'flex',marginBottom:10,background:'rgba(0,0,0,0.25)',borderRadius:12,overflow:'hidden'}}><div style={{flex:1,padding:'10px 12px',borderRight:'1px solid rgba(212,168,71,0.08)'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.guardado}</div><div style={{fontSize:16,fontWeight:700,color:'#5cba7d'}}>{fmt(m.valor_atual)}</div></div><div style={{flex:1,padding:'10px 12px',borderRight:'1px solid rgba(212,168,71,0.08)'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.metaLabel}</div><div style={{fontSize:16,fontWeight:700,color:'#e8d4c8'}}>{fmt(m.valor_total)}</div></div><div style={{flex:1,padding:'10px 12px'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.faltaLabel}</div><div style={{fontSize:16,fontWeight:700,color:concluida?'#5cba7d':'#d4a847'}}>{concluida?'✓':fmt(falta)}</div></div></div><div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#7a5545',marginBottom:5}}><span>{t.pctConc(pct)}</span>{concluida&&<span style={{color:'#5cba7d'}}>{t.sonhoAlc}</span>}</div><div style={{background:'rgba(255,255,255,0.05)',borderRadius:10,height:10,overflow:'hidden',marginBottom:12}}><div style={{height:'100%',background:concluida?'#5cba7d':'linear-gradient(90deg,#8b5e14,#d4a847)',borderRadius:10,width:`${pct}%`,transition:'width 0.5s ease'}}/></div>{sim&&!concluida&&(<div style={{background:'rgba(212,168,71,0.05)',borderRadius:10,padding:'10px 12px',marginBottom:12}}><div style={{fontSize:11,color:'#d4a847',fontWeight:700,marginBottom:8,textTransform:'uppercase'}}>{t.planoPara(sim.dias)}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px'}}>{[[t.porDia,sim.porDia],[t.porSemana,sim.porSemana],[t.porMes,sim.porMes],[t.porAno,sim.porAno]].map(([label,val])=>(<div key={label} style={{background:'rgba(0,0,0,0.2)',borderRadius:'8px',padding:'6px 8px',display:'flex',justifyContent:'space-between',alignItems:'center'}}><span style={{fontSize:'11px',color:'#7a5545'}}>{label}</span><span style={{fontSize:'13px',fontWeight:'700',color:'#d4a847'}}>{fmt(val)}</span></div>))}</div></div>)}{editValorId===m.id?(<div style={{display:'flex',gap:8}}><input style={{flex:1,background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:10,padding:'9px 12px',color:'#e8d4c8',fontSize:14,outline:'none'}} type="number" inputMode="decimal" value={editValorInput} onChange={e=>setEditValorInput(e.target.value)} autoFocus onKeyDown={e=>e.key==='Enter'&&handleAtualizarValor(m)}/><button onClick={()=>handleAtualizarValor(m)} style={{background:'#d4a847',border:'none',borderRadius:10,padding:'9px 14px',color:'#0f0a08',fontWeight:700,cursor:'pointer',fontSize:13}}>OK</button><button onClick={()=>{setEditValorId(null);setEditValorInput('');}} style={{background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:10,padding:'9px',color:'#7a5545',cursor:'pointer'}}>✕</button></div>):(<div style={{display:'flex',gap:5}}>{[[`- ${cur}50`,-50],[`+ ${cur}50`,50],[`+ ${cur}100`,100],[`+ ${cur}200`,200]].map(([l,v])=>(<button key={l} onClick={()=>onUpdate(m.id,Math.max(0,m.valor_atual+v))} style={{flex:1,padding:'8px 2px',borderRadius:9,border:`1px solid ${v<0?'rgba(212,168,71,0.1)':'rgba(212,168,71,0.25)'}`,background:v<0?'transparent':'rgba(212,168,71,0.08)',color:v<0?'#5a3525':'#d4a847',fontSize:11,fontWeight:600,cursor:'pointer'}}>{l}</button>))}<button onClick={()=>{setEditValorId(m.id);setEditValorInput(String(m.valor_atual));}} style={{padding:'8px 9px',borderRadius:9,border:'1px solid rgba(212,168,71,0.2)',background:'rgba(212,168,71,0.1)',color:'#d4a847',fontSize:11,cursor:'pointer'}}>✏️</button></div>)}</div>);})}
+        {metas.map(m=>{const pct=m.valor_total>0?Math.min(100,Math.round((m.valor_atual/m.valor_total)*100)):0;const concluida=pct>=100;const falta=Math.max(0,m.valor_total-m.valor_atual);const sim=calcSim(m.valor_total,m.valor_atual,m.prazo);return(<div key={m.id} style={{background:'#1a1008',borderRadius:18,border:`1px solid ${concluida?'rgba(92,186,125,0.3)':'rgba(212,168,71,0.12)'}`,padding:16,marginBottom:12}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}><div style={{flex:1}}><div style={{fontSize:16,fontWeight:700,color:concluida?'#5cba7d':'#e8d4c8'}}>{concluida?'✅ ':'🌟 '}{m.titulo}</div>{m.prazo&&<div style={{fontSize:11,color:'#7a5545',marginTop:2}}>{t.prazoInfo} {fmtDate(m.prazo,LANGS[lang].locale)}</div>}</div><button onClick={()=>setConfirmId(m.id)} style={{background:'rgba(212,71,71,0.08)',border:'1px solid rgba(212,71,71,0.15)',borderRadius:8,cursor:'pointer',padding:'5px 8px',color:'#d44747',marginLeft:8}}><Icon n="trash" s={13} c="#d44747"/></button></div><div style={{display:'flex',marginBottom:10,background:'rgba(0,0,0,0.25)',borderRadius:12,overflow:'hidden'}}><div style={{flex:1,padding:'10px 12px',borderRight:'1px solid rgba(212,168,71,0.08)'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.guardado}</div><div style={{fontSize:16,fontWeight:700,color:'#5cba7d'}}>{fmt(m.valor_atual)}</div></div><div style={{flex:1,padding:'10px 12px',borderRight:'1px solid rgba(212,168,71,0.08)'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.metaLabel}</div><div style={{fontSize:16,fontWeight:700,color:'#e8d4c8'}}>{fmt(m.valor_total)}</div></div><div style={{flex:1,padding:'10px 12px'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.faltaLabel}</div><div style={{fontSize:16,fontWeight:700,color:concluida?'#5cba7d':'#d4a847'}}>{concluida?'✓':fmt(falta)}</div></div></div><div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#7a5545',marginBottom:5}}><span>{t.pctConc(pct)}</span>{concluida&&<span style={{color:'#5cba7d'}}>{t.sonhoAlc}</span>}</div><div style={{background:'rgba(255,255,255,0.05)',borderRadius:10,height:10,overflow:'hidden',marginBottom:12}}><div style={{height:'100%',background:concluida?'#5cba7d':'linear-gradient(90deg,#8b5e14,#d4a847)',borderRadius:10,width:`${pct}%`,transition:'width 0.5s ease'}}/></div>{sim&&!concluida&&(<div style={{background:'rgba(212,168,71,0.05)',borderRadius:10,padding:'10px 12px',marginBottom:12}}><div style={{fontSize:11,color:'#d4a847',fontWeight:700,marginBottom:8,textTransform:'uppercase'}}>{t.planoPara(sim.dias)}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px'}}>{[[t.porDia,sim.porDia],[t.porSemana,sim.porSemana],[t.porMes,sim.porMes],[t.porAno,sim.porAno]].map(([label,val])=>(<div key={label} style={{background:'rgba(0,0,0,0.2)',borderRadius:'8px',padding:'6px 8px',display:'flex',justifyContent:'space-between',alignItems:'center'}}><span style={{fontSize:'11px',color:'#7a5545'}}>{label}</span><span style={{fontSize:'13px',fontWeight:'700',color:'#d4a847'}}>{fmt(val)}</span></div>))}</div></div>)}{editValorId===m.id?(<div style={{display:'flex',gap:8}}><input style={{flex:1,background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:10,padding:'9px 12px',color:'#e8d4c8',fontSize:14,outline:'none'}} type="number" inputMode="decimal" value={editValorInput} onChange={e=>setEditValorInput(e.target.value)} autoFocus onKeyDown={e=>e.key==='Enter'&&handleAtualizarValor(m)}/><button onClick={()=>handleAtualizarValor(m)} style={{background:'#d4a847',border:'none',borderRadius:10,padding:'9px 14px',color:'#0f0a08',fontWeight:700,cursor:'pointer',fontSize:13}}>OK</button><button onClick={()=>{setEditValorId(null);setEditValorInput('');}} style={{background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:10,padding:'9px',color:'#7a5545',cursor:'pointer'}}>✕</button></div>):(<div style={{display:'flex',gap:5}}>{[[`- ${cur}50`,-50],[`+ ${cur}50`,50],[`+ ${cur}100`,100],[`+ ${cur}200`,200]].map(([l,v])=>(<button key={l} onClick={()=>onUpdate(m.id,Math.max(0,m.valor_atual+v))} style={{flex:1,padding:'8px 2px',borderRadius:9,border:`1px solid ${v<0?'rgba(212,168,71,0.1)':'rgba(212,168,71,0.25)'}`,background:v<0?'transparent':'rgba(212,168,71,0.08)',color:v<0?'#5a3525':'#d4a847',fontSize:11,fontWeight:600,cursor:'pointer'}}>{l}</button>))}<button onClick={()=>{setEditValorId(m.id);setEditValorInput(String(m.valor_atual));}} style={{padding:'8px 9px',borderRadius:9,border:'1px solid rgba(212,168,71,0.2)',background:'rgba(212,168,71,0.1)',color:'#d4a847',fontSize:11,cursor:'pointer'}}>✏️</button></div>)}{concluida&&<button onClick={()=>abrirWhatsApp((t.whatsappMeta||(n=>`Alcancei minha meta "${n}" no app Lição de Mulher! 💰🌸 https://www.licaodemulher.com.br`))(m.titulo))} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,width:'100%',marginTop:10,background:'#25D366',border:'none',borderRadius:10,padding:'10px',color:'white',fontSize:13,fontWeight:700,cursor:'pointer'}}>💬 Compartilhar conquista no WhatsApp</button>}</div>);})}
       </div>
     );
   };
@@ -1114,7 +1153,7 @@
       pricing_title:'Simples e transparente',
       free_title:'Gratuito',free_price:'R$ 0',
       free_feats:['Dashboard mensal','Controle de gastos','Dica diária','15 créditos de boas-vindas','2 créditos por login diário'],
-      prem_title:'Premium',prem_price:'R$ 19,90',prem_period:'/mês',
+      prem_title:'Premium',prem_price:'R$ 19,90',prem_period:'/mês', anual_price:'R$ 99',anual_period:'/ano',anual_eco:'= R$8,25/mês · 58% off',
       prem_feats:['Tudo do plano gratuito','Metas e sonhos ilimitados','Envelopes digitais','Sofia — IA pessoal 24h','100 créditos mensais','Séries completas'],
       prem_cta:'Assinar Premium',
       faq_title:'Perguntas frequentes',
@@ -1337,6 +1376,177 @@
     );
   };
 
+
+  /* ============================================================
+     CALCULADORA DE DÍVIDA
+  ============================================================ */
+  const CalculadoraModal=({onClose})=>{
+    const {t,lang}=useLang();
+    const cur=LANGS[lang].currency;
+    const [divida,setDivida]=useState('');
+    const [juros,setJuros]=useState('');
+    const [parcelas,setParcelas]=useState('');
+    const [result,setResult]=useState(null);
+    const calcular=()=>{
+      const pv=parseFloat(divida.replace(',','.'));
+      const r=parseFloat(juros.replace(',','.'))/100;
+      const n=parseInt(parcelas);
+      if(!pv||!n||isNaN(pv)||isNaN(n)||pv<=0||n<=0)return;
+      let parcela,totalPago;
+      if(!r||r===0){parcela=pv/n;totalPago=pv;}
+      else{parcela=pv*(r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);totalPago=parcela*n;}
+      const totalJuros=totalPago-pv;
+      setResult({parcela,totalPago,totalJuros,pct:((totalJuros/pv)*100).toFixed(1)});
+    };
+    const fmt=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const iS={width:'100%',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:10,padding:'12px 14px',color:'#e8d4c8',fontSize:15,outline:'none',fontFamily:'Nunito',marginBottom:10};
+    return(
+      <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+        <div style={{background:'#1a1008',borderRadius:'20px 20px 0 0',border:'1px solid rgba(212,168,71,0.25)',padding:24,width:'100%',maxWidth:480,paddingBottom:40,animation:'slideUp 0.3s ease'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+            <div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#d4a847'}}>{t.calcTitle||'Calculadora de Dívida'}</div>
+              <div style={{fontSize:11,color:'#7a5545',marginTop:2}}>{t.calcSub||'Descubra quanto vai pagar no total'}</div>
+            </div>
+            <button onClick={onClose} style={{background:'none',border:'none',color:'#7a5545',fontSize:20,cursor:'pointer',padding:4}}>✕</button>
+          </div>
+          <input type="number" inputMode="decimal" placeholder={t.calcDivida||'Valor da dívida (R$)'} value={divida} onChange={e=>setDivida(e.target.value)} style={iS}/>
+          <input type="number" inputMode="decimal" placeholder={t.calcJuros||'Juros ao mês (%) — deixe vazio se não tiver'} value={juros} onChange={e=>setJuros(e.target.value)} style={iS}/>
+          <input type="number" inputMode="numeric" placeholder={t.calcParcelas||'Número de parcelas'} value={parcelas} onChange={e=>setParcelas(e.target.value)} style={iS}/>
+          <div style={{display:'flex',gap:10,marginTop:4}}>
+            <button onClick={calcular} style={{flex:1,background:'linear-gradient(135deg,#c8784a,#a05830)',border:'none',borderRadius:12,padding:'13px',color:'white',fontSize:14,fontWeight:700,cursor:'pointer'}}>
+              {t.calcBtnCalc||'Calcular'}
+            </button>
+            <button onClick={()=>{setDivida('');setJuros('');setParcelas('');setResult(null);}} style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:12,padding:'13px 16px',color:'#7a5545',fontSize:13,cursor:'pointer'}}>
+              {t.calcBtnLimpar||'Limpar'}
+            </button>
+          </div>
+          {result&&(
+            <div style={{marginTop:18,background:'rgba(212,168,71,0.06)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:14,padding:18,animation:'fadeIn 0.3s ease'}}>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,marginBottom:14}}>
+                <div style={{textAlign:'center'}}>
+                  <div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:4}}>{t.calcValorParcela||'Parcela'}</div>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#d4a847',fontWeight:700}}>{cur}{fmt(result.parcela)}</div>
+                </div>
+                <div style={{textAlign:'center',borderLeft:'1px solid rgba(212,168,71,0.15)',borderRight:'1px solid rgba(212,168,71,0.15)',padding:'0 8px'}}>
+                  <div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:4}}>{t.calcTotalPagar||'Total'}</div>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8',fontWeight:700}}>{cur}{fmt(result.totalPago)}</div>
+                </div>
+                <div style={{textAlign:'center'}}>
+                  <div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:4}}>{t.calcTotalJuros||'Juros'}</div>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e07070',fontWeight:700}}>{cur}{fmt(result.totalJuros)}</div>
+                </div>
+              </div>
+              {result.pct>0&&<div style={{fontSize:12,color:'#e07070',textAlign:'center',padding:'8px 12px',background:'rgba(220,80,80,0.07)',borderRadius:8}}>
+                {t.calcAviso||'⚠️ Os juros representam'} <strong>{result.pct}%</strong> do valor original.
+              </div>}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  /* ============================================================
+     DESAFIO 52 SEMANAS
+  ============================================================ */
+  const DesafioScreen=({userId})=>{
+    const {t,lang}=useLang();
+    const LS_KEY='ldm_desafio_'+(userId||'local');
+    const SEMANAS=Array.from({length:52},(_,i)=>i+1);
+    const totalMeta=SEMANAS.reduce((a,b)=>a+b,0);
+    const [checked,setChecked]=useState(()=>{
+      try{const s=localStorage.getItem(LS_KEY);return s?JSON.parse(s):{};}catch{return {};}
+    });
+    const [showZerar,setShowZerar]=useState(false);
+    const toggle=w=>{
+      setChecked(prev=>{const n={...prev};if(n[w])delete n[w];else n[w]=true;
+        try{localStorage.setItem(LS_KEY,JSON.stringify(n));}catch{}return n;
+      });
+    };
+    const totalGuardado=SEMANAS.filter(w=>checked[w]).reduce((a,b)=>a+b,0);
+    const pct=Math.round((totalGuardado/totalMeta)*100);
+    const semanasFeitas=SEMANAS.filter(w=>checked[w]).length;
+    const fmt=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const compartilhar=()=>{
+      const msg=t.whatsappDesafio?t.whatsappDesafio(semanasFeitas,fmt(totalGuardado)):`Já completei ${semanasFeitas} semanas do Desafio 52 Semanas e guardei R$${fmt(totalGuardado)}! 🎯 https://www.licaodemulher.com.br`;
+      window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    };
+    const zerar=()=>{
+      setChecked({});
+      try{localStorage.removeItem(LS_KEY);}catch{}
+      setShowZerar(false);
+    };
+    return(
+      <div style={{padding:'0 0 100px',background:'#0f0a08',minHeight:'100vh'}}>
+        <div style={{padding:'20px 16px 16px'}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847',marginBottom:4}}>{t.desafioTitle||'Desafio das 52 Semanas'}</div>
+          <div style={{fontSize:12,color:'#7a5545',marginBottom:20,lineHeight:1.5}}>{t.desafioSub||'Guarde R$1 na semana 1, R$2 na semana 2... R$1.378 em 1 ano!'}</div>
+
+          {/* Progress */}
+          <div style={{background:'#1a1210',borderRadius:14,padding:16,marginBottom:16,border:'1px solid rgba(212,168,71,0.15)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:10}}>
+              <div>
+                <div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:3}}>{t.desafioGuardado||'Guardado até agora'}</div>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,color:'#d4a847',fontWeight:700}}>R$ {fmt(totalGuardado)}</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:22,fontWeight:900,color:pct>=100?'#4dd67a':'#e8d4c8'}}>{pct}%</div>
+                <div style={{fontSize:10,color:'#7a5545'}}>{semanasFeitas}/52 semanas</div>
+              </div>
+            </div>
+            <div style={{height:8,background:'rgba(255,255,255,0.06)',borderRadius:4,overflow:'hidden'}}>
+              <div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,#c8784a,#d4a847)',borderRadius:4,transition:'width 0.5s ease'}}/>
+            </div>
+            <div style={{fontSize:10,color:'#7a5545',marginTop:6,textAlign:'right'}}>{t.desafioMeta||'Meta total: R$ 1.378,00'}</div>
+          </div>
+
+          {pct>=100&&<div style={{background:'rgba(77,214,122,0.1)',border:'1px solid rgba(77,214,122,0.3)',borderRadius:12,padding:'12px 16px',marginBottom:16,textAlign:'center',fontSize:14,color:'#4dd67a',fontWeight:700}}>{t.desafioParabens||'Parabéns! Desafio concluído! 🎉'}</div>}
+
+          <div style={{display:'flex',gap:10,marginBottom:16}}>
+            <button onClick={compartilhar} style={{flex:1,background:'#25D366',border:'none',borderRadius:12,padding:'11px',color:'white',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+              💬 {t.desafioCompartilhar||'Compartilhar no WhatsApp'}
+            </button>
+            <button onClick={()=>setShowZerar(true)} style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:12,padding:'11px 14px',color:'#7a5545',fontSize:12,cursor:'pointer'}}>↺</button>
+          </div>
+        </div>
+
+        {/* 52 weeks grid */}
+        <div style={{padding:'0 12px',display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:7}}>
+          {SEMANAS.map(w=>{
+            const done=!!checked[w];
+            return(
+              <button key={w} onClick={()=>toggle(w)} style={{background:done?'rgba(212,168,71,0.15)':'#1a1210',border:`1px solid ${done?'rgba(212,168,71,0.4)':'rgba(255,255,255,0.06)'}`,borderRadius:10,padding:'10px 6px',cursor:'pointer',transition:'all 0.15s',display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+                <div style={{fontSize:9,color:done?'#d4a847':'#5a3525',fontWeight:700,textTransform:'uppercase'}}>{t.desafioSemana||'Sem.'}{w}</div>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:13,color:done?'#d4a847':'#7a5545',fontWeight:700}}>R${w}</div>
+                <div style={{fontSize:14,lineHeight:1}}>{done?'✅':'◻️'}</div>
+              </button>
+            );
+          })}
+        </div>
+
+        {showZerar&&(
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+            <div style={{background:'#1a1008',borderRadius:16,padding:24,maxWidth:300,width:'100%',textAlign:'center',border:'1px solid rgba(212,168,71,0.2)'}}>
+              <div style={{fontSize:32,marginBottom:12}}>⚠️</div>
+              <div style={{fontSize:15,color:'#e8d4c8',fontWeight:700,marginBottom:8}}>Reiniciar desafio?</div>
+              <div style={{fontSize:12,color:'#7a5545',marginBottom:20}}>Todo o progresso será perdido.</div>
+              <div style={{display:'flex',gap:10}}>
+                <button onClick={()=>setShowZerar(false)} style={{flex:1,background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:10,padding:'11px',color:'#c8a090',cursor:'pointer',fontSize:13}}>Cancelar</button>
+                <button onClick={zerar} style={{flex:1,background:'rgba(200,80,80,0.2)',border:'1px solid rgba(200,80,80,0.3)',borderRadius:10,padding:'11px',color:'#f07070',cursor:'pointer',fontSize:13,fontWeight:700}}>Reiniciar</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
+  const abrirWhatsApp = (msg) => {
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  };
+
 const App=()=>{
     const [lang,setLangState]=useState(()=>{const s=localStorage.getItem('ldm_lang');return(s&&LANGS[s])?s:'pt';});
     const [langChosen,setLangChosen]=useState(()=>!!localStorage.getItem('ldm_lang_chosen'));
@@ -1349,7 +1559,7 @@ const App=()=>{
     const [loading,setLoading]=useState(true);const [deferredPrompt,setDeferredPrompt]=useState(null);const [showInstall,setShowInstall]=useState(false);
     const [recoveryMode,setRecoveryMode]=useState(false);const [novaSenha,setNovaSenha]=useState('');const [novaSenhaMsg,setNovaSenhaMsg]=useState('');const [novaSenhaErro,setNovaSenhaErro]=useState('');const [novaSenhaLoading,setNovaSenhaLoading]=useState(false);const [showSenha,setShowSenha]=useState(false);
     const [creditos,setCreditos]=useState(0);const [sequencia,setSequencia]=useState(0);const [desbloqueados,setDesbloqueados]=useState({});const [creditosToast,setCreditosToast]=useState(null);
-    const [showLoja,setShowLoja]=useState(false);const [showMemoria,setShowMemoria]=useState(false);
+    const [showLoja,setShowLoja]=useState(false);const [showMemoria,setShowMemoria]=useState(false);const [showCalc,setShowCalc]=useState(false);
     const isPremium=profile?.is_premium||false;
 
     useEffect(()=>{const h=e=>{e.preventDefault();setDeferredPrompt(e);setShowInstall(true);};window.addEventListener('beforeinstallprompt',h);return()=>window.removeEventListener('beforeinstallprompt',h);},[]);
@@ -1435,6 +1645,7 @@ const App=()=>{
       {id:'historias',icon:'film',label:t.navHistorias},
       {id:'conselheiro',icon:'star',label:t.navSofia},
       {id:'perfil',icon:'user',label:t.navPerfil},
+      {id:'desafio',icon:'star2',label:t.navDesafio||'Desafio'},
     ];
     const ctxValue={lang,t,setLang,preco:lang!=='pt'?PRECO_INTL:PRECO,stripeLink:lang!=='pt'?STRIPE_LINK_INTL:STRIPE_LINK};
 
@@ -1448,6 +1659,7 @@ const App=()=>{
       <div style={{background:'#0f0a08',minHeight:'100vh'}}>
         {creditosToast&&<CreditosToast msg={creditosToast} onClose={()=>setCreditosToast(null)}/>}
         {showLoja&&<LojaCreditos onClose={()=>setShowLoja(false)} lang={lang}/>}
+        {showCalc&&<CalculadoraModal onClose={()=>setShowCalc(false)}/>}
         {showMemoria&&<MemoriaMes transacoes={transacoes} dividas={dividas} onClose={()=>setShowMemoria(false)}/>}
 
         {/* Top bar */}
@@ -1463,8 +1675,9 @@ const App=()=>{
           </div>
         </div>
 
-        {tab==='home'&&<Dashboard profile={profile} transacoes={transacoes} dividas={dividas} onAdd={()=>setTab('gastos')} creditos={creditos} sequencia={sequencia} onOpenLoja={()=>setShowLoja(true)} onOpenMemoria={()=>setShowMemoria(true)}/>}
-        {tab==='gastos'&&<GastosScreen transacoes={transacoes} dividas={dividas} onAdd={addTransacao} onDelete={delTransacao} onEdit={editTransacao} onAddDivida={addDivida} onDeleteDivida={delDivida} onQuitarDivida={quitarDivida}/>}
+        {tab==='home'&&<Dashboard profile={profile} transacoes={transacoes} dividas={dividas} onAdd={()=>setTab('gastos')} creditos={creditos} sequencia={sequencia} onOpenLoja={()=>setShowLoja(true)} onOpenMemoria={()=>setShowMemoria(true)} onDesafio={()=>setTab('desafio')}/>}
+        {tab==='desafio'&&<DesafioScreen userId={user?.id}/>}
+        {tab==='gastos'&&<GastosScreen transacoes={transacoes} dividas={dividas} onAdd={addTransacao} onDelete={delTransacao} onEdit={editTransacao} onAddDivida={addDivida} onDeleteDivida={delDivida} onQuitarDivida={quitarDivida} onCalc={()=>setShowCalc(true)}/>}
         {tab==='metas'&&<MetasScreen metas={metas} onAdd={addMeta} onUpdate={updMeta} onDelete={delMeta} isPremium={isPremium} onUpgrade={handleUpgrade}/>}
         {tab==='envelopes'&&<EnvelopesScreen envelopes={envelopes} onAdd={addEnvelope} onUpdate={updEnvelope} onDelete={delEnvelope} isPremium={isPremium} onUpgrade={handleUpgrade}/>}
         {tab==='historias'&&<HistoriasScreen creditos={creditos} onGastarCreditos={gastarCreditos} desbloqueados={desbloqueados} onOpenLoja={()=>setShowLoja(true)}/>}
