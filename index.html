@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f0a08">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Lição de Mulher — Finanças</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="Lição de Mulher">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7708708400293403" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.7/babel.min.js" crossorigin="anonymous" integrity="sha384-ezQ6HS3FLspd9te19o2McUV6FAK091+GG7KO54f/R8DKgCDi7fULhapNrd5LY+vG"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0/dist/umd/supabase.min.js" crossorigin="anonymous" integrity="sha384-o+Hkm/usHFhCEWo1Ae1cLsOLiQQNrD2UfI424QDAaiZR7URnC8v35ey7s2sbGZHB"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overscroll-behavior: none; }
+    body { background: #0f0a08; color: #c8a090; font-family: 'Nunito', -apple-system, sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    #root { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; overflow-x: hidden; }
+    input, button, textarea, select { font-family: inherit; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.7) sepia(1) saturate(3) hue-rotate(5deg); }
+    ::-webkit-scrollbar { width: 0; display: none; } * { scrollbar-width: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes coinBounce { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-6px) scale(1.1);} }
+    @keyframes shimmer { 0%{background-position:-200% 0;} 100%{background-position:200% 0;} }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { createClient } = supabase;
+  const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
+
+  /* ============================================================ CONFIG ============================================================ */
+  const SUPABASE_URL     = 'https://emvgejbbusrbawohyfeu.supabase.co';
+  const SUPABASE_KEY     = 'sb_publishable_S6ZlCNYHCm89Ok6Mhqy3fw_wv9JdHO2';
+  const STRIPE_LINK      = 'https://buy.stripe.com/9B6eVd8WWfZ48Gm2uIfjG00';
+  const STRIPE_LINK_INTL = 'https://buy.stripe.com/3cI5kD6OO28eg8OedqfjG01';
+  const PRECO            = 'R$19,90/mês';
+  const PRECO_INTL       = 'US$9,90/month';
+  const R2_BASE          = 'https://pub-030583a8cc43472c981d3cd5f7e29755.r2.dev';
+  const sb               = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  /* Pacotes de créditos para lojinha */
+  const PACOTES_CREDITOS = [
+    { id:'pack_5',  creditos:10,  preco:'R$2,90',  precoUSD:'$0.99',  popular:false, bonus:'',      emoji:'🪙', desc:'Terminar 1 episódio' },
+    { id:'pack_25', creditos:30,  preco:'R$6,90',  precoUSD:'$1.99',  popular:true,  bonus:'+5',    emoji:'💰', desc:'Melhor custo-benefício' },
+    { id:'pack_50', creditos:70,  preco:'R$12,90', precoUSD:'$3.99',  popular:false, bonus:'+20',   emoji:'💎', desc:'Para quem adora as séries' },
+    { id:'pack_100',creditos:150, preco:'R$19,90', precoUSD:'$5.99',  popular:false, bonus:'+50',   emoji:'👑', desc:'Mesmo preço do Premium mensal!' },
+  ];
+
+  /* Links Stripe para pacotes — criar no Stripe Dashboard como Payment Link avulso (one-time) */
+  const STRIPE_PACKS = {
+    pack_5:   'https://buy.stripe.com/8x28wP2yy6ou5ua2uIfjG03',   /* R$2,90  → 10 créditos  */
+    pack_25:  'https://buy.stripe.com/cNi00j1uu5kq1dUc5ifjG04',   /* R$6,90  → 30 créditos  */
+    pack_50:  'https://buy.stripe.com/aFabJ18WWaEK8Gm9XafjG05',   /* R$12,90 → 70 créditos  */
+    pack_100: 'https://buy.stripe.com/dRmdR98WWcMSe0GedqfjG06',   /* R$19,90 → 150 créditos */
+  };
+
+  const CREDITOS_CONFIG = {
+    boas_vindas:15, login_diario:2, sequencia_7:10, sequencia_30:30,
+    indicacao:10, premium_mensal:100,
+  };
+
+  const YT_CHANNELS = {
+    pt: { url:'https://www.youtube.com/channel/UCP5RlDgEe-tjAEx1MyhBRHA', handle:'@LicaoDeMulher', channelId:'UCP5RlDgEe-tjAEx1MyhBRHA' },
+    en: { url:'https://www.youtube.com/channel/UCNzffAv7SwVIOCzgyLRy3Tg', handle:'@WomansLesson', channelId:'UCNzffAv7SwVIOCzgyLRy3Tg' },
+    fr: { url:'https://www.youtube.com/channel/UClxiR39Mv1PT-AI2nY9sFiA', handle:'@LaLecondelaFemme', channelId:'UClxiR39Mv1PT-AI2nY9sFiA' },
+    es: { url:'https://www.youtube.com/channel/UC4GtpsswfqhY7WzLFPVgeKw', handle:'@LeccionDeMujer', channelId:'UC4GtpsswfqhY7WzLFPVgeKw' },
+  };
+
+  /* ============================================================ CONTEÚDO DEMO ============================================================ */
+  const CONTEUDO = {
+    pt: {
+      series: [
+        { id:'envelope-s1', titulo:'A Mulher do Envelope', episodios:6, descricao:'Uma história em 6 partes sobre como Maria saiu das dívidas usando envelopes.', thumb:'📦', cor:'#d4a847',
+          eps:[{id:'ep1',num:1,titulo:'O Dia que Tudo Desmoronou',duracao:'18 min',creditos:3,url:null},{id:'ep2',num:2,titulo:'A Vizinha Sábia',duracao:'20 min',creditos:3,url:null},{id:'ep3',num:3,titulo:'Os Três Envelopes',duracao:'22 min',creditos:3,url:null},{id:'ep4',num:4,titulo:'O Primeiro Mês',duracao:'19 min',creditos:3,url:null},{id:'ep5',num:5,titulo:'Quando Quase Desistiu',duracao:'21 min',creditos:3,url:null},{id:'ep6',num:6,titulo:'A Virada',duracao:'25 min',creditos:3,url:null}] },
+        { id:'recomecar-s1', titulo:'Recomeçar aos 50', episodios:5, descricao:'Rosa perdeu tudo aos 50 anos. Veja como ela reconstruiu sua vida.', thumb:'🌱', cor:'#5cba7d',
+          eps:[{id:'r1',num:1,titulo:'Zero na Conta',duracao:'16 min',creditos:3,url:null},{id:'r2',num:2,titulo:'O Segredo da Despensa',duracao:'18 min',creditos:3,url:null},{id:'r3',num:3,titulo:'Cinquenta e Um Reais',duracao:'20 min',creditos:3,url:null},{id:'r4',num:4,titulo:'A Lista que Salvou',duracao:'17 min',creditos:3,url:null},{id:'r5',num:5,titulo:'Livre',duracao:'23 min',creditos:3,url:null}] },
+      ],
+      avulsos:[{id:'av1',titulo:'52 Anos e Endividada: A Regra do Envelope',duracao:'26 min',creditos:5,thumb:'💌',url:null},{id:'av2',titulo:'Guardei R$4.300 em 8 Meses Sem Meu Marido Saber',duracao:'20 min',creditos:5,thumb:'🏦',url:null},{id:'av3',titulo:'62 Anos: O Código das Mulheres que Nunca Ficam Sem Dinheiro',duracao:'28 min',creditos:5,thumb:'🔑',url:null},{id:'av4',titulo:'A Lei das 3 Economias',duracao:'31 min',creditos:5,thumb:'📊',url:null}],
+      treinamentos:[{id:'tr1',titulo:'Como Montar Seus 3 Envelopes na Prática',duracao:'12 min',creditos:4,thumb:'✂️',url:null},{id:'tr2',titulo:'Sair do Nome Sujo em 90 Dias: O Passo a Passo',duracao:'15 min',creditos:4,thumb:'📋',url:null},{id:'tr3',titulo:'Meditação: Afirmações para Mulher que Recomeça',duracao:'8 min',creditos:2,thumb:'🧘',url:null}],
+    },
+    en: {
+      series:[{id:'envelope-en',titulo:"The Envelope Woman",episodios:6,descricao:'A 6-part story about how Maria got out of debt using envelopes.',thumb:'📦',cor:'#d4a847',eps:[{id:'e1',num:1,titulo:'The Day Everything Fell Apart',duracao:'18 min',creditos:3,url:null},{id:'e2',num:2,titulo:'The Wise Neighbor',duracao:'20 min',creditos:3,url:null},{id:'e3',num:3,titulo:'Three Envelopes',duracao:'22 min',creditos:3,url:null},{id:'e4',num:4,titulo:'The First Month',duracao:'19 min',creditos:3,url:null},{id:'e5',num:5,titulo:'When She Almost Gave Up',duracao:'21 min',creditos:3,url:null},{id:'e6',num:6,titulo:'The Turnaround',duracao:'25 min',creditos:3,url:null}]}],
+      avulsos:[{id:'a1',titulo:'52 and in Debt: The Envelope Rule',duracao:'26 min',creditos:5,thumb:'💌',url:null},{id:'a2',titulo:'I Saved $4,700 in 9 Months Without My Husband Knowing',duracao:'22 min',creditos:5,thumb:'🏦',url:null}],
+      treinamentos:[{id:'t1',titulo:'How to Set Up Your 3 Envelopes',duracao:'12 min',creditos:4,thumb:'✂️',url:null}],
+    },
+    fr: {
+      series:[{id:'enveloppe-fr',titulo:"La Femme des Enveloppes",episodios:6,descricao:"Une histoire en 6 parties sur comment Marie s'est sortie des dettes.",thumb:'📦',cor:'#d4a847',eps:[{id:'f1',num:1,titulo:"Le Jour où Tout s'est Effondré",duracao:'18 min',creditos:3,url:null},{id:'f2',num:2,titulo:'La Voisine Sage',duracao:'20 min',creditos:3,url:null},{id:'f3',num:3,titulo:'Les Trois Enveloppes',duracao:'22 min',creditos:3,url:null},{id:'f4',num:4,titulo:'Le Premier Mois',duracao:'19 min',creditos:3,url:null},{id:'f5',num:5,titulo:'Quand Elle a Failli Abandonner',duracao:'21 min',creditos:3,url:null},{id:'f6',num:6,titulo:'Le Tournant',duracao:'25 min',creditos:3,url:null}]}],
+      avulsos:[{id:'fa1',titulo:"52 Ans Endettée : La Règle des Enveloppes",duracao:'26 min',creditos:5,thumb:'💌',url:null},{id:'fa2',titulo:"J'ai Mis 4 200€ de Côté en 8 Mois",duracao:'22 min',creditos:5,thumb:'🏦',url:null}],
+      treinamentos:[{id:'ft1',titulo:'Comment Préparer Vos 3 Enveloppes',duracao:'12 min',creditos:4,thumb:'✂️',url:null}],
+    },
+    es: {
+      series:[{id:'sobre-es',titulo:"La Mujer del Sobre",episodios:6,descricao:'Una historia en 6 partes sobre cómo María salió de las deudas.',thumb:'📦',cor:'#d4a847',eps:[{id:'s1',num:1,titulo:'El Día que Todo se Derrumbó',duracao:'18 min',creditos:3,url:null},{id:'s2',num:2,titulo:'La Vecina Sabia',duracao:'20 min',creditos:3,url:null},{id:'s3',num:3,titulo:'Los Tres Sobres',duracao:'22 min',creditos:3,url:null},{id:'s4',num:4,titulo:'El Primer Mes',duracao:'19 min',creditos:3,url:null},{id:'s5',num:5,titulo:'Cuando Casi Se Rindió',duracao:'21 min',creditos:3,url:null},{id:'s6',num:6,titulo:'El Giro',duracao:'25 min',creditos:3,url:null}]}],
+      avulsos:[{id:'sa1',titulo:'52 Años Endeudada: La Regla del Sobre',duracao:'26 min',creditos:5,thumb:'💌',url:null},{id:'sa2',titulo:'Ahorré $4,500 en 8 Meses',duracao:'22 min',creditos:5,thumb:'🏦',url:null}],
+      treinamentos:[{id:'st1',titulo:'Cómo Preparar tus 3 Sobres',duracao:'12 min',creditos:4,thumb:'✂️',url:null}],
+    },
+  };
+
+  /* ============================================================ LANGS ============================================================ */
+  const LANGS = {
+    pt:{flag:'🇧🇷',name:'Português',locale:'pt-BR',currency:'R$',showExtras:true,showEbook:true,
+      sofiaSystem:'Você é Sofia, conselheira financeira especializada em ajudar mulheres brasileiras. Seja acolhedora, empática, prática e objetiva. Use linguagem simples. Nunca dê conselhos jurídicos ou médicos. Responda sempre em português brasileiro. Máximo 3 parágrafos curtos.',
+      sofiaHello:n=>`Olá, ${n}! 🌸 Sou sua conselheira financeira. Como posso te ajudar hoje?`,
+      sofiaPensando:'Sofia está pensando...', sofiaErro:'Ops! Erro. Tente novamente. 🌸', sofiaInput:'Pergunte sobre finanças...', sofiaTitle:'🤖 Conselheira Sofia', sofiaSub:'Sua especialista financeira com IA',
+      loading:'Carregando...', appTagline:'Cuide do seu dinheiro com sabedoria e carinho',
+      loginTab:'Entrar', signupTab:'Criar conta', nomeLabel:'Seu nome', nomePh:'Maria das Graças', emailLabel:'E-mail', senhaLabel:'Senha', senhaPh:'••••••••', senhaMinPh:'Mínimo 6 caracteres', esqueciSenha:'Esqueci minha senha', aguarde:'Aguarde...', btnEntrar:'Entrar', btnCriar:'Criar minha conta',
+      quote:'"Plante suas sementes no silêncio, confie no\ntempo de Deus e transforme sua dor em sabedoria."',
+      emailSent:e=>`Enviamos um link para ${e}. Verifique sua caixa de entrada!`,
+      contaCriada:'Conta criada! Verifique seu e-mail.', preenchaAll:'Preencha todos os campos.', digiteNome:'Digite seu nome.', digiteEmail:'Digite seu e-mail acima primeiro.', erroPadrao:'Algo deu errado. Tente novamente.',
+      erros:{'Invalid login credentials':'E-mail ou senha incorretos.','User already registered':'Este e-mail já tem uma conta.','Password should be at least 6 characters':'Senha: mínimo 6 caracteres.','Unable to validate email address: invalid format':'E-mail inválido.','Email not confirmed':'Confirme seu e-mail antes de entrar.'},
+      premium:'⭐ Premium', gratuito:'Gratuito',
+      navInicio:'Início', navGastos:'Gastos', navMetas:'Sonhos', navEnvelopes:'Envelopes', navHistorias:'Histórias', navSofia:'Sofia IA', navPerfil:'Perfil',
+      bomDia:'Bom dia', boaTarde:'Boa tarde', boaNoite:'Boa noite',
+      saldoMes:'Saldo do mês', entradas:'↑ Entradas', saidas:'↓ Saídas', gasto:'Gasto',
+      dicaDia:'Dica do dia', ondeGastouMais:'Onde gastou mais', ultimosLanc:'Últimos lançamentos',
+      nenhumLanc:'Nenhum lançamento ainda.', toqueComec:'Toque aqui para começar!', adicionarLanc:'Adicionar lançamento',
+      querMaisCtrl:'Quer mais controle? ✨', vejaPremium:'Veja o que o Premium libera para você:',
+      freeFeatures:['Dashboard do mês','Controle de gastos','Dica diária','15 créditos de boas-vindas','2 créditos por login diário'],
+      premFeatures:['Metas e sonhos','Envelopes digitais','Sofia IA','100 créditos/mês','Séries completas','Acesso ilimitado'],
+      assinarPor:p=>`Assinar por apenas ${p}`, cancelarQuando:'Cancele quando quiser · Sem multa',
+      meusGastos:'Meus Gastos', fechar:'✕ Fechar', novo:'+ Novo', labelGasto:'↓ Gasto', labelReceita:'↑ Receita', labelDivida:'⚠️ Dívida Recorrente',
+      valorLabel:'Valor', catLabel:'Categoria', descLabel:'Descrição (opcional)', descPh:'Ex: Mercado do bairro', dataLabel:'Data', salvando:'Salvando...', salvarLanc:'Salvar lançamento',
+      filtros:[['todos','Todos'],['gasto','Gastos'],['receita','Receitas'],['divida','Dívidas']],
+      nenhumAqui:'Nenhum lançamento aqui.', editarLanc:'Editar lançamento', salvarAlter:'Salvar alterações',
+      confirmarExcl:'Excluir este lançamento? Esta ação não pode ser desfeita.', confirmarMeta:'Excluir esta meta? O progresso será perdido.',
+      cancelar:'Cancelar', excluir:'Excluir',
+      catsGasto:['Alimentação','Transporte','Saúde','Educação','Casa','Beleza','Lazer','Roupas','Outros'],
+      catsDivida:['Aluguel','Água','Luz','Internet','Telefone','Cartão de Crédito','Empréstimo','Financiamento','Faculdade','Condomínio','Escola','Outros'],
+      catsReceita:['Salário','Freelance','Vendas','Presente','Outros'],
+      mesesLabel:'Meses restantes', totalParc:'Total de parcelas', dividaRecLabel:'Dívida Recorrente',
+      meusSonhos:'Meus Sonhos', addMeta:'+ Meta', qualSonho:'Qual é seu sonho?', sonhoPh:'Ex: Geladeira nova, Viagem, Reserva', quantoCusta:'Quanto custa?', prazoLabel:'Prazo para alcançar (opcional)', simulLabel:'📊 Simulação', simulPre:'Para alcançar em', simulDias:'dias', simulPos:', você precisa guardar:', criarMeta:'Criar meta', nenhumaMeta:'Nenhuma meta criada.', proxSonho:'Qual é o seu próximo sonho?',
+      guardado:'Guardado', metaLabel:'Meta', faltaLabel:'Falta', pctConc:p=>`${p}% concluído`, sonhoAlc:'🎉 Sonho alcançado!', planoPara:d=>`📊 Plano para alcançar em ${d} dias`, porDia:'Por dia', porSemana:'Por semana', porMes:'Por mês', porAno:'Por ano', prazoInfo:'Prazo:',
+      envelopes:'Envelopes', addEnv:'+ Envelope', desafioEnv:m=>`Desafio dos Envelopes · ${m}`, dicaEnv:'💡 Separe seu dinheiro em envelopes no início do mês. Quando acabar, acabou! É assim que a mulher sábia mantém o controle.',
+      nomeEnv:'Nome do envelope', nomeEnvPh:'Ex: Mercado, Farmácia, Lazer...', quantoEnv:'Quanto coloca neste envelope?', criarEnv:'Criar envelope', nenhumEnv:'Nenhum envelope ainda.', criarMeusEnv:'Criar meus envelopes',
+      usadoDe:(g,l)=>`${g} usado de ${l}`, esgotado:'Esgotado!', restam:v=>`${v} restam`, outroBtn:'+ Outro',
+      idiomaLabel:'Idioma', sigaNas:'Nos siga nas redes', sair:'Sair da conta', saindo:'Saindo...',
+      premiumAtivo:'Premium ativo', sejaPremium:'Seja Premium', premiumDesc:p=>`Metas, Envelopes, Sofia IA, 100 créditos/mês e muito mais por apenas ${p}. Cancele quando quiser.`, assinarPremium:'Assinar Premium',
+      jaPaguei:'Já paguei · Ativar com código', codigoPh:'Código de ativação', ativar:'Ativar', ativando:'Verificando...', codigoOk:'✅ Premium ativado! Bem-vinda ao clube!', codigoErro:'❌ Código inválido.',
+      citaPerfil:'"A mulher que cuida do dinheiro cuida da própria liberdade."',
+      novaSenhaTitle:'Nova Senha', novaSenhaSub:'Digite sua nova senha abaixo', novaSenhaPh:'Nova senha (mínimo 6 caracteres)', salvarSenha:'Salvar nova senha', salvandoSenha:'Salvando...', senhaMinErro:'A senha deve ter pelo menos 6 caracteres.', senhaOk:'Senha atualizada! Redirecionando...', senhaErro:'Erro ao atualizar senha.',
+      recursoPremi:'Recurso Premium', recursoDesc:p=>`Este recurso é exclusivo para assinantes Premium. Por apenas ${p} você tem acesso a tudo!`, assinarBtn:p=>`Assinar Premium — ${p}`, semMulta:'Cancele quando quiser. Sem multa.',
+      instalarTitle:'Instalar Lição de Mulher', instalarSub:'Adicionar à tela inicial como app', agoraNao:'Agora não', instalarBtn:'Instalar ✨',
+      escolhaIdiomaObrig:'⚠️ Escolha seu idioma antes de criar a conta.', escolhaIdioma:'Escolha seu idioma', podeMudar:'Escolha o idioma do seu canal.', continuar:'Continuar',
+      novoVideo:'Novo vídeo!', ytCanal:'📺 Canal Lição de Mulher', assistirAgora:'Assistir agora →',
+      seusCreditos:'Seus Créditos', creditosTitulo:'🪙 Sistema de Créditos', creditosDesc:'Ganhe créditos todo dia e desbloqueie histórias exclusivas!',
+      loginDiario:'Login diário', sequencia:'Sequência', sequenciaDesc:'dias seguidos', boasBoas:'Boas-vindas!', indicar:'Indicar Amiga', indicarDesc:'Sua amiga ganha 15 créditos, você ganha 10!', seuLink:'Seu link de indicação',
+      historiasTitle:'Histórias Exclusivas', seriesTitle:'Séries', avulsosTitle:'Histórias Avulsas', treinamentosTitle:'Treinamentos', episodiosLabel:'episódios',
+      creditosInsuf:'Créditos insuficientes', desbloqueado:'✅ Assistir', bloquear:'🔒 Desbloquear', creditosLabel:'créditos', verEpisodios:'Ver episódios', voltar:'← Voltar',
+      playerTitle:'Assistindo', videoIndisponivel:'Vídeo em breve! Este episódio será lançado em breve.',
+      streakBonus7:'🎉 +10 bônus por 7 dias!', streakBonus30:'🏆 +30 bônus por 30 dias!',
+      creditosGanhos:(n,m)=>`+${n} créditos — ${m}`,
+      /* Lojinha */
+      lojaTitle:'🛍️ Loja de Créditos', lojaDesc:'Compre créditos para desbloquear histórias quando quiser!', comprar:'Comprar', popular:'⭐ Popular', lojaAviso:'Pagamento seguro via Stripe. Créditos liberados após confirmação.',
+      /* Memória do mês */
+      memoriaTitle:'📊 Memória do Mês', memoriaGastoMes:'Total gasto no mês', memoriaRecMes:'Total de receitas', memoriaTop:'Top categorias', memoriaDividas:'Dívidas recorrentes do mês', memoriaProxMes:'Projeção para o próximo mês',
+      dividasTitle:'⚠️ Minhas Dívidas', addDivida:'+ Dívida', nomeDivida:'Nome da dívida', valorParcela:'Valor da parcela', numParcelas:'Quantas parcelas restam?', parcelasInf:'Deixe em branco se for fixo mensal (sem fim)', vencimento:'Dia do vencimento', criarDivida:'Salvar dívida', nenhumaDivida:'Nenhuma dívida registrada.', dividaQuitada:'🎉 Dívida quitada!', parcelasDe:(a,t)=>`Parcela ${a} de ${t}`,
+      dicas:["Antes de comprar algo, espere 24 horas. Se ainda quiser, aí pode.","Guarde pelo menos R$10 por semana. Pequeno hoje, grande amanhã.","Anote tudo que gastou hoje. A consciência já é o primeiro passo.","Dívida é como buraco: quanto mais fundo, mais difícil sair. Pare de cavar.","Sua energia vale dinheiro. Não gaste com quem drena as duas coisas.","Cozinhar em casa é um ato de amor próprio e de economia.","Todo real economizado é um real conquistado.","A mulher sábia pensa três vezes antes de parcelar.","Dinheiro guardado é liberdade. Dinheiro gasto é só memória.","Não compare sua vida financeira com a das outras. Cada uma tem sua batalha.","O orçamento não é uma prisão. É o mapa do seu sonho.","A mulher que controla o dinheiro, controla o próprio destino.","Um passo de cada vez. Hoje você anotou. Amanhã você muda.","Sonho sem plano é só devaneio. Com plano, é caminho."],
+    },
+    en:{flag:'🇺🇸',name:'English',locale:'en-US',currency:'$',showExtras:false,showEbook:false,
+      sofiaSystem:'You are Sofia, a financial advisor for women. Be welcoming, empathetic, practical. Simple language. Max 3 short paragraphs.',
+      sofiaHello:n=>`Hello, ${n}! 🌸 I'm your financial advisor. How can I help you today?`,
+      sofiaPensando:'Sofia is thinking...', sofiaErro:'Oops! Error. Try again. 🌸', sofiaInput:'Ask about finances...', sofiaTitle:'🤖 Advisor Sofia', sofiaSub:'Your AI financial specialist',
+      loading:'Loading...', appTagline:'Take care of your money with wisdom and care',
+      loginTab:'Sign In', signupTab:'Create Account', nomeLabel:'Your name', nomePh:'Jane Smith', emailLabel:'Email', senhaLabel:'Password', senhaPh:'••••••••', senhaMinPh:'At least 6 characters', esqueciSenha:'Forgot password', aguarde:'Please wait...', btnEntrar:'Sign In', btnCriar:'Create my account',
+      quote:'"Plant your seeds in silence, trust in God\'s\ntiming and turn your pain into wisdom."',
+      emailSent:e=>`We sent a link to ${e}. Check your inbox!`, contaCriada:'Account created! Check your email.', preenchaAll:'Please fill all fields.', digiteNome:'Enter your name.', digiteEmail:'Enter your email first.', erroPadrao:'Something went wrong. Try again.',
+      erros:{'Invalid login credentials':'Email or password incorrect.','User already registered':'This email already has an account.','Password should be at least 6 characters':'Password: at least 6 characters.','Unable to validate email address: invalid format':'Invalid email.','Email not confirmed':'Confirm your email before signing in.'},
+      premium:'⭐ Premium', gratuito:'Free',
+      navInicio:'Home', navGastos:'Expenses', navMetas:'Dreams', navEnvelopes:'Envelopes', navHistorias:'Stories', navSofia:'Sofia AI', navPerfil:'Profile',
+      bomDia:'Good morning', boaTarde:'Good afternoon', boaNoite:'Good evening',
+      saldoMes:'Monthly Balance', entradas:'↑ Income', saidas:'↓ Expenses', gasto:'Spent',
+      dicaDia:'Tip of the day', ondeGastouMais:'Top spending', ultimosLanc:'Recent transactions',
+      nenhumLanc:'No transactions yet.', toqueComec:'Tap here to start!', adicionarLanc:'Add transaction',
+      querMaisCtrl:'Want more control? ✨', vejaPremium:'See what Premium unlocks:',
+      freeFeatures:['Monthly dashboard','Expense control','Daily tip','15 welcome credits','2 daily login credits'],
+      premFeatures:['Goals & dreams','Digital envelopes','Sofia AI','100 credits/month','Full series','Unlimited access'],
+      assinarPor:p=>`Subscribe for only ${p}`, cancelarQuando:'Cancel anytime · No fees',
+      meusGastos:'My Expenses', fechar:'✕ Close', novo:'+ New', labelGasto:'↓ Expense', labelReceita:'↑ Income', labelDivida:'⚠️ Recurring Debt',
+      valorLabel:'Amount', catLabel:'Category', descLabel:'Description (optional)', descPh:'e.g. Grocery store', dataLabel:'Date', salvando:'Saving...', salvarLanc:'Save',
+      filtros:[['todos','All'],['gasto','Expenses'],['receita','Income'],['divida','Debts']],
+      nenhumAqui:'No transactions here.', editarLanc:'Edit transaction', salvarAlter:'Save changes',
+      confirmarExcl:'Delete this transaction? This cannot be undone.', confirmarMeta:'Delete this goal?',
+      cancelar:'Cancel', excluir:'Delete',
+      catsGasto:['Food','Transport','Health','Education','Home','Beauty','Leisure','Clothes','Other'],
+      catsDivida:['Rent','Water','Electricity','Internet','Phone','Credit Card','Loan','Financing','College','Condo','School','Other'],
+      catsReceita:['Salary','Freelance','Sales','Gift','Other'],
+      mesesLabel:'Months remaining', totalParc:'Total installments', dividaRecLabel:'Recurring Debt',
+      meusSonhos:'My Dreams', addMeta:'+ Goal', qualSonho:"What's your dream?", sonhoPh:'e.g. Vacation, Savings', quantoCusta:'How much does it cost?', prazoLabel:'Deadline (optional)', simulLabel:'📊 Simulation', simulPre:'To reach in', simulDias:'days', simulPos:', you need to save:', criarMeta:'Create goal', nenhumaMeta:'No goals yet.', proxSonho:"What's your next dream?",
+      guardado:'Saved', metaLabel:'Goal', faltaLabel:'Remaining', pctConc:p=>`${p}% complete`, sonhoAlc:'🎉 Dream achieved!', planoPara:d=>`📊 Plan in ${d} days`, porDia:'Per day', porSemana:'Per week', porMes:'Per month', porAno:'Per year', prazoInfo:'Deadline:',
+      envelopes:'Envelopes', addEnv:'+ Envelope', desafioEnv:m=>`Envelope Challenge · ${m}`, dicaEnv:"💡 Separate your money into envelopes at the start of the month.",
+      nomeEnv:'Envelope name', nomeEnvPh:'e.g. Groceries, Pharmacy...', quantoEnv:'How much goes in?', criarEnv:'Create envelope', nenhumEnv:'No envelopes yet.', criarMeusEnv:'Create my envelopes',
+      usadoDe:(g,l)=>`${g} used of ${l}`, esgotado:'Empty!', restam:v=>`${v} left`, outroBtn:'+ Other',
+      idiomaLabel:'Language', sigaNas:'Follow us', sair:'Sign out', saindo:'Signing out...',
+      premiumAtivo:'Premium active', sejaPremium:'Go Premium', premiumDesc:p=>`Goals, Envelopes, Sofia AI, 100 credits/month and more for only ${p}.`, assinarPremium:'Subscribe Premium',
+      jaPaguei:'Already paid · Code', codigoPh:'Activation code', ativar:'Activate', ativando:'Verifying...', codigoOk:'✅ Premium activated! Welcome!', codigoErro:'❌ Invalid code.',
+      citaPerfil:'"The woman who manages her money manages her own freedom."',
+      novaSenhaTitle:'New Password', novaSenhaSub:'Enter your new password', novaSenhaPh:'New password (at least 6 characters)', salvarSenha:'Save new password', salvandoSenha:'Saving...', senhaMinErro:'Password must be at least 6 characters.', senhaOk:'Password updated! Redirecting...', senhaErro:'Error updating password.',
+      recursoPremi:'Premium Feature', recursoDesc:p=>`For Premium subscribers only. For just ${p}!`, assinarBtn:p=>`Subscribe Premium — ${p}`, semMulta:'Cancel anytime.',
+      instalarTitle:"Install Woman's Lesson", instalarSub:'Add to home screen', agoraNao:'Not now', instalarBtn:'Install ✨',
+      escolhaIdiomaObrig:'⚠️ Choose your language first.', escolhaIdioma:'Choose your language', podeMudar:'Choose your channel language.', continuar:'Continue',
+      novoVideo:'New video!', ytCanal:"📺 Woman's Lesson", assistirAgora:'Watch now →',
+      seusCreditos:'Your Credits', creditosTitulo:'🪙 Credits System', creditosDesc:'Earn credits daily and unlock exclusive stories!',
+      loginDiario:'Daily login', sequencia:'Streak', sequenciaDesc:'days in a row', boasBoas:'Welcome!', indicar:'Refer a Friend', indicarDesc:'Your friend gets 15 credits, you get 10!', seuLink:'Your referral link',
+      historiasTitle:'Exclusive Stories', seriesTitle:'Series', avulsosTitle:'Stories', treinamentosTitle:'Trainings', episodiosLabel:'episodes',
+      creditosInsuf:'Insufficient credits', desbloqueado:'✅ Watch', bloquear:'🔒 Unlock', creditosLabel:'credits', verEpisodios:'See episodes', voltar:'← Back',
+      playerTitle:'Now Watching', videoIndisponivel:'Coming soon!',
+      streakBonus7:'🎉 +10 bonus for 7 days!', streakBonus30:'🏆 +30 bonus for 30 days!',
+      creditosGanhos:(n,m)=>`+${n} credits — ${m}`,
+      lojaTitle:'🛍️ Credits Store', lojaDesc:'Buy credits to unlock stories anytime!', comprar:'Buy', popular:'⭐ Popular', lojaAviso:'Secure payment via Stripe.',
+      memoriaTitle:'📊 Monthly Overview', memoriaGastoMes:'Total spent', memoriaRecMes:'Total income', memoriaTop:'Top categories', memoriaDividas:'Recurring debts', memoriaProxMes:'Next month projection',
+      dividasTitle:'⚠️ My Debts', addDivida:'+ Debt', nomeDivida:'Debt name', valorParcela:'Installment amount', numParcelas:'How many installments left?', parcelasInf:'Leave blank for ongoing monthly', vencimento:'Due day of month', criarDivida:'Save debt', nenhumaDivida:'No debts registered.', dividaQuitada:'🎉 Debt paid off!', parcelasDe:(a,t)=>`Installment ${a} of ${t}`,
+      dicas:["Before buying, wait 24 hours.","Save at least $5 per week.","Write down everything you spent today.","Debt is like a hole: deeper means harder.","Cooking at home saves money.","Every dollar saved is a dollar earned.","The wise woman thinks before using credit.","Saved money is freedom.","Don't compare your finances to others.","The budget is your dream's map.","The woman who controls money controls her destiny.","One step at a time.","A dream without a plan is just wishful thinking.","With a plan, a dream becomes a path."],
+    },
+    fr:{flag:'🇫🇷',name:'Français',locale:'fr-FR',currency:'€',showExtras:false,showEbook:false,
+      sofiaSystem:"Vous êtes Sofia, conseillère financière pour femmes. Chaleureuse, empathique, pratique. Max 3 paragraphes.",
+      sofiaHello:n=>`Bonjour, ${n}! 🌸 Je suis votre conseillère financière.`,
+      sofiaPensando:'Sofia réfléchit...', sofiaErro:'Oups! Erreur. 🌸', sofiaInput:'Posez une question...', sofiaTitle:'🤖 Conseillère Sofia', sofiaSub:'Votre spécialiste financière IA',
+      loading:'Chargement...', appTagline:'Gérez votre argent avec sagesse',
+      loginTab:'Se connecter', signupTab:'Créer un compte', nomeLabel:'Votre prénom', nomePh:'Marie Dupont', emailLabel:'E-mail', senhaLabel:'Mot de passe', senhaPh:'••••••••', senhaMinPh:'Au moins 6 caractères', esqueciSenha:'Mot de passe oublié', aguarde:'Patientez...', btnEntrar:'Se connecter', btnCriar:'Créer mon compte',
+      quote:'"Semez en silence, faites confiance au temps\nde Dieu et transformez votre douleur en sagesse."',
+      emailSent:e=>`Lien envoyé à ${e}.`, contaCriada:'Compte créé! Vérifiez votre e-mail.', preenchaAll:'Remplissez tous les champs.', digiteNome:'Entrez votre prénom.', digiteEmail:"Entrez votre e-mail d'abord.", erroPadrao:"Une erreur s'est produite.",
+      erros:{'Invalid login credentials':'E-mail ou mot de passe incorrect.','User already registered':'Cet e-mail a déjà un compte.','Password should be at least 6 characters':'Mot de passe: minimum 6 caractères.','Unable to validate email address: invalid format':'E-mail invalide.','Email not confirmed':'Confirmez votre e-mail.'},
+      premium:'⭐ Premium', gratuito:'Gratuit',
+      navInicio:'Accueil', navGastos:'Dépenses', navMetas:'Rêves', navEnvelopes:'Enveloppes', navHistorias:'Histoires', navSofia:'Sofia IA', navPerfil:'Profil',
+      bomDia:'Bonjour', boaTarde:'Bon après-midi', boaNoite:'Bonsoir',
+      saldoMes:'Solde du mois', entradas:'↑ Revenus', saidas:'↓ Dépenses', gasto:'Dépensé',
+      dicaDia:'Conseil du jour', ondeGastouMais:'Plus dépensé', ultimosLanc:'Dernières transactions',
+      nenhumLanc:'Aucune transaction.', toqueComec:'Appuyez pour commencer!', adicionarLanc:'Ajouter',
+      querMaisCtrl:'Plus de contrôle? ✨', vejaPremium:'Découvrez Premium:',
+      freeFeatures:['Tableau de bord','Contrôle','Conseil quotidien','15 crédits','2 crédits/jour'],
+      premFeatures:['Objectifs','Enveloppes','Sofia IA','100 crédits/mois','Séries complètes'],
+      assinarPor:p=>`S'abonner pour ${p}`, cancelarQuando:'Annulez quand vous voulez',
+      meusGastos:'Mes Dépenses', fechar:'✕', novo:'+ Nouveau', labelGasto:'↓ Dépense', labelReceita:'↑ Revenu', labelDivida:'⚠️ Dette Récurrente',
+      valorLabel:'Montant', catLabel:'Catégorie', descLabel:'Description', descPh:'Ex: Épicerie', dataLabel:'Date', salvando:'Enregistrement...', salvarLanc:'Enregistrer',
+      filtros:[['todos','Tout'],['gasto','Dépenses'],['receita','Revenus'],['divida','Dettes']],
+      nenhumAqui:'Aucune transaction.', editarLanc:'Modifier', salvarAlter:'Enregistrer',
+      confirmarExcl:'Supprimer?', confirmarMeta:'Supprimer cet objectif?',
+      cancelar:'Annuler', excluir:'Supprimer',
+      catsGasto:['Alimentation','Transport','Santé','Éducation','Logement','Beauté','Loisirs','Vêtements','Autres'],
+      catsDivida:['Loyer','Eau','Électricité','Internet','Téléphone','Carte de crédit','Prêt','Financement','Université','Charges','École','Autres'],
+      catsReceita:['Salaire','Freelance','Ventes','Cadeau','Autres'],
+      mesesLabel:'Mois restants', totalParc:'Total versements', dividaRecLabel:'Dette Récurrente',
+      meusSonhos:'Mes Rêves', addMeta:'+ Objectif', qualSonho:'Quel est votre rêve?', sonhoPh:'Ex: Voyage', quantoCusta:'Combien ça coûte?', prazoLabel:'Date limite', simulLabel:'📊 Simulation', simulPre:'Pour atteindre en', simulDias:'jours', simulPos:', épargnez:', criarMeta:'Créer', nenhumaMeta:'Aucun objectif.', proxSonho:'Votre prochain rêve?',
+      guardado:'Épargné', metaLabel:'Objectif', faltaLabel:'Reste', pctConc:p=>`${p}%`, sonhoAlc:'🎉 Rêve accompli!', planoPara:d=>`📊 Plan en ${d} jours`, porDia:'Par jour', porSemana:'Par semaine', porMes:'Par mois', porAno:'Par an', prazoInfo:'Échéance:',
+      envelopes:'Enveloppes', addEnv:'+ Enveloppe', desafioEnv:m=>`Défi · ${m}`, dicaEnv:"💡 Répartissez votre argent en enveloppes.",
+      nomeEnv:"Nom", nomeEnvPh:'Ex: Courses...', quantoEnv:'Combien?', criarEnv:'Créer', nenhumEnv:'Aucune enveloppe.', criarMeusEnv:'Créer mes enveloppes',
+      usadoDe:(g,l)=>`${g} sur ${l}`, esgotado:'Épuisé!', restam:v=>`${v} restant`, outroBtn:'+ Autre',
+      idiomaLabel:'Langue', sigaNas:'Suivez-nous', sair:'Se déconnecter', saindo:'Déconnexion...',
+      premiumAtivo:'Premium actif', sejaPremium:'Devenez Premium', premiumDesc:p=>`Pour seulement ${p}.`, assinarPremium:"S'abonner",
+      jaPaguei:'Déjà payé · Code', codigoPh:"Code d'activation", ativar:'Activer', ativando:'Vérification...', codigoOk:'✅ Premium activé!', codigoErro:'❌ Code invalide.',
+      citaPerfil:'"La femme qui gère son argent gère sa liberté."',
+      novaSenhaTitle:'Nouveau mot de passe', novaSenhaSub:'Entrez votre nouveau mot de passe', novaSenhaPh:'Nouveau mot de passe', salvarSenha:'Enregistrer', salvandoSenha:'...', senhaMinErro:'Au moins 6 caractères.', senhaOk:'Mis à jour!', senhaErro:'Erreur.',
+      recursoPremi:'Fonctionnalité Premium', recursoDesc:p=>`Pour ${p} seulement!`, assinarBtn:p=>`S'abonner — ${p}`, semMulta:'Annulez quand vous voulez.',
+      instalarTitle:'Installer', instalarSub:"Ajouter à l'écran", agoraNao:'Pas maintenant', instalarBtn:'Installer ✨',
+      escolhaIdiomaObrig:'⚠️ Choisissez votre langue.', escolhaIdioma:'Choisissez', podeMudar:'Langue du canal.', continuar:'Continuer',
+      novoVideo:'Nouvelle vidéo!', ytCanal:'📺 La Leçon de la Femme', assistirAgora:'Regarder →',
+      seusCreditos:'Vos Crédits', creditosTitulo:'🪙 Crédits', creditosDesc:'Gagnez des crédits!',
+      loginDiario:'Connexion quotidienne', sequencia:'Série', sequenciaDesc:'jours', boasBoas:'Bienvenue!', indicar:'Parrainer', indicarDesc:'10 crédits pour vous!', seuLink:'Votre lien',
+      historiasTitle:'Histoires', seriesTitle:'Séries', avulsosTitle:'Histoires', treinamentosTitle:'Formations', episodiosLabel:'épisodes',
+      creditosInsuf:'Crédits insuffisants', desbloqueado:'✅ Regarder', bloquear:'🔒 Débloquer', creditosLabel:'crédits', verEpisodios:'Voir', voltar:'← Retour',
+      playerTitle:'En cours', videoIndisponivel:'Bientôt disponible!',
+      streakBonus7:'🎉 +10 pour 7 jours!', streakBonus30:'🏆 +30 pour 30 jours!',
+      creditosGanhos:(n,m)=>`+${n} crédits — ${m}`,
+      lojaTitle:'🛍️ Boutique', lojaDesc:'Achetez des crédits!', comprar:'Acheter', popular:'⭐ Populaire', lojaAviso:'Paiement sécurisé.',
+      memoriaTitle:'📊 Bilan du mois', memoriaGastoMes:'Total dépensé', memoriaRecMes:'Total revenus', memoriaTop:'Top catégories', memoriaDividas:'Dettes récurrentes', memoriaProxMes:'Projection',
+      dividasTitle:'⚠️ Mes Dettes', addDivida:'+ Dette', nomeDivida:'Nom', valorParcela:'Montant', numParcelas:'Versements restants?', parcelasInf:'Laisser vide si mensuel', vencimento:'Jour échéance', criarDivida:'Enregistrer', nenhumaDivida:'Aucune dette.', dividaQuitada:'🎉 Remboursé!', parcelasDe:(a,t)=>`Versement ${a}/${t}`,
+      dicas:["Attendez 24h avant d'acheter.","Épargnez 10€ par semaine.","Notez vos dépenses.","La dette est un piège.","Cuisiner économise.","Chaque euro épargné compte.","L'argent épargné est liberté.","Ne comparez pas vos finances.","Le budget est la carte du rêve.","Contrôlez votre argent.","Un pas à la fois.","Un rêve sans plan n'est qu'une illusion.","Avec un plan, le rêve devient réalité.","Faites confiance au processus."],
+    },
+    es:{flag:'🇲🇽',name:'Español',locale:'es-MX',currency:'$',showExtras:false,showEbook:false,
+      sofiaSystem:'Eres Sofía, asesora financiera para mujeres. Acogedora, empática, práctica. Máximo 3 párrafos.',
+      sofiaHello:n=>`¡Hola, ${n}! 🌸 Soy tu asesora financiera.`,
+      sofiaPensando:'Sofía está pensando...', sofiaErro:'¡Error! Inténtalo de nuevo. 🌸', sofiaInput:'Pregunta sobre finanzas...', sofiaTitle:'🤖 Asesora Sofía', sofiaSub:'Tu especialista financiera IA',
+      loading:'Cargando...', appTagline:'Cuida tu dinero con sabiduría',
+      loginTab:'Entrar', signupTab:'Crear cuenta', nomeLabel:'Tu nombre', nomePh:'María González', emailLabel:'Correo', senhaLabel:'Contraseña', senhaPh:'••••••••', senhaMinPh:'Mínimo 6 caracteres', esqueciSenha:'Olvidé mi contraseña', aguarde:'Espere...', btnEntrar:'Entrar', btnCriar:'Crear mi cuenta',
+      quote:'"Siembra en silencio, confía en el tiempo de\nDios y convierte tu dolor en sabiduría."',
+      emailSent:e=>`Enlace enviado a ${e}.`, contaCriada:'¡Cuenta creada! Revisa tu correo.', preenchaAll:'Completa todos los campos.', digiteNome:'Escribe tu nombre.', digiteEmail:'Escribe tu correo primero.', erroPadrao:'Algo salió mal.',
+      erros:{'Invalid login credentials':'Correo o contraseña incorrectos.','User already registered':'Este correo ya tiene cuenta.','Password should be at least 6 characters':'Contraseña: mínimo 6 caracteres.','Unable to validate email address: invalid format':'Correo inválido.','Email not confirmed':'Confirma tu correo.'},
+      premium:'⭐ Premium', gratuito:'Gratuito',
+      navInicio:'Inicio', navGastos:'Gastos', navMetas:'Sueños', navEnvelopes:'Sobres', navHistorias:'Historias', navSofia:'Sofía IA', navPerfil:'Perfil',
+      bomDia:'Buenos días', boaTarde:'Buenas tardes', boaNoite:'Buenas noches',
+      saldoMes:'Balance del mes', entradas:'↑ Ingresos', saidas:'↓ Gastos', gasto:'Gastado',
+      dicaDia:'Consejo del día', ondeGastouMais:'Más gastado', ultimosLanc:'Últimos movimientos',
+      nenhumLanc:'Sin movimientos.', toqueComec:'¡Toca para empezar!', adicionarLanc:'Agregar',
+      querMaisCtrl:'¿Más control? ✨', vejaPremium:'Mira lo que Premium libera:',
+      freeFeatures:['Panel','Control','Consejo diario','15 créditos','2 créditos/día'],
+      premFeatures:['Metas','Sobres','Sofía IA','100 créditos/mes','Series completas'],
+      assinarPor:p=>`Suscribirse por ${p}`, cancelarQuando:'Cancela cuando quieras',
+      meusGastos:'Mis Gastos', fechar:'✕', novo:'+ Nuevo', labelGasto:'↓ Gasto', labelReceita:'↑ Ingreso', labelDivida:'⚠️ Deuda Recurrente',
+      valorLabel:'Monto', catLabel:'Categoría', descLabel:'Descripción', descPh:'Ej: Supermercado', dataLabel:'Fecha', salvando:'Guardando...', salvarLanc:'Guardar',
+      filtros:[['todos','Todos'],['gasto','Gastos'],['receita','Ingresos'],['divida','Deudas']],
+      nenhumAqui:'Sin movimientos.', editarLanc:'Editar', salvarAlter:'Guardar',
+      confirmarExcl:'¿Eliminar?', confirmarMeta:'¿Eliminar esta meta?',
+      cancelar:'Cancelar', excluir:'Eliminar',
+      catsGasto:['Alimentación','Transporte','Salud','Educación','Casa','Belleza','Ocio','Ropa','Otros'],
+      catsDivida:['Renta','Agua','Luz','Internet','Teléfono','Tarjeta de Crédito','Préstamo','Financiamiento','Universidad','Condominio','Escuela','Otros'],
+      catsReceita:['Salario','Freelance','Ventas','Regalo','Otros'],
+      mesesLabel:'Meses restantes', totalParc:'Total cuotas', dividaRecLabel:'Deuda Recurrente',
+      meusSonhos:'Mis Sueños', addMeta:'+ Meta', qualSonho:'¿Cuál es tu sueño?', sonhoPh:'Ej: Viaje', quantoCusta:'¿Cuánto cuesta?', prazoLabel:'Fecha límite', simulLabel:'📊 Simulación', simulPre:'Para lograr en', simulDias:'días', simulPos:', ahorra:', criarMeta:'Crear meta', nenhumaMeta:'Sin metas.', proxSonho:'¿Tu próximo sueño?',
+      guardado:'Ahorrado', metaLabel:'Meta', faltaLabel:'Falta', pctConc:p=>`${p}%`, sonhoAlc:'🎉 ¡Sueño logrado!', planoPara:d=>`📊 Plan en ${d} días`, porDia:'Por día', porSemana:'Por semana', porMes:'Por mes', porAno:'Por año', prazoInfo:'Fecha:',
+      envelopes:'Sobres', addEnv:'+ Sobre', desafioEnv:m=>`Desafío · ${m}`, dicaEnv:'💡 Separa tu dinero en sobres.',
+      nomeEnv:'Nombre', nomeEnvPh:'Ej: Mercado...', quantoEnv:'¿Cuánto?', criarEnv:'Crear', nenhumEnv:'Sin sobres.', criarMeusEnv:'Crear mis sobres',
+      usadoDe:(g,l)=>`${g} de ${l}`, esgotado:'¡Agotado!', restam:v=>`${v} restante`, outroBtn:'+ Otro',
+      idiomaLabel:'Idioma', sigaNas:'Síguenos', sair:'Cerrar sesión', saindo:'Saliendo...',
+      premiumAtivo:'Premium activo', sejaPremium:'Sé Premium', premiumDesc:p=>`Por solo ${p}.`, assinarPremium:'Suscribirse',
+      jaPaguei:'Ya pagué · Código', codigoPh:'Código', ativar:'Activar', ativando:'Verificando...', codigoOk:'✅ ¡Premium activado!', codigoErro:'❌ Código inválido.',
+      citaPerfil:'"La mujer que cuida el dinero cuida su libertad."',
+      novaSenhaTitle:'Nueva Contraseña', novaSenhaSub:'Nueva contraseña', novaSenhaPh:'Nueva contraseña', salvarSenha:'Guardar', salvandoSenha:'...', senhaMinErro:'Al menos 6 caracteres.', senhaOk:'¡Actualizada!', senhaErro:'Error.',
+      recursoPremi:'Función Premium', recursoDesc:p=>`¡Por ${p}!`, assinarBtn:p=>`Suscribirse — ${p}`, semMulta:'Cancela cuando quieras.',
+      instalarTitle:'Instalar', instalarSub:'Agregar a inicio', agoraNao:'Ahora no', instalarBtn:'Instalar ✨',
+      escolhaIdiomaObrig:'⚠️ Elige tu idioma.', escolhaIdioma:'Elige', podeMudar:'Idioma del canal.', continuar:'Continuar',
+      novoVideo:'¡Nuevo video!', ytCanal:'📺 Lección de Mujer', assistirAgora:'Ver →',
+      seusCreditos:'Tus Créditos', creditosTitulo:'🪙 Créditos', creditosDesc:'¡Gana créditos cada día!',
+      loginDiario:'Inicio diario', sequencia:'Racha', sequenciaDesc:'días', boasBoas:'¡Bienvenida!', indicar:'Recomendar', indicarDesc:'10 créditos para ti!', seuLink:'Tu enlace',
+      historiasTitle:'Historias', seriesTitle:'Series', avulsosTitle:'Historias', treinamentosTitle:'Entrenamientos', episodiosLabel:'episodios',
+      creditosInsuf:'Créditos insuficientes', desbloqueado:'✅ Ver', bloquear:'🔒 Desbloquear', creditosLabel:'créditos', verEpisodios:'Ver', voltar:'← Volver',
+      playerTitle:'Viendo', videoIndisponivel:'¡Próximamente!',
+      streakBonus7:'🎉 +10 por 7 días!', streakBonus30:'🏆 +30 por 30 días!',
+      creditosGanhos:(n,m)=>`+${n} créditos — ${m}`,
+      lojaTitle:'🛍️ Tienda', lojaDesc:'¡Compra créditos!', comprar:'Comprar', popular:'⭐ Popular', lojaAviso:'Pago seguro.',
+      memoriaTitle:'📊 Resumen del mes', memoriaGastoMes:'Total gastado', memoriaRecMes:'Total ingresos', memoriaTop:'Categorías', memoriaDividas:'Deudas recurrentes', memoriaProxMes:'Proyección',
+      dividasTitle:'⚠️ Mis Deudas', addDivida:'+ Deuda', nomeDivida:'Nombre', valorParcela:'Cuota', numParcelas:'¿Cuántas cuotas restan?', parcelasInf:'Dejar vacío si es mensual fijo', vencimento:'Día de vencimiento', criarDivida:'Guardar', nenhumaDivida:'Sin deudas.', dividaQuitada:'🎉 ¡Deuda pagada!', parcelasDe:(a,t)=>`Cuota ${a} de ${t}`,
+      dicas:["Espera 24h antes de comprar.","Ahorra $50 por semana.","Anota tus gastos.","La deuda es una trampa.","Cocinar en casa ahorra.","Cada peso ahorrado vale.","El dinero guardado es libertad.","No compares tus finanzas.","El presupuesto es tu mapa.","Controla tu dinero.","Un paso a la vez.","Un sueño sin plan es fantasía.","Con un plan, el sueño es posible.","Confía en el proceso."],
+    },
+  };
+
+  /* ============================================================ CONTEXT ============================================================ */
+  const LangCtx = createContext({ lang:'pt', t:LANGS.pt, setLang:()=>{}, preco:PRECO, stripeLink:STRIPE_LINK });
+  const useLang = () => useContext(LangCtx);
+
+  /* ============================================================ UTILS ============================================================ */
+  const fmtMoney=(v,cur)=>{const n=Number(v||0);if(cur==='R$')return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});if(cur==='€')return '€'+n.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});return cur+' '+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  const fmtShort=(v,cur)=>{const n=Number(v||0);if(cur==='R$'){if(n>=1000)return 'R$ '+(n/1000).toFixed(1).replace('.',',')+' k';return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}if(n>=1000)return cur+' '+(n/1000).toFixed(1)+'k';return cur+' '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});};
+  const fmtDate=(d,loc)=>{try{return new Date(d+'T12:00:00').toLocaleDateString(loc||'pt-BR',{day:'2-digit',month:'short'});}catch{return d;}};
+  const mesAtual=()=>new Date().toISOString().slice(0,7);
+  const hoje=()=>new Date().toISOString().slice(0,10);
+
+  /* ============================================================ ICONS ============================================================ */
+  const icons={
+    home:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
+    gastos:"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.88 14.76V18h-1.7v-1.29c-1.25-.26-2.35-1.01-2.44-2.41h1.55c.08.76.58 1.35 1.6 1.35.96 0 1.48-.49 1.48-1.15 0-.62-.38-.97-1.56-1.27-1.35-.33-2.62-.84-2.62-2.35 0-1.1.84-1.93 2.09-2.18V7.5h1.7v1.21c1.37.29 2.05 1.19 2.11 2.36H13.6c-.07-.78-.44-1.35-1.42-1.35-.93 0-1.44.44-1.44 1.09 0 .6.42.92 1.62 1.24 1.35.34 2.57.89 2.57 2.4 0 1.13-.85 2.02-2.05 2.31z",
+    target:"M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-5a5 5 0 100-10 5 5 0 000 10zm0-3a2 2 0 110-4 2 2 0 010 4z",
+    envelope2:"M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
+    user:"M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
+    plus:"M12 5v14M5 12h14", lock:"M19 11H5a2 2 0 00-2 2v7a2 2 0 002 2h14a2 2 0 002-2v-7a2 2 0 00-2-2zM7 11V7a5 5 0 0110 0v4",
+    star:"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+    trash:"M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2",
+    tip:"M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+    wallet:"M3 10h18M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zm7 10a1 1 0 110-2 1 1 0 010 2z",
+    globe:"M12 2a10 10 0 100 20A10 10 0 0012 2zm0 0c-2.8 0-5 4.5-5 10s2.2 10 5 10 5-4.5 5-10S14.8 2 12 2zM2 12h20",
+    film:"M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z M10 9l5 3-5 3V9z",
+    shop:"M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z M3 6h18 M16 10a4 4 0 01-8 0",
+    chart:"M18 20V10M12 20V4M6 20v-6",
+    alert:"M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01",
+    check:"M20 6L9 17l-5-5",
+    calendar:"M3 4h18v18H3V4z M16 2v4M8 2v4M3 10h18",
+  };
+  const Icon=({n,s=22,c='currentColor',filled})=>(<svg width={s} height={s} viewBox="0 0 24 24" fill={filled?c:'none'} stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{(icons[n]||'').split(' M').map((d,i)=><path key={i} d={i===0?d:'M'+d}/>)}</svg>);
+
+  /* ============================================================ LOADING ============================================================ */
+  const Loading=()=>{const {t}=useLang();return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'#0f0a08',gap:16}}><div style={{width:44,height:44,borderRadius:'50%',border:'3px solid rgba(212,168,71,0.15)',borderTopColor:'#d4a847',animation:'spin 0.9s linear infinite'}}/><div style={{fontSize:13,color:'#7a5545'}}>{t.loading}</div></div>);};
+
+  /* ============================================================ PREMIUM WALL ============================================================ */
+  const PremiumWall=({onUpgrade})=>{const {t,preco}=useLang();return(<div style={{padding:'40px 24px',textAlign:'center',animation:'fadeIn 0.3s ease'}}><div style={{width:64,height:64,borderRadius:'50%',background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.3)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px'}}><Icon n="lock" s={28} c="#d4a847"/></div><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8',marginBottom:10}}>{t.recursoPremi}</div><div style={{fontSize:14,color:'#7a5545',lineHeight:1.7,marginBottom:28,maxWidth:280,margin:'0 auto 28px'}}>{t.recursoDesc(preco)}</div><button onClick={onUpgrade} style={{background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:14,padding:'14px 32px',fontSize:15,fontWeight:700,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}><Icon n="star" s={16} c="#0f0a08" filled/>{t.assinarBtn(preco)}</button><div style={{fontSize:11,color:'#7a5545',marginTop:12}}>{t.semMulta}</div></div>);};
+
+  /* ============================================================ MODAL CONFIRM ============================================================ */
+  const ModalConfirm=({msg,onConfirm,onCancel})=>{const {t}=useLang();return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:24}}><div style={{background:'#1e1208',borderRadius:20,border:'1px solid rgba(212,168,71,0.2)',padding:24,width:'100%',maxWidth:320,animation:'slideUp 0.25s ease'}}><div style={{fontSize:15,color:'#e8d4c8',marginBottom:20,textAlign:'center',lineHeight:1.6}}>{msg}</div><div style={{display:'flex',gap:10}}><button onClick={onCancel} style={{flex:1,background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:12,padding:'12px',color:'#7a5545',fontSize:14,fontWeight:600,cursor:'pointer'}}>{t.cancelar}</button><button onClick={onConfirm} style={{flex:1,background:'rgba(212,71,71,0.15)',border:'1px solid rgba(212,71,71,0.3)',borderRadius:12,padding:'12px',color:'#d44747',fontSize:14,fontWeight:700,cursor:'pointer'}}>{t.excluir}</button></div></div></div>);};
+
+  /* ============================================================ CREDITOS TOAST ============================================================ */
+  const CreditosToast=({msg,onClose})=>{useEffect(()=>{const t=setTimeout(onClose,3000);return()=>clearTimeout(t);},[]);return(<div style={{position:'fixed',top:70,left:'50%',transform:'translateX(-50%)',zIndex:999,background:'linear-gradient(135deg,#2d1a05,#1a0f05)',border:'1.5px solid #d4a847',borderRadius:16,padding:'12px 20px',display:'flex',alignItems:'center',gap:10,animation:'slideUp 0.3s ease',boxShadow:'0 8px 24px rgba(212,168,71,0.25)',maxWidth:320,whiteSpace:'nowrap'}}><span style={{fontSize:22,animation:'coinBounce 0.6s ease'}}>🪙</span><span style={{color:'#d4a847',fontWeight:700,fontSize:15}}>{msg}</span></div>);};
+
+  /* ============================================================ LANG PICKER ============================================================ */
+  const LangPickerModal=({onClose})=>{const {lang,setLang,t}=useLang();return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:300,display:'flex',alignItems:'flex-end',justifyContent:'center'}}><div style={{background:'#1a1008',borderRadius:'20px 20px 0 0',border:'1px solid rgba(212,168,71,0.2)',padding:24,width:'100%',maxWidth:480,animation:'slideUp 0.3s ease'}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8',marginBottom:4}}>{t.idiomaLabel}</div><div style={{fontSize:12,color:'#7a5545',marginBottom:20}}>{t.podeMudar}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:20}}>{Object.entries(LANGS).map(([key,l])=>(<button key={key} onClick={()=>{setLang(key);onClose();}} style={{background:lang===key?'rgba(212,168,71,0.15)':'rgba(0,0,0,0.3)',border:`1.5px solid ${lang===key?'#d4a847':'rgba(212,168,71,0.12)'}`,borderRadius:14,padding:'14px 12px',cursor:'pointer',display:'flex',alignItems:'center',gap:10}}><span style={{fontSize:28}}>{l.flag}</span><div style={{textAlign:'left'}}><div style={{fontSize:14,fontWeight:700,color:lang===key?'#d4a847':'#e8d4c8'}}>{l.name}</div><div style={{fontSize:10,color:'#5a3525'}}>{l.currency}</div></div></button>))}</div><button onClick={onClose} style={{width:'100%',background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:12,padding:'12px',color:'#7a5545',fontSize:14,cursor:'pointer'}}>{t.cancelar}</button></div></div>);};
+
+  /* ============================================================ YOUTUBE BANNER ============================================================ */
+  const YouTubeBanner=()=>{const {lang,t}=useLang();const [video,setVideo]=useState(null);const [visible,setVisible]=useState(false);const LS_KEY=`ldm_yt_seen_${lang}`;const channelData=YT_CHANNELS[lang];useEffect(()=>{if(!channelData?.channelId)return;const fetchVideo=async()=>{try{const rssUrl=`https://www.youtube.com/feeds/videos.xml?channel_id=${channelData.channelId}`;const apiUrl=`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;const res=await fetch(apiUrl);const data=await res.json();if(data.status==='ok'&&data.items?.length>0){const latest=data.items[0];const link=latest.link||'';const videoId=link.split('v=')[1]?.split('&')[0]||latest.guid?.split('v=')[1]?.split('&')[0]||'';const seenId=localStorage.getItem(LS_KEY);if(videoId&&videoId!==seenId){setVideo({id:videoId,title:latest.title,thumbnail:`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,link:link||`https://www.youtube.com/watch?v=${videoId}`});setVisible(true);}}}catch(e){}};fetchVideo();},[lang]);const handleClose=e=>{e.preventDefault();e.stopPropagation();if(video)localStorage.setItem(LS_KEY,video.id);setVisible(false);};if(!visible||!video)return null;return(<div style={{marginBottom:14,animation:'slideUp 0.35s ease'}}><a href={video.link} target="_blank" rel="noopener noreferrer" style={{display:'block',textDecoration:'none'}}><div style={{background:'linear-gradient(135deg,#1c0808,#110505)',borderRadius:16,border:'1px solid rgba(220,38,38,0.3)',padding:'12px 14px',position:'relative',overflow:'hidden'}}><div style={{position:'absolute',top:10,left:12,display:'flex',alignItems:'center',gap:5,background:'rgba(220,38,38,0.9)',borderRadius:20,padding:'3px 10px',zIndex:1}}><div style={{width:6,height:6,borderRadius:'50%',background:'white',animation:'pulse 1.5s ease infinite'}}/><span style={{fontSize:10,fontWeight:700,color:'white',textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.novoVideo}</span></div><button onClick={handleClose} style={{position:'absolute',top:8,right:8,background:'rgba(0,0,0,0.55)',border:'none',borderRadius:'50%',width:24,height:24,color:'white',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,zIndex:2}}>✕</button><div style={{display:'flex',gap:12,marginTop:22}}><div style={{position:'relative',flexShrink:0}}><img src={video.thumbnail} alt="" style={{width:96,height:54,borderRadius:8,objectFit:'cover',display:'block'}} onError={e=>e.target.style.display='none'}/><div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{width:26,height:26,background:'rgba(0,0,0,0.68)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}}><div style={{width:0,height:0,borderTop:'6px solid transparent',borderBottom:'6px solid transparent',borderLeft:'11px solid white',marginLeft:2}}/></div></div></div><div style={{flex:1,minWidth:0}}><div style={{fontSize:11,color:'#ff6b6b',marginBottom:3,fontWeight:600}}>{t.ytCanal}</div><div style={{fontSize:13,fontWeight:700,color:'#f0e0e0',lineHeight:1.35,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{video.title}</div><div style={{fontSize:11,color:'#a06060',marginTop:5}}>{t.assistirAgora}</div></div></div></div></a></div>);};
+
+  /* ============================================================ LOJA DE CRÉDITOS ============================================================ */
+  const LojaCreditos=({onClose,lang})=>{
+    const {t}=useLang();
+    const ispt=lang==='pt';
+    return(
+      <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:300,display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+        <div style={{background:'#1a1008',borderRadius:'20px 20px 0 0',border:'1px solid rgba(212,168,71,0.3)',padding:24,width:'100%',maxWidth:480,animation:'slideUp 0.3s ease',maxHeight:'90vh',overflowY:'auto'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#d4a847'}}>{t.lojaTitle}</div>
+            <button onClick={onClose} style={{background:'rgba(212,168,71,0.1)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:'50%',width:32,height:32,cursor:'pointer',color:'#d4a847',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+          </div>
+          <div style={{fontSize:13,color:'#7a5545',marginBottom:20,lineHeight:1.6}}>{t.lojaDesc}</div>
+
+          {PACOTES_CREDITOS.map(pack=>(
+            <div key={pack.id} style={{background:pack.popular?'linear-gradient(135deg,#2d1a05,#1a0f05)':'#160c04',borderRadius:16,border:`1.5px solid ${pack.popular?'#d4a847':'rgba(212,168,71,0.15)'}`,padding:'16px 18px',marginBottom:12,position:'relative',overflow:'hidden'}}>
+              {pack.popular&&<div style={{position:'absolute',top:0,right:0,background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',fontSize:10,fontWeight:700,padding:'4px 12px',borderRadius:'0 16px 0 10px'}}>{t.popular}</div>}
+              {pack.bonus&&<div style={{position:'absolute',top:0,left:0,background:'rgba(92,186,125,0.9)',color:'white',fontSize:10,fontWeight:700,padding:'4px 10px',borderRadius:'16px 0 10px 0'}}>BÔNUS {pack.bonus}</div>}
+              <div style={{display:'flex',alignItems:'center',gap:16}}>
+                <div style={{fontSize:36,flexShrink:0}}>{pack.emoji}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8',fontWeight:700}}>
+                    {pack.creditos} <span style={{fontSize:13,color:'#d4a847',fontWeight:400}}>créditos</span>
+                    {pack.bonus&&<span style={{fontSize:11,color:'#5cba7d',marginLeft:6}}>+{pack.bonus.replace('+','')} bônus</span>}
+                  </div>
+                  <div style={{fontSize:12,color:'#7a5545',marginTop:2}}>{pack.desc}</div>
+                </div>
+                <button
+                  onClick={()=>window.open(STRIPE_PACKS[pack.id],'_blank')}
+                  style={{background:pack.popular?'linear-gradient(135deg,#d4a847,#c49030)':'rgba(212,168,71,0.12)',border:`1px solid ${pack.popular?'transparent':'rgba(212,168,71,0.25)'}`,borderRadius:12,padding:'10px 16px',color:pack.popular?'#0f0a08':'#d4a847',fontSize:14,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0}}>
+                  {ispt?pack.preco:pack.precoUSD}
+                </button>
+              </div>
+            </div>
+          ))}
+
+          <div style={{background:'rgba(212,168,71,0.06)',borderRadius:12,padding:'10px 14px',marginTop:6,display:'flex',alignItems:'center',gap:8}}>
+            <span style={{fontSize:16}}>🔒</span>
+            <span style={{fontSize:11,color:'#7a5545',lineHeight:1.5}}>{t.lojaAviso}</span>
+          </div>
+
+          <div style={{background:'linear-gradient(135deg,#1e1005,#160c04)',borderRadius:14,border:'1px solid rgba(212,168,71,0.15)',padding:'14px 16px',marginTop:12}}>
+            <div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:6}}>💡 Dica</div>
+            <div style={{fontSize:12,color:'#7a5545',lineHeight:1.6}}>
+              {ispt?'Com o plano Premium você recebe 100 créditos todo mês por apenas R$19,90!':'With Premium you get 100 credits monthly!'}
+            </div>
+            <button onClick={()=>{onClose();window.open(lang!=='pt'?STRIPE_LINK_INTL:STRIPE_LINK,'_blank');}} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:10,padding:'10px',fontSize:13,fontWeight:700,cursor:'pointer',marginTop:10,display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+              <Icon n="star" s={13} c="#0f0a08" filled/>Assinar Premium
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ============================================================ MEMÓRIA DO MÊS ============================================================ */
+  const MemoriaMes=({transacoes,dividas,onClose})=>{
+    const {lang,t}=useLang();
+    const cur=LANGS[lang].currency;
+    const fmt=v=>fmtMoney(v,cur);
+    const mes=mesAtual();
+    const txMes=transacoes.filter(tx=>tx.data&&tx.data.startsWith(mes));
+    const rec=txMes.filter(tx=>tx.tipo==='receita').reduce((s,tx)=>s+Number(tx.valor),0);
+    const gas=txMes.filter(tx=>tx.tipo==='gasto').reduce((s,tx)=>s+Number(tx.valor),0);
+    const divMes=dividas.filter(d=>!d.quitada);
+    const totalDiv=divMes.reduce((s,d)=>s+Number(d.valor_parcela),0);
+    const saldo=rec-gas-totalDiv;
+    const cats={};
+    txMes.filter(tx=>tx.tipo==='gasto').forEach(tx=>{cats[tx.categoria]=(cats[tx.categoria]||0)+Number(tx.valor);});
+    const topCats=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const totalGasto=gas+totalDiv;
+    const mesNome=new Date().toLocaleDateString(LANGS[lang].locale,{month:'long',year:'numeric'});
+
+    return(
+      <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',zIndex:300,display:'flex',alignItems:'flex-end',justifyContent:'center'}}>
+        <div style={{background:'#1a1008',borderRadius:'20px 20px 0 0',border:'1px solid rgba(212,168,71,0.3)',padding:24,width:'100%',maxWidth:480,animation:'slideUp 0.3s ease',maxHeight:'90vh',overflowY:'auto'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847'}}>{t.memoriaTitle}</div>
+            <button onClick={onClose} style={{background:'rgba(212,168,71,0.1)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:'50%',width:32,height:32,cursor:'pointer',color:'#d4a847',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+          </div>
+          <div style={{fontSize:12,color:'#5a3525',marginBottom:18}}>{mesNome}</div>
+
+          {/* Resumo financeiro */}
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+            <div style={{background:'rgba(92,186,125,0.08)',border:'1px solid rgba(92,186,125,0.2)',borderRadius:14,padding:'14px'}}>
+              <div style={{fontSize:11,color:'#5cba7d',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:6}}>{t.memoriaRecMes}</div>
+              <div style={{fontSize:20,fontWeight:700,color:'#5cba7d'}}>{fmt(rec)}</div>
+            </div>
+            <div style={{background:'rgba(212,71,71,0.08)',border:'1px solid rgba(212,71,71,0.2)',borderRadius:14,padding:'14px'}}>
+              <div style={{fontSize:11,color:'#d44747',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:6}}>{t.memoriaGastoMes}</div>
+              <div style={{fontSize:20,fontWeight:700,color:'#d44747'}}>{fmt(totalGasto)}</div>
+            </div>
+          </div>
+
+          {/* Saldo líquido */}
+          <div style={{background:saldo>=0?'rgba(92,186,125,0.08)':'rgba(212,71,71,0.08)',border:`1px solid ${saldo>=0?'rgba(92,186,125,0.25)':'rgba(212,71,71,0.25)'}`,borderRadius:14,padding:'14px 18px',marginBottom:16,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{fontSize:13,color:'#7a5545'}}>Saldo líquido</div>
+            <div style={{fontSize:22,fontWeight:700,color:saldo>=0?'#5cba7d':'#d44747'}}>{fmt(saldo)}</div>
+          </div>
+
+          {/* Dívidas do mês */}
+          {divMes.length>0&&(
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#d44747',marginBottom:10,textTransform:'uppercase',letterSpacing:'0.06em'}}>⚠️ {t.memoriaDividas}</div>
+              {divMes.map(d=>(
+                <div key={d.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:'1px solid rgba(212,71,71,0.07)'}}>
+                  <div>
+                    <div style={{fontSize:13,color:'#c8a090',fontWeight:600}}>{d.nome}</div>
+                    <div style={{fontSize:10,color:'#7a5545',marginTop:1}}>
+                      {d.total_parcelas?`${t.parcelasDe(d.parcelas_pagas+1,d.total_parcelas)} · vence dia ${d.vencimento}`:`Fixo mensal · vence dia ${d.vencimento}`}
+                    </div>
+                  </div>
+                  <div style={{fontSize:14,fontWeight:700,color:'#d44747'}}>{fmt(d.valor_parcela)}</div>
+                </div>
+              ))}
+              <div style={{display:'flex',justifyContent:'space-between',padding:'10px 0 0',marginTop:4,borderTop:'1px solid rgba(212,71,71,0.15)'}}>
+                <div style={{fontSize:12,color:'#7a5545'}}>Total dívidas</div>
+                <div style={{fontSize:15,fontWeight:700,color:'#d44747'}}>{fmt(totalDiv)}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Top categorias de gastos */}
+          {topCats.length>0&&(
+            <div style={{marginBottom:16}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:10,textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.memoriaTop}</div>
+              {topCats.map(([cat,val])=>{const pct=totalGasto>0?Math.min(100,(val/totalGasto)*100):0;return(
+                <div key={cat} style={{marginBottom:10}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                    <span style={{fontSize:13,color:'#c8a090'}}>{cat}</span>
+                    <span style={{fontSize:13,fontWeight:600,color:'#d44747'}}>{fmt(val)}</span>
+                  </div>
+                  <div style={{background:'rgba(255,255,255,0.05)',borderRadius:6,height:6,overflow:'hidden'}}>
+                    <div style={{height:'100%',background:'linear-gradient(90deg,#8b5e14,#d4a847)',borderRadius:6,width:`${pct}%`,transition:'width 0.5s ease'}}/>
+                  </div>
+                </div>
+              );})}
+            </div>
+          )}
+
+          {/* Projeção próximo mês */}
+          {rec>0&&(
+            <div style={{background:'rgba(212,168,71,0.06)',borderRadius:14,border:'1px solid rgba(212,168,71,0.15)',padding:'14px 16px'}}>
+              <div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:8}}>🔮 {t.memoriaProxMes}</div>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                <span style={{fontSize:12,color:'#7a5545'}}>Se manter o mesmo padrão</span>
+                <span style={{fontSize:13,fontWeight:700,color:saldo>=0?'#5cba7d':'#d44747'}}>{fmt(saldo)}/mês</span>
+              </div>
+              <div style={{display:'flex',justifyContent:'space-between'}}>
+                <span style={{fontSize:12,color:'#7a5545'}}>Em 12 meses você terá</span>
+                <span style={{fontSize:13,fontWeight:700,color:saldo>=0?'#5cba7d':'#d44747'}}>{fmt(saldo*12)}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  /* ============================================================ AUTH SCREEN ============================================================ */
+  const AuthScreen=({onLogin,onOpenLang,langChosen})=>{
+    const {lang,t}=useLang();
+    const [modo,setModo]=useState('login');const [nome,setNome]=useState('');const [email,setEmail]=useState('');const [senha,setSenha]=useState('');const [loading,setLoading]=useState(false);const [erro,setErro]=useState('');const [msg,setMsg]=useState('');const [showSenha,setShowSenha]=useState(false);
+    const handleEsqueciSenha=async()=>{setErro('');setMsg('');if(!email){setErro(t.digiteEmail);return;}setLoading(true);try{const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});if(error)throw error;setMsg(t.emailSent(email));}catch(e){setErro(t.erroPadrao);}setLoading(false);};
+    const handleAuth=async()=>{setErro('');setMsg('');if(modo==='cadastro'&&!langChosen){setErro(t.escolhaIdiomaObrig);return;}if(!email||!senha){setErro(t.preenchaAll);return;}setLoading(true);try{if(modo==='cadastro'){if(!nome.trim()){setErro(t.digiteNome);setLoading(false);return;}const{error}=await sb.auth.signUp({email,password:senha,options:{data:{nome:nome.trim(),lang}}});if(error)throw error;setMsg(t.contaCriada);setModo('login');}else{const{data,error}=await sb.auth.signInWithPassword({email,password:senha});if(error)throw error;onLogin(data.user);}}catch(e){setErro(t.erros[e.message]||t.erroPadrao);}setLoading(false);};
+    const iS={width:'100%',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'13px 16px',color:'#e8d4c8',fontSize:15,outline:'none',fontFamily:'Nunito',marginBottom:12};
+    return(
+      <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',background:'#0f0a08',padding:'0 0 40px'}}>
+        <div style={{position:'absolute',top:14,right:16,zIndex:10}}><button onClick={onOpenLang} style={{display:'flex',alignItems:'center',gap:5,background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:20,padding:'4px 10px',cursor:'pointer',fontSize:13}}><span>{LANGS[lang].flag}</span><Icon n="globe" s={13} c="#7a5545"/></button></div>
+        <div style={{padding:'60px 24px 40px',textAlign:'center'}}>
+          <div style={{width:72,height:72,borderRadius:'50%',background:'linear-gradient(135deg,#d4a847,#8b5e14)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',boxShadow:'0 0 40px rgba(212,168,71,0.2)'}}><Icon n="wallet" s={32} c="#0f0a08"/></div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:28,color:'#d4a847',letterSpacing:'-0.5px',marginBottom:4}}>Lição de Mulher</div>
+          <div style={{fontSize:16,color:'#c8a090',marginBottom:6}}>Finanças + Histórias</div>
+          <div style={{fontSize:13,color:'#7a5545',lineHeight:1.6,maxWidth:260,margin:'0 auto'}}>{t.appTagline}</div>
+        </div>
+        <div style={{margin:'0 20px',background:'#1a1008',borderRadius:20,border:'1px solid rgba(212,168,71,0.15)',padding:24}}>
+          <div style={{display:'flex',background:'rgba(0,0,0,0.3)',borderRadius:12,padding:3,marginBottom:24}}>{['login','cadastro'].map(m=>(<button key={m} onClick={()=>{setModo(m);setErro('');setMsg('');}} style={{flex:1,padding:'10px',borderRadius:10,fontSize:14,fontWeight:600,cursor:'pointer',border:'none',background:modo===m?'#d4a847':'transparent',color:modo===m?'#0f0a08':'#7a5545',transition:'all 0.2s'}}>{m==='login'?t.loginTab:t.signupTab}</button>))}</div>
+          {erro&&<div style={{background:'rgba(212,71,71,0.1)',border:'1px solid rgba(212,71,71,0.25)',borderRadius:10,padding:'10px 14px',fontSize:13,color:'#d44747',marginBottom:14}}>{erro}</div>}
+          {msg&&<div style={{background:'rgba(76,175,112,0.1)',border:'1px solid rgba(76,175,112,0.25)',borderRadius:10,padding:'10px 14px',fontSize:13,color:'#5cba7d',marginBottom:14}}>{msg}</div>}
+          {modo==='cadastro'&&(<>
+            <div style={{marginBottom:14}}><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.idiomaLabel}</div>
+              <button onClick={onOpenLang} type="button" style={{width:'100%',background:langChosen?'rgba(212,168,71,0.08)':'rgba(212,71,71,0.08)',border:langChosen?'1px solid rgba(212,168,71,0.35)':'1.5px solid rgba(212,71,71,0.5)',borderRadius:12,padding:'12px 16px',color:langChosen?'#d4a847':'#d44747',fontSize:15,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <span>{langChosen?`${LANGS[lang].flag}  ${LANGS[lang].name}`:`🌐  ${t.escolhaIdioma} *`}</span><span style={{fontSize:12,opacity:0.6}}>▼</span></button>
+            </div>
+            <div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.nomeLabel}</div>
+            <input style={iS} placeholder={t.nomePh} value={nome} onChange={e=>setNome(e.target.value)}/>
+          </>)}
+          <div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.emailLabel}</div>
+          <input style={iS} type="email" inputMode="email" placeholder="email@exemplo.com" value={email} onChange={e=>setEmail(e.target.value)}/>
+          <div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.senhaLabel}</div>
+          <div style={{position:'relative',marginBottom:modo==='login'?8:20}}>
+            <input style={{...iS,marginBottom:0,paddingRight:'44px'}} type={showSenha?'text':'password'} placeholder={modo==='cadastro'?t.senhaMinPh:t.senhaPh} value={senha} onChange={e=>setSenha(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleAuth()}/>
+            <button onClick={()=>setShowSenha(s=>!s)} type="button" style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',color:'#7a5545',fontSize:'18px',padding:'4px'}}>{showSenha?'🙈':'👁️'}</button>
+          </div>
+          {modo==='login'&&(<div style={{textAlign:'right',marginBottom:18}}><button onClick={handleEsqueciSenha} disabled={loading} style={{background:'none',border:'none',cursor:'pointer',fontSize:12,color:'#d4a847',textDecoration:'underline'}}>{t.esqueciSenha}</button></div>)}
+          <button onClick={handleAuth} disabled={loading} style={{width:'100%',background:loading?'rgba(212,168,71,0.4)':'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:14,padding:'14px',fontSize:16,fontWeight:700,cursor:loading?'not-allowed':'pointer'}}>
+            {loading?t.aguarde:(modo==='login'?t.btnEntrar:t.btnCriar)}
+          </button>
+        </div>
+        <div style={{margin:'16px 20px 0',background:'rgba(212,168,71,0.06)',border:'1px solid rgba(212,168,71,0.15)',borderRadius:16,padding:'12px 16px',display:'flex',alignItems:'center',gap:12}}>
+          <span style={{fontSize:24}}>🪙</span>
+          <div><div style={{fontSize:13,fontWeight:700,color:'#d4a847'}}>+15 créditos de boas-vindas!</div><div style={{fontSize:11,color:'#7a5545'}}>Ganhe créditos todo dia fazendo login</div></div>
+        </div>
+        <div style={{textAlign:'center',margin:'24px 24px 0',fontSize:12,color:'#5a3525',fontStyle:'italic',lineHeight:1.7}}>
+          {t.quote.split('\n').map((l,i)=><span key={i}>{l}{i===0?<br/>:null}</span>)}
+        </div>
+      </div>
+    );
+  };
+
+  /* ============================================================ DASHBOARD ============================================================ */
+  const Dashboard=({profile,transacoes,dividas,onAdd,creditos,sequencia,onOpenLoja,onOpenMemoria})=>{
+    const {lang,t,preco,stripeLink}=useLang();
+    const cur=LANGS[lang].currency;
+    const fmt=v=>fmtMoney(v,cur);const fmtS=v=>fmtShort(v,cur);
+    const mes=mesAtual();
+    const txMes=transacoes.filter(tx=>tx.data&&tx.data.startsWith(mes));
+    const rec=txMes.filter(tx=>tx.tipo==='receita').reduce((s,tx)=>s+Number(tx.valor),0);
+    const gas=txMes.filter(tx=>tx.tipo==='gasto').reduce((s,tx)=>s+Number(tx.valor),0);
+    const divMes=dividas.filter(d=>!d.quitada).reduce((s,d)=>s+Number(d.valor_parcela),0);
+    const saldo=rec-gas-divMes;
+    const hora=new Date().getHours();
+    const saudacao=hora<12?t.bomDia:hora<18?t.boaTarde:t.boaNoite;
+    const nomePrimeiro=(profile?.nome||'querida').split(' ')[0];
+    const mesNome=new Date().toLocaleDateString(LANGS[lang].locale,{month:'long',year:'numeric'});
+    const dicaDoDia=t.dicas[new Date().getDate()%t.dicas.length];
+    const cats={};txMes.filter(tx=>tx.tipo==='gasto').forEach(tx=>{cats[tx.categoria]=(cats[tx.categoria]||0)+Number(tx.valor);});
+    const topCats=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    return(
+      <div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:13,color:'#7a5545'}}>{saudacao},</div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:26,color:'#e8d4c8'}}>{nomePrimeiro} 🌸</div>
+          <div style={{fontSize:12,color:'#5a3525',marginTop:2}}>{mesNome}</div>
+        </div>
+
+        {/* Card créditos + sequência + loja */}
+        <div style={{background:'linear-gradient(135deg,#1a1008,#0f0806)',borderRadius:18,border:'1px solid rgba(212,168,71,0.2)',padding:'14px 16px',marginBottom:14}}>
+          <div style={{display:'flex',gap:0,marginBottom:12}}>
+            <div style={{flex:1,textAlign:'center',borderRight:'1px solid rgba(212,168,71,0.1)',paddingRight:12}}>
+              <div style={{fontSize:24,animation:'coinBounce 2s ease infinite'}}>🪙</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#d4a847',fontWeight:700}}>{creditos||0}</div>
+              <div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em'}}>{t.seusCreditos}</div>
+            </div>
+            <div style={{flex:1,textAlign:'center',paddingLeft:12}}>
+              <div style={{fontSize:24}}>🔥</div>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:sequencia>=7?'#d44747':'#c8a090',fontWeight:700}}>{sequencia||0}</div>
+              <div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em'}}>{t.sequencia} {t.sequenciaDesc}</div>
+            </div>
+          </div>
+          <button onClick={onOpenLoja} style={{width:'100%',background:'linear-gradient(135deg,#2d1a05,#1a0f05)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:12,padding:'10px',fontSize:13,fontWeight:700,color:'#d4a847',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+            <Icon n="shop" s={15} c="#d4a847"/> 🛍️ Comprar créditos
+          </button>
+        </div>
+
+        {/* Ebook PT only */}
+        {LANGS[lang].showEbook&&(<a href="https://shre.ink/licao-de-mulher" target="_blank" style={{display:'block',textDecoration:'none',marginBottom:14}}><div style={{background:'linear-gradient(135deg,#3a0a2a,#1a0518)',borderRadius:16,border:'1px solid rgba(212,71,140,0.3)',padding:'16px 18px',display:'flex',alignItems:'center',gap:'14px',position:'relative',overflow:'hidden'}}><div style={{position:'absolute',top:0,right:0,background:'#e0356a',color:'white',fontSize:'10px',fontWeight:'700',padding:'4px 10px',borderRadius:'0 16px 0 10px'}}>42% OFF</div><div style={{fontSize:'36px',flexShrink:0}}>📖</div><div style={{flex:1}}><div style={{fontSize:'11px',color:'#d47ab0',marginBottom:'3px',textTransform:'uppercase',letterSpacing:'0.05em'}}>E-book Exclusivo</div><div style={{fontSize:'14px',fontWeight:'700',color:'#f0c0e0',lineHeight:1.3,marginBottom:'6px'}}>As 7 Lições que Toda Mulher Aprende Tarde</div><div style={{display:'flex',alignItems:'center',gap:'8px'}}><span style={{fontSize:'12px',color:'#a08090',textDecoration:'line-through'}}>R$ 47</span><span style={{fontSize:'18px',fontWeight:'700',color:'#ff8cc8'}}>R$ 27</span></div></div></div></a>)}
+
+        <YouTubeBanner/>
+
+        {/* Botão memória do mês */}
+        <button onClick={onOpenMemoria} style={{width:'100%',background:'#1a1008',border:'1px solid rgba(212,168,71,0.2)',borderRadius:14,padding:'12px 16px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}}>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <Icon n="chart" s={18} c="#d4a847"/>
+            <div style={{textAlign:'left'}}>
+              <div style={{fontSize:13,fontWeight:700,color:'#d4a847'}}>{t.memoriaTitle}</div>
+              <div style={{fontSize:11,color:'#7a5545',marginTop:1}}>Visão geral do mês com dívidas</div>
+            </div>
+          </div>
+          <Icon n="alert" s={16} c={dividas.filter(d=>!d.quitada).length>0?'#d44747':'#5a3525'}/>
+        </button>
+
+        {/* Alerta dívidas vencendo */}
+        {dividas.filter(d=>!d.quitada).length>0&&(
+          <div style={{background:'rgba(212,71,71,0.08)',border:'1px solid rgba(212,71,71,0.2)',borderRadius:14,padding:'12px 16px',marginBottom:14,display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontSize:20}}>⚠️</span>
+            <div style={{flex:1}}>
+              <div style={{fontSize:13,fontWeight:700,color:'#d44747'}}>{dividas.filter(d=>!d.quitada).length} dívidas ativas este mês</div>
+              <div style={{fontSize:11,color:'#7a5545',marginTop:1}}>Total: {fmtMoney(dividas.filter(d=>!d.quitada).reduce((s,d)=>s+Number(d.valor_parcela),0),cur)}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Saldo card */}
+        <div style={{background:'linear-gradient(135deg,#2d1a05,#1a0f05)',borderRadius:20,border:'1px solid rgba(212,168,71,0.25)',padding:'22px',marginBottom:14}}>
+          <div style={{fontSize:12,color:'#7a5545',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.saldoMes}</div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:36,color:saldo>=0?'#5cba7d':'#d44747',marginBottom:18,letterSpacing:'-1px'}}>{fmt(saldo)}</div>
+          <div style={{display:'flex'}}>
+            <div style={{flex:1}}><div style={{fontSize:11,color:'#7a5545',marginBottom:3}}>{t.entradas}</div><div style={{fontSize:17,fontWeight:700,color:'#5cba7d'}}>{fmtS(rec)}</div></div>
+            <div style={{width:1,background:'rgba(212,168,71,0.12)',margin:'0 12px'}}/>
+            <div style={{flex:1}}><div style={{fontSize:11,color:'#7a5545',marginBottom:3}}>{t.saidas}</div><div style={{fontSize:17,fontWeight:700,color:'#d44747'}}>{fmtS(gas)}</div></div>
+            {divMes>0&&(<><div style={{width:1,background:'rgba(212,168,71,0.12)',margin:'0 12px'}}/><div style={{flex:1}}><div style={{fontSize:11,color:'#d44747',marginBottom:3}}>Dívidas</div><div style={{fontSize:17,fontWeight:700,color:'#d44747'}}>{fmtS(divMes)}</div></div></>)}
+          </div>
+        </div>
+
+        {/* Dica */}
+        <div style={{background:'#1a1008',borderRadius:16,border:'1px solid rgba(212,168,71,0.12)',padding:'14px 16px',marginBottom:14}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}><Icon n="tip" s={15} c="#d4a847"/><span style={{fontSize:10,fontWeight:700,color:'#d4a847',textTransform:'uppercase',letterSpacing:'0.08em'}}>{t.dicaDia}</span></div>
+          <div style={{fontSize:14,color:'#c8a090',lineHeight:1.7,fontStyle:'italic'}}>"{dicaDoDia}"</div>
+        </div>
+
+        {/* Top categorias */}
+        {topCats.length>0&&(<div style={{background:'#1a1008',borderRadius:16,border:'1px solid rgba(212,168,71,0.12)',padding:'14px 16px',marginBottom:14}}><div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:12,textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.ondeGastouMais}</div>{topCats.map(([cat,val])=>(<div key={cat} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}><div style={{fontSize:13,color:'#c8a090'}}>{cat}</div><div style={{display:'flex',alignItems:'center',gap:10}}><div style={{width:60,height:5,background:'rgba(212,168,71,0.1)',borderRadius:5,overflow:'hidden'}}><div style={{height:'100%',background:'#d4a847',borderRadius:5,width:`${Math.min(100,(val/gas)*100)}%`}}/></div><div style={{fontSize:13,fontWeight:600,color:'#d44747',minWidth:70,textAlign:'right'}}>{fmt(val)}</div></div></div>))}</div>)}
+
+        {/* Últimos */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:12,textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.ultimosLanc}</div>
+          {transacoes.length===0?(<div style={{textAlign:'center',padding:'30px 20px',color:'#5a3525',fontSize:13,background:'#1a1008',borderRadius:16,border:'1px solid rgba(212,168,71,0.1)'}}><div style={{fontSize:28,marginBottom:10}}>💰</div>{t.nenhumLanc}<br/><span style={{color:'#d4a847',cursor:'pointer'}} onClick={onAdd}>{t.toqueComec}</span></div>):(transacoes.slice(0,5).map(tx=>(<div key={tx.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid rgba(212,168,71,0.07)'}}><div><div style={{fontSize:14,color:'#c8a090',fontWeight:500}}>{tx.descricao||tx.categoria}</div><div style={{fontSize:11,color:'#5a3525',marginTop:2}}>{tx.categoria} · {fmtDate(tx.data,LANGS[lang].locale)}</div></div><div style={{fontSize:15,fontWeight:700,color:tx.tipo==='receita'?'#5cba7d':tx.tipo==='divida'?'#d44747':'#d44747'}}>{tx.tipo==='receita'?'+':'-'}{fmt(tx.valor)}</div></div>)))}
+        </div>
+
+        <button onClick={onAdd} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:14,padding:'14px',fontSize:15,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><Icon n="plus" s={18} c="#0f0a08"/>{t.adicionarLanc}</button>
+
+        {/* Free vs premium */}
+        {!profile?.is_premium&&(<div style={{marginTop:20,background:'linear-gradient(135deg,#1e1005,#160c04)',borderRadius:20,border:'1px solid rgba(212,168,71,0.2)',padding:'18px 16px'}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:17,color:'#d4a847',marginBottom:4}}>{t.querMaisCtrl}</div><div style={{fontSize:12,color:'#7a5545',marginBottom:16,lineHeight:1.6}}>{t.vejaPremium}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:0,background:'rgba(0,0,0,0.3)',borderRadius:14,overflow:'hidden',border:'1px solid rgba(212,168,71,0.1)'}}><div style={{padding:'12px 14px',borderRight:'1px solid rgba(212,168,71,0.1)'}}><div style={{fontSize:11,fontWeight:700,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:12}}>Gratuito</div>{t.freeFeatures.map(f=><div key={f} style={{display:'flex',alignItems:'center',gap:6,marginBottom:7}}><div style={{width:5,height:5,borderRadius:'50%',background:'#5a3525',flexShrink:0}}/><span style={{fontSize:11,color:'#7a5545'}}>{f}</span></div>)}</div><div style={{padding:'12px 14px',background:'rgba(212,168,71,0.04)'}}><div style={{fontSize:11,fontWeight:700,color:'#d4a847',textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:12,display:'flex',alignItems:'center',gap:5}}><Icon n="star" s={11} c="#d4a847" filled/>Premium</div>{t.premFeatures.map(f=><div key={f} style={{display:'flex',alignItems:'center',gap:6,marginBottom:7}}><div style={{width:5,height:5,borderRadius:'50%',background:'#d4a847',flexShrink:0}}/><span style={{fontSize:11,color:'#c8a090'}}>{f}</span></div>)}</div></div><button onClick={()=>window.open(lang!=='pt'?STRIPE_LINK_INTL:STRIPE_LINK,'_blank')} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:13,padding:'12px',fontSize:14,fontWeight:700,cursor:'pointer',marginTop:14,display:'flex',alignItems:'center',justifyContent:'center',gap:7}}><Icon n="star" s={14} c="#0f0a08" filled/>{t.assinarPor(lang!=='pt'?PRECO_INTL:PRECO)}</button><div style={{textAlign:'center',fontSize:11,color:'#5a3525',marginTop:8}}>{t.cancelarQuando}</div></div>)}
+      </div>
+    );
+  };
+
+  /* ============================================================ MODAL EDITAR TX ============================================================ */
+  const ModalEditar=({tx,onSave,onCancel})=>{
+    const {lang,t}=useLang();const cur=LANGS[lang].currency;
+    const [tipo,setTipo]=useState(tx.tipo);const [valor,setValor]=useState(String(tx.valor));const [categoria,setCategoria]=useState(tx.categoria);const [descricao,setDescricao]=useState(tx.descricao||'');const [data,setData]=useState(tx.data);const [loading,setLoading]=useState(false);
+    const cats={gasto:t.catsGasto,receita:t.catsReceita,divida:t.catsDivida};
+    const iS={width:'100%',background:'rgba(0,0,0,0.4)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'11px 13px',color:'#e8d4c8',fontSize:14,outline:'none',fontFamily:'Nunito',marginBottom:10};
+    const handleSave=async()=>{if(!valor||!categoria)return;setLoading(true);await onSave(tx.id,{tipo,valor:parseFloat(valor),categoria,descricao,data});setLoading(false);};
+    return(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',zIndex:200,display:'flex',alignItems:'flex-end',justifyContent:'center'}}><div style={{background:'#1e1208',borderRadius:'20px 20px 0 0',border:'1px solid rgba(212,168,71,0.2)',padding:20,width:'100%',maxWidth:480,animation:'slideUp 0.3s ease',maxHeight:'90vh',overflowY:'auto'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8'}}>{t.editarLanc}</div><button onClick={onCancel} style={{background:'none',border:'none',cursor:'pointer',color:'#7a5545',fontSize:20}}>✕</button></div><div style={{display:'flex',gap:8,marginBottom:14}}>{[['gasto',t.labelGasto,'#d44747'],['receita',t.labelReceita,'#5cba7d']].map(([tp,l,cor])=>(<button key={tp} onClick={()=>{setTipo(tp);setCategoria('');}} style={{flex:1,padding:'10px',borderRadius:12,border:`1.5px solid ${tipo===tp?cor:'rgba(212,168,71,0.12)'}`,background:tipo===tp?cor+'25':'transparent',color:tipo===tp?cor:'#7a5545',fontSize:13,fontWeight:700,cursor:'pointer'}}>{l}</button>))}</div><div style={{fontSize:11,color:'#7a5545',marginBottom:4}}>{t.valorLabel} ({cur})</div><input style={{...iS,fontSize:20,fontWeight:700}} type="number" inputMode="decimal" value={valor} onChange={e=>setValor(e.target.value)}/><div style={{fontSize:11,color:'#7a5545',marginBottom:6,marginTop:4}}>{t.catLabel}</div><div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:12}}>{(cats[tipo]||cats.gasto).map(c=><button key={c} onClick={()=>setCategoria(c)} style={{padding:'5px 11px',borderRadius:20,border:`1px solid ${categoria===c?'#d4a847':'rgba(212,168,71,0.12)'}`,background:categoria===c?'rgba(212,168,71,0.15)':'transparent',color:categoria===c?'#d4a847':'#7a5545',fontSize:11,cursor:'pointer'}}>{c}</button>)}</div><div style={{fontSize:11,color:'#7a5545',marginBottom:4}}>{t.descLabel}</div><input style={iS} placeholder={t.descPh} value={descricao} onChange={e=>setDescricao(e.target.value)}/><div style={{fontSize:11,color:'#7a5545',marginBottom:4}}>{t.dataLabel}</div><input style={{...iS,marginBottom:16}} type="date" value={data} onChange={e=>setData(e.target.value)}/><button onClick={handleSave} disabled={loading} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:13,padding:'13px',fontSize:15,fontWeight:700,cursor:'pointer'}}>{loading?t.salvando:t.salvarAlter}</button></div></div>);
+  };
+
+  /* ============================================================ GASTOS SCREEN — com dívidas recorrentes ============================================================ */
+  const GastosScreen=({transacoes,dividas,onAdd,onDelete,onEdit,onAddDivida,onDeleteDivida,onQuitarDivida})=>{
+    const {lang,t}=useLang();const cur=LANGS[lang].currency;const fmt=v=>fmtMoney(v,cur);
+    const [showForm,setShowForm]=useState(false);const [tipo,setTipo]=useState('gasto');const [valor,setValor]=useState('');const [categoria,setCategoria]=useState('');const [descricao,setDescricao]=useState('');const [data,setData]=useState(hoje());const [loading,setLoading]=useState(false);
+    const [filtro,setFiltro]=useState('todos');const [confirmId,setConfirmId]=useState(null);const [editTx,setEditTx]=useState(null);
+    const [showDivForm,setShowDivForm]=useState(false);const [divNome,setDivNome]=useState('');const [divValor,setDivValor]=useState('');const [divParcelas,setDivParcelas]=useState('');const [divVenc,setDivVenc]=useState('');const [divCat,setDivCat]=useState('');const [savingDiv,setSavingDiv]=useState(false);
+    const [confirmDivId,setConfirmDivId]=useState(null);
+
+    const cats={gasto:t.catsGasto,receita:t.catsReceita,divida:t.catsDivida};
+    const handleAdd=async()=>{if(!valor||!categoria)return;setLoading(true);await onAdd({tipo,valor:parseFloat(valor.replace(',','.')),categoria,descricao,data});setValor('');setCategoria('');setDescricao('');setData(hoje());setShowForm(false);setLoading(false);};
+    const handleAddDivida=async()=>{if(!divNome||!divValor||!divVenc)return;setSavingDiv(true);await onAddDivida({nome:divNome,categoria:divCat||'Outros',valor_parcela:parseFloat(divValor),total_parcelas:divParcelas?parseInt(divParcelas):null,parcelas_pagas:0,vencimento:parseInt(divVenc),quitada:false});setDivNome('');setDivValor('');setDivParcelas('');setDivVenc('');setDivCat('');setShowDivForm(false);setSavingDiv(false);};
+    const txFiltradas=filtro==='todos'?transacoes:transacoes.filter(tx=>tx.tipo===filtro);
+    const iS={width:'100%',background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'12px 14px',color:'#e8d4c8',fontSize:15,outline:'none',fontFamily:'Nunito',marginBottom:12};
+    return(
+      <div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}>
+        {confirmId&&<ModalConfirm msg={t.confirmarExcl} onConfirm={async()=>{await onDelete(confirmId);setConfirmId(null);}} onCancel={()=>setConfirmId(null)}/>}
+        {confirmDivId&&<ModalConfirm msg="Excluir esta dívida?" onConfirm={async()=>{await onDeleteDivida(confirmDivId);setConfirmDivId(null);}} onCancel={()=>setConfirmDivId(null)}/>}
+        {editTx&&<ModalEditar tx={editTx} onSave={async(id,dados)=>{await onEdit(id,dados);setEditTx(null);}} onCancel={()=>setEditTx(null)}/>}
+
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8'}}>{t.meusGastos}</div>
+          <button onClick={()=>{setShowForm(!showForm);setShowDivForm(false);}} style={{background:showForm?'rgba(212,71,71,0.15)':'rgba(212,168,71,0.12)',border:`1px solid ${showForm?'rgba(212,71,71,0.3)':'rgba(212,168,71,0.25)'}`,borderRadius:10,padding:'8px 14px',color:showForm?'#d44747':'#d4a847',fontSize:13,fontWeight:600,cursor:'pointer'}}>
+            {showForm?t.fechar:t.novo}
+          </button>
+        </div>
+
+        {/* FORM DE LANÇAMENTO NORMAL */}
+        {showForm&&(
+          <div style={{background:'#1a1008',borderRadius:18,border:'1px solid rgba(212,168,71,0.2)',padding:18,marginBottom:16,animation:'slideUp 0.3s ease'}}>
+            <div style={{display:'flex',gap:8,marginBottom:16}}>
+              {[['gasto',t.labelGasto,'#d44747'],['receita',t.labelReceita,'#5cba7d']].map(([tp,l,cor])=>(
+                <button key={tp} onClick={()=>{setTipo(tp);setCategoria('');}} style={{flex:1,padding:'11px',borderRadius:12,border:`1.5px solid ${tipo===tp?cor:'rgba(212,168,71,0.12)'}`,background:tipo===tp?cor+'25':'transparent',color:tipo===tp?cor:'#7a5545',fontSize:14,fontWeight:700,cursor:'pointer'}}>{l}</button>
+              ))}
+            </div>
+            <div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.valorLabel} ({cur})</div>
+            <input style={{...iS,fontSize:22,fontWeight:700,marginBottom:14}} type="number" inputMode="decimal" placeholder="0,00" value={valor} onChange={e=>setValor(e.target.value)}/>
+            <div style={{fontSize:12,color:'#7a5545',marginBottom:8}}>{t.catLabel}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginBottom:14}}>
+              {cats[tipo].map(c=><button key={c} onClick={()=>setCategoria(c)} style={{padding:'6px 12px',borderRadius:20,border:`1px solid ${categoria===c?'#d4a847':'rgba(212,168,71,0.12)'}`,background:categoria===c?'rgba(212,168,71,0.15)':'transparent',color:categoria===c?'#d4a847':'#7a5545',fontSize:12,fontWeight:500,cursor:'pointer'}}>{c}</button>)}
+            </div>
+            <div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.descLabel}</div>
+            <input style={iS} placeholder={t.descPh} value={descricao} onChange={e=>setDescricao(e.target.value)}/>
+            <div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.dataLabel}</div>
+            <input style={{...iS,marginBottom:18}} type="date" value={data} onChange={e=>setData(e.target.value)}/>
+            <button onClick={handleAdd} disabled={loading||!valor||!categoria} style={{width:'100%',background:(!valor||!categoria)?'rgba(212,168,71,0.25)':'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:13,padding:'13px',fontSize:15,fontWeight:700,cursor:(!valor||!categoria)?'not-allowed':'pointer'}}>
+              {loading?t.salvando:t.salvarLanc}
+            </button>
+          </div>
+        )}
+
+        {/* SEÇÃO DE DÍVIDAS RECORRENTES */}
+        <div style={{marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <div style={{fontSize:14,fontWeight:700,color:'#d44747',display:'flex',alignItems:'center',gap:6}}>
+              <Icon n="alert" s={15} c="#d44747"/>{t.dividasTitle}
+            </div>
+            <button onClick={()=>{setShowDivForm(!showDivForm);setShowForm(false);}} style={{background:'rgba(212,71,71,0.1)',border:'1px solid rgba(212,71,71,0.25)',borderRadius:10,padding:'6px 12px',color:'#d44747',fontSize:12,fontWeight:600,cursor:'pointer'}}>
+              {showDivForm?t.fechar:t.addDivida}
+            </button>
+          </div>
+
+          {/* Form dívida */}
+          {showDivForm&&(
+            <div style={{background:'rgba(212,71,71,0.05)',borderRadius:16,border:'1px solid rgba(212,71,71,0.2)',padding:16,marginBottom:12,animation:'slideUp 0.3s ease'}}>
+              <div style={{fontSize:12,color:'#d44747',marginBottom:5,fontWeight:700}}>⚠️ Nova Dívida Recorrente</div>
+              <div style={{fontSize:11,color:'#7a5545',marginBottom:5}}>{t.nomeDivida}</div>
+              <input style={iS} placeholder="Ex: Aluguel, Empréstimo, Faculdade..." value={divNome} onChange={e=>setDivNome(e.target.value)}/>
+              <div style={{fontSize:11,color:'#7a5545',marginBottom:8}}>Categoria</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:5,marginBottom:12}}>
+                {t.catsDivida.map(c=><button key={c} onClick={()=>setDivCat(c)} style={{padding:'5px 10px',borderRadius:20,border:`1px solid ${divCat===c?'#d44747':'rgba(212,71,71,0.15)'}`,background:divCat===c?'rgba(212,71,71,0.15)':'transparent',color:divCat===c?'#d44747':'#7a5545',fontSize:11,cursor:'pointer'}}>{c}</button>)}
+              </div>
+              <div style={{fontSize:11,color:'#7a5545',marginBottom:5}}>{t.valorParcela} ({cur})</div>
+              <input style={{...iS,fontSize:18,fontWeight:700}} type="number" inputMode="decimal" placeholder="0,00" value={divValor} onChange={e=>setDivValor(e.target.value)}/>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}}>
+                <div>
+                  <div style={{fontSize:11,color:'#7a5545',marginBottom:5}}>{t.numParcelas}</div>
+                  <input style={{...iS,marginBottom:0}} type="number" inputMode="numeric" placeholder="Ex: 12" value={divParcelas} onChange={e=>setDivParcelas(e.target.value)}/>
+                  <div style={{fontSize:10,color:'#5a3525',marginTop:4}}>{t.parcelasInf}</div>
+                </div>
+                <div>
+                  <div style={{fontSize:11,color:'#7a5545',marginBottom:5}}>{t.vencimento} (1-31)</div>
+                  <input style={{...iS,marginBottom:0}} type="number" inputMode="numeric" placeholder="Ex: 5" min="1" max="31" value={divVenc} onChange={e=>setDivVenc(e.target.value)}/>
+                </div>
+              </div>
+              <button onClick={handleAddDivida} disabled={savingDiv||!divNome||!divValor||!divVenc} style={{width:'100%',background:(!divNome||!divValor||!divVenc)?'rgba(212,71,71,0.2)':'linear-gradient(135deg,#d44747,#8b1414)',color:'white',border:'none',borderRadius:12,padding:'12px',fontSize:14,fontWeight:700,cursor:(!divNome||!divValor||!divVenc)?'not-allowed':'pointer'}}>
+                {savingDiv?t.salvando:t.criarDivida}
+              </button>
+            </div>
+          )}
+
+          {/* Lista de dívidas */}
+          {dividas.length===0?(
+            <div style={{background:'rgba(212,71,71,0.05)',borderRadius:14,border:'1px solid rgba(212,71,71,0.1)',padding:'20px',textAlign:'center',color:'#7a5545',fontSize:13}}>
+              <div style={{fontSize:24,marginBottom:8}}>✅</div>{t.nenhumaDivida}
+            </div>
+          ):(
+            dividas.map(d=>{
+              const progressPct=d.total_parcelas?Math.round((d.parcelas_pagas/d.total_parcelas)*100):null;
+              const restam=d.total_parcelas?d.total_parcelas-d.parcelas_pagas:null;
+              return(
+                <div key={d.id} style={{background:d.quitada?'rgba(92,186,125,0.05)':'rgba(212,71,71,0.05)',borderRadius:14,border:`1px solid ${d.quitada?'rgba(92,186,125,0.2)':'rgba(212,71,71,0.15)'}`,padding:'14px 16px',marginBottom:10}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:15,fontWeight:700,color:d.quitada?'#5cba7d':'#e8d4c8'}}>{d.quitada?'✅ ':''}{d.nome}</div>
+                      <div style={{fontSize:11,color:'#7a5545',marginTop:2}}>
+                        {d.categoria} · Vence dia {d.vencimento}
+                        {d.total_parcelas&&!d.quitada&&` · ${restam} ${restam===1?'mês restante':'meses restantes'}`}
+                        {d.quitada&&<span style={{color:'#5cba7d',fontWeight:700}}> · {t.dividaQuitada}</span>}
+                      </div>
+                    </div>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <div style={{fontSize:16,fontWeight:700,color:d.quitada?'#5cba7d':'#d44747'}}>{fmt(d.valor_parcela)}/mês</div>
+                      <button onClick={()=>setConfirmDivId(d.id)} style={{background:'none',border:'none',cursor:'pointer',padding:'4px',color:'#7a5545'}}>
+                        <Icon n="trash" s={13} c="#7a5545"/>
+                      </button>
+                    </div>
+                  </div>
+                  {d.total_parcelas&&!d.quitada&&(
+                    <>
+                      <div style={{background:'rgba(255,255,255,0.05)',borderRadius:6,height:6,overflow:'hidden',marginBottom:8}}>
+                        <div style={{height:'100%',background:'linear-gradient(90deg,#d44747,#ff6b6b)',borderRadius:6,width:`${progressPct}%`,transition:'width 0.5s ease'}}/>
+                      </div>
+                      <div style={{fontSize:10,color:'#7a5545',display:'flex',justifyContent:'space-between'}}>
+                        <span>{t.parcelasDe(d.parcelas_pagas+1,d.total_parcelas)}</span>
+                        <span>{progressPct}% pago · {fmt(d.valor_parcela*(d.total_parcelas-d.parcelas_pagas))} restante</span>
+                      </div>
+                    </>
+                  )}
+                  {!d.quitada&&(
+                    <button onClick={()=>onQuitarDivida(d.id)} style={{width:'100%',marginTop:10,background:'rgba(92,186,125,0.1)',border:'1px solid rgba(92,186,125,0.25)',borderRadius:10,padding:'8px',fontSize:12,fontWeight:700,color:'#5cba7d',cursor:'pointer'}}>
+                      ✅ Marcar parcela paga
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Filtros e lista de lançamentos */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+          <div style={{fontSize:14,fontWeight:700,color:'#e8d4c8'}}>Lançamentos</div>
+        </div>
+        <div style={{display:'flex',gap:8,marginBottom:16,flexWrap:'wrap'}}>
+          {t.filtros.map(([f,l])=><button key={f} onClick={()=>setFiltro(f)} style={{padding:'6px 14px',borderRadius:20,border:`1px solid ${filtro===f?'#d4a847':'rgba(212,168,71,0.12)'}`,background:filtro===f?'rgba(212,168,71,0.15)':'transparent',color:filtro===f?'#d4a847':'#7a5545',fontSize:12,fontWeight:600,cursor:'pointer'}}>{l}</button>)}
+        </div>
+        {txFiltradas.length===0?(<div style={{textAlign:'center',padding:40,color:'#5a3525'}}><div style={{fontSize:32,marginBottom:12}}>📝</div><div style={{fontSize:14}}>{t.nenhumAqui}</div></div>):(
+          txFiltradas.map(tx=>(
+            <div key={tx.id} style={{background:'#1a1008',borderRadius:14,padding:'12px 14px',marginBottom:8,border:`1px solid ${tx.tipo==='divida'?'rgba(212,71,71,0.15)':'rgba(212,168,71,0.07)'}`,animation:'fadeIn 0.2s ease'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div style={{flex:1}}><div style={{fontSize:14,color:'#c8a090',fontWeight:600}}>{tx.descricao||tx.categoria}</div><div style={{fontSize:11,color:'#5a3525',marginTop:2}}>{tx.categoria} · {fmtDate(tx.data,LANGS[lang].locale)}</div></div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{fontSize:15,fontWeight:700,color:tx.tipo==='receita'?'#5cba7d':'#d44747'}}>{tx.tipo==='receita'?'+':'-'}{fmt(tx.valor)}</div>
+                  <button onClick={()=>setEditTx(tx)} style={{background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.15)',borderRadius:8,cursor:'pointer',padding:'5px 8px',color:'#d4a847'}}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button onClick={()=>setConfirmId(tx.id)} style={{background:'rgba(212,71,71,0.08)',border:'1px solid rgba(212,71,71,0.15)',borderRadius:8,cursor:'pointer',padding:'5px 8px',color:'#d44747'}}>
+                    <Icon n="trash" s={13} c="#d44747"/>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
+
+  /* ============================================================ METAS SCREEN ============================================================ */
+  const MetasScreen=({metas,onAdd,onUpdate,onDelete,isPremium,onUpgrade})=>{
+    const {lang,t}=useLang();const cur=LANGS[lang].currency;const fmt=v=>fmtMoney(v,cur);
+    const [showForm,setShowForm]=useState(false);const [titulo,setTitulo]=useState('');const [valorTotal,setValorTotal]=useState('');const [prazo,setPrazo]=useState('');const [loading,setLoading]=useState(false);const [confirmId,setConfirmId]=useState(null);const [editValorId,setEditValorId]=useState(null);const [editValorInput,setEditValorInput]=useState('');
+    if(!isPremium)return(<div style={{padding:'20px 16px 100px'}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8',marginBottom:20}}>{t.meusSonhos}</div><PremiumWall onUpgrade={onUpgrade}/></div>);
+    const calcSim=(vt,va,prazoStr)=>{if(!prazoStr||!vt)return null;const diff=new Date(prazoStr+'T12:00:00')-new Date();if(diff<=0)return null;const dias=Math.max(1,Math.ceil(diff/(1000*60*60*24)));const falta=Math.max(0,vt-(va||0));return{dias,falta,porDia:falta/dias,porSemana:falta/Math.max(1,Math.ceil(dias/7)),porMes:falta/Math.max(1,Math.ceil(dias/30)),porAno:falta/Math.max(1,Math.ceil(dias/365))};};
+    const handleAdd=async()=>{if(!titulo||!valorTotal)return;setLoading(true);await onAdd({titulo,valor_total:parseFloat(valorTotal),valor_atual:0,prazo:prazo||null});setTitulo('');setValorTotal('');setPrazo('');setShowForm(false);setLoading(false);};
+    const handleAtualizarValor=async(m)=>{const v=parseFloat(editValorInput.replace(',','.'));if(!isNaN(v)&&v>=0)await onUpdate(m.id,v);setEditValorId(null);setEditValorInput('');};
+    const iS={width:'100%',background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'12px 14px',color:'#e8d4c8',fontSize:14,outline:'none',fontFamily:'Nunito',marginBottom:12};
+    return(
+      <div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}>
+        {confirmId&&<ModalConfirm msg={t.confirmarMeta} onConfirm={async()=>{await onDelete(confirmId);setConfirmId(null);}} onCancel={()=>setConfirmId(null)}/>}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8'}}>{t.meusSonhos}</div>
+          <button onClick={()=>setShowForm(!showForm)} style={{background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:10,padding:'8px 14px',color:'#d4a847',fontSize:13,fontWeight:600,cursor:'pointer'}}>{showForm?t.fechar:t.addMeta}</button>
+        </div>
+        {showForm&&(<div style={{background:'#1a1008',borderRadius:18,border:'1px solid rgba(212,168,71,0.2)',padding:18,marginBottom:16,animation:'slideUp 0.3s ease'}}><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.qualSonho}</div><input style={iS} placeholder={t.sonhoPh} value={titulo} onChange={e=>setTitulo(e.target.value)}/><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.quantoCusta} ({cur})</div><input style={iS} type="number" inputMode="decimal" placeholder="0,00" value={valorTotal} onChange={e=>setValorTotal(e.target.value)}/><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.prazoLabel}</div><input style={iS} type="date" value={prazo} onChange={e=>setPrazo(e.target.value)}/>{valorTotal&&prazo&&(()=>{const sim=calcSim(parseFloat(valorTotal),0,prazo);if(!sim)return null;return(<div style={{background:'rgba(212,168,71,0.06)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'12px 14px',marginBottom:14}}><div style={{fontSize:11,color:'#d4a847',fontWeight:700,marginBottom:6,textTransform:'uppercase'}}>{t.simulLabel}</div><div style={{fontSize:13,color:'#c8a090',lineHeight:1.8}}>{t.simulPre} <strong style={{color:'#d4a847'}}>{sim.dias} {t.simulDias}</strong>{t.simulPos}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginTop:'10px'}}>{[[t.porDia,sim.porDia],[t.porSemana,sim.porSemana],[t.porMes,sim.porMes],[t.porAno,sim.porAno]].map(([label,val])=>(<div key={label} style={{background:'rgba(0,0,0,0.2)',borderRadius:'10px',padding:'8px 10px',textAlign:'center'}}><div style={{fontSize:'11px',color:'#7a5545',marginBottom:'2px'}}>{label}</div><div style={{fontSize:'15px',fontWeight:'700',color:'#5cba7d'}}>{fmt(val)}</div></div>))}</div></div>);})()}<button onClick={handleAdd} disabled={loading||!titulo||!valorTotal} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:13,padding:'13px',fontSize:15,fontWeight:700,cursor:'pointer'}}>{t.criarMeta}</button></div>)}
+        {metas.length===0&&!showForm&&(<div style={{textAlign:'center',padding:40,color:'#5a3525'}}><div style={{fontSize:32,marginBottom:12}}>🌟</div><div style={{fontSize:14}}>{t.nenhumaMeta}</div><div style={{fontSize:13,marginTop:4,color:'#d4a847',cursor:'pointer'}} onClick={()=>setShowForm(true)}>{t.proxSonho}</div></div>)}
+        {metas.map(m=>{const pct=m.valor_total>0?Math.min(100,Math.round((m.valor_atual/m.valor_total)*100)):0;const concluida=pct>=100;const falta=Math.max(0,m.valor_total-m.valor_atual);const sim=calcSim(m.valor_total,m.valor_atual,m.prazo);return(<div key={m.id} style={{background:'#1a1008',borderRadius:18,border:`1px solid ${concluida?'rgba(92,186,125,0.3)':'rgba(212,168,71,0.12)'}`,padding:16,marginBottom:12}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}><div style={{flex:1}}><div style={{fontSize:16,fontWeight:700,color:concluida?'#5cba7d':'#e8d4c8'}}>{concluida?'✅ ':'🌟 '}{m.titulo}</div>{m.prazo&&<div style={{fontSize:11,color:'#7a5545',marginTop:2}}>{t.prazoInfo} {fmtDate(m.prazo,LANGS[lang].locale)}</div>}</div><button onClick={()=>setConfirmId(m.id)} style={{background:'rgba(212,71,71,0.08)',border:'1px solid rgba(212,71,71,0.15)',borderRadius:8,cursor:'pointer',padding:'5px 8px',color:'#d44747',marginLeft:8}}><Icon n="trash" s={13} c="#d44747"/></button></div><div style={{display:'flex',marginBottom:10,background:'rgba(0,0,0,0.25)',borderRadius:12,overflow:'hidden'}}><div style={{flex:1,padding:'10px 12px',borderRight:'1px solid rgba(212,168,71,0.08)'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.guardado}</div><div style={{fontSize:16,fontWeight:700,color:'#5cba7d'}}>{fmt(m.valor_atual)}</div></div><div style={{flex:1,padding:'10px 12px',borderRight:'1px solid rgba(212,168,71,0.08)'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.metaLabel}</div><div style={{fontSize:16,fontWeight:700,color:'#e8d4c8'}}>{fmt(m.valor_total)}</div></div><div style={{flex:1,padding:'10px 12px'}}><div style={{fontSize:10,color:'#5a3525',marginBottom:2}}>{t.faltaLabel}</div><div style={{fontSize:16,fontWeight:700,color:concluida?'#5cba7d':'#d4a847'}}>{concluida?'✓':fmt(falta)}</div></div></div><div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#7a5545',marginBottom:5}}><span>{t.pctConc(pct)}</span>{concluida&&<span style={{color:'#5cba7d'}}>{t.sonhoAlc}</span>}</div><div style={{background:'rgba(255,255,255,0.05)',borderRadius:10,height:10,overflow:'hidden',marginBottom:12}}><div style={{height:'100%',background:concluida?'#5cba7d':'linear-gradient(90deg,#8b5e14,#d4a847)',borderRadius:10,width:`${pct}%`,transition:'width 0.5s ease'}}/></div>{sim&&!concluida&&(<div style={{background:'rgba(212,168,71,0.05)',borderRadius:10,padding:'10px 12px',marginBottom:12}}><div style={{fontSize:11,color:'#d4a847',fontWeight:700,marginBottom:8,textTransform:'uppercase'}}>{t.planoPara(sim.dias)}</div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px'}}>{[[t.porDia,sim.porDia],[t.porSemana,sim.porSemana],[t.porMes,sim.porMes],[t.porAno,sim.porAno]].map(([label,val])=>(<div key={label} style={{background:'rgba(0,0,0,0.2)',borderRadius:'8px',padding:'6px 8px',display:'flex',justifyContent:'space-between',alignItems:'center'}}><span style={{fontSize:'11px',color:'#7a5545'}}>{label}</span><span style={{fontSize:'13px',fontWeight:'700',color:'#d4a847'}}>{fmt(val)}</span></div>))}</div></div>)}{editValorId===m.id?(<div style={{display:'flex',gap:8}}><input style={{flex:1,background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:10,padding:'9px 12px',color:'#e8d4c8',fontSize:14,outline:'none'}} type="number" inputMode="decimal" value={editValorInput} onChange={e=>setEditValorInput(e.target.value)} autoFocus onKeyDown={e=>e.key==='Enter'&&handleAtualizarValor(m)}/><button onClick={()=>handleAtualizarValor(m)} style={{background:'#d4a847',border:'none',borderRadius:10,padding:'9px 14px',color:'#0f0a08',fontWeight:700,cursor:'pointer',fontSize:13}}>OK</button><button onClick={()=>{setEditValorId(null);setEditValorInput('');}} style={{background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:10,padding:'9px',color:'#7a5545',cursor:'pointer'}}>✕</button></div>):(<div style={{display:'flex',gap:5}}>{[[`- ${cur}50`,-50],[`+ ${cur}50`,50],[`+ ${cur}100`,100],[`+ ${cur}200`,200]].map(([l,v])=>(<button key={l} onClick={()=>onUpdate(m.id,Math.max(0,m.valor_atual+v))} style={{flex:1,padding:'8px 2px',borderRadius:9,border:`1px solid ${v<0?'rgba(212,168,71,0.1)':'rgba(212,168,71,0.25)'}`,background:v<0?'transparent':'rgba(212,168,71,0.08)',color:v<0?'#5a3525':'#d4a847',fontSize:11,fontWeight:600,cursor:'pointer'}}>{l}</button>))}<button onClick={()=>{setEditValorId(m.id);setEditValorInput(String(m.valor_atual));}} style={{padding:'8px 9px',borderRadius:9,border:'1px solid rgba(212,168,71,0.2)',background:'rgba(212,168,71,0.1)',color:'#d4a847',fontSize:11,cursor:'pointer'}}>✏️</button></div>)}</div>);})}
+      </div>
+    );
+  };
+
+  /* ============================================================ ENVELOPES ============================================================ */
+  const EnvelopesScreen=({envelopes,onAdd,onUpdate,onDelete,isPremium,onUpgrade})=>{
+    const {lang,t}=useLang();const cur=LANGS[lang].currency;const fmt=v=>fmtMoney(v,cur);
+    const [showForm,setShowForm]=useState(false);const [nome,setNome]=useState('');const [limite,setLimite]=useState('');const [loading,setLoading]=useState(false);
+    if(!isPremium)return(<div style={{padding:'20px 16px 100px'}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8',marginBottom:20}}>{t.envelopes}</div><PremiumWall onUpgrade={onUpgrade}/></div>);
+    const handleAdd=async()=>{if(!nome||!limite)return;setLoading(true);await onAdd({nome,valor_limite:parseFloat(limite),valor_gasto:0,mes_ano:mesAtual()});setNome('');setLimite('');setShowForm(false);setLoading(false);};
+    const iS={width:'100%',background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.18)',borderRadius:12,padding:'12px 14px',color:'#e8d4c8',fontSize:14,outline:'none',fontFamily:'Nunito',marginBottom:12};
+    const mesNome=new Date().toLocaleDateString(LANGS[lang].locale,{month:'long'});
+    return(<div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8'}}>{t.envelopes}</div><button onClick={()=>setShowForm(!showForm)} style={{background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:10,padding:'8px 14px',color:'#d4a847',fontSize:13,fontWeight:600,cursor:'pointer'}}>{t.addEnv}</button></div><div style={{fontSize:12,color:'#5a3525',marginBottom:16}}>{t.desafioEnv(mesNome)}</div><div style={{background:'linear-gradient(135deg,#1a1008,#0f0a08)',borderRadius:14,border:'1px solid rgba(212,168,71,0.1)',padding:'13px 15px',marginBottom:16,fontSize:13,color:'#c8a090',lineHeight:1.7}}>{t.dicaEnv}</div>{showForm&&(<div style={{background:'#1a1008',borderRadius:18,border:'1px solid rgba(212,168,71,0.2)',padding:18,marginBottom:16,animation:'slideUp 0.3s ease'}}><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.nomeEnv}</div><input style={iS} placeholder={t.nomeEnvPh} value={nome} onChange={e=>setNome(e.target.value)}/><div style={{fontSize:12,color:'#7a5545',marginBottom:5}}>{t.quantoEnv}</div><input style={{...iS,marginBottom:18}} type="number" inputMode="decimal" placeholder="0,00" value={limite} onChange={e=>setLimite(e.target.value)}/><button onClick={handleAdd} disabled={loading||!nome||!limite} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:13,padding:'13px',fontSize:15,fontWeight:700,cursor:'pointer'}}>{t.criarEnv}</button></div>)}{envelopes.length===0&&!showForm&&(<div style={{textAlign:'center',padding:40,color:'#5a3525'}}><Icon n="envelope2" s={36} c="#3d2010"/><div style={{fontSize:14,marginTop:12}}>{t.nenhumEnv}</div><div style={{fontSize:13,marginTop:4,color:'#d4a847',cursor:'pointer'}} onClick={()=>setShowForm(true)}>{t.criarMeusEnv}</div></div>)}{envelopes.map(e=>{const pct=e.valor_limite>0?Math.min(100,Math.round((e.valor_gasto/e.valor_limite)*100)):0;const cor=pct>=100?'#d44747':pct>=80?'#d4a847':'#5cba7d';const disponivel=Math.max(0,e.valor_limite-e.valor_gasto);return(<div key={e.id} style={{background:'#1a1008',borderRadius:18,border:`1px solid ${pct>=100?'rgba(212,71,71,0.3)':'rgba(212,168,71,0.1)'}`,padding:16,marginBottom:12}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}><div><div style={{fontSize:15,fontWeight:700,color:'#e8d4c8'}}>{e.nome}</div><div style={{fontSize:12,color:'#5a3525',marginTop:2}}>{t.usadoDe(fmt(e.valor_gasto),fmt(e.valor_limite))}</div></div><div style={{textAlign:'right',display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4}}><div style={{fontSize:13,fontWeight:700,color:cor}}>{pct>=100?t.esgotado:t.restam(fmt(disponivel))}</div><button onClick={()=>onDelete(e.id)} style={{background:'none',border:'none',cursor:'pointer'}}><Icon n="trash" s={14} c="#7a5545"/></button></div></div><div style={{background:'rgba(255,255,255,0.05)',borderRadius:10,height:8,overflow:'hidden',marginBottom:12}}><div style={{height:'100%',borderRadius:10,background:cor,width:`${pct}%`,transition:'width 0.5s ease'}}/></div><div style={{display:'flex',gap:6}}>{[[`- ${cur}10`,-10],[`+ ${cur}10`,10],[`+ ${cur}50`,50]].map(([l,v])=>(<button key={l} onClick={()=>onUpdate(e.id,Math.max(0,e.valor_gasto+v))} style={{flex:1,padding:'9px',borderRadius:9,border:`1px solid ${v<0?'rgba(212,168,71,0.1)':'rgba(212,168,71,0.25)'}`,background:v<0?'transparent':'rgba(212,168,71,0.08)',color:v<0?'#5a3525':'#d4a847',fontSize:12,fontWeight:600,cursor:'pointer'}}>{l}</button>))}<button onClick={()=>{const v=prompt(t.valorLabel+':');if(v&&!isNaN(v))onUpdate(e.id,e.valor_gasto+parseFloat(v));}} style={{flex:1,padding:'9px',borderRadius:9,border:'1px solid rgba(212,168,71,0.25)',background:'rgba(212,168,71,0.08)',color:'#d4a847',fontSize:12,fontWeight:600,cursor:'pointer'}}>{t.outroBtn}</button></div></div>);})}</div>);
+  };
+
+  /* ============================================================ HISTORIAS SCREEN ============================================================ */
+  const HistoriasScreen=({creditos,onGastarCreditos,desbloqueados,onOpenLoja})=>{
+    const {lang,t}=useLang();
+    const localConteudo=CONTEUDO[lang]||CONTEUDO.pt;
+    const [conteudo,setConteudo]=useState(localConteudo);
+    const [view,setView]=useState('home');const [serieSel,setSerieSel]=useState(null);const [itemPlayer,setItemPlayer]=useState(null);const [showInsuf,setShowInsuf]=useState(false);
+
+    /* Busca conteúdo real do Supabase — se houver, sobrepõe o local */
+    useEffect(()=>{
+      setConteudo(CONTEUDO[lang]||CONTEUDO.pt);
+      const fetchConteudo=async()=>{
+        try{
+          const{data}=await sb.from('conteudo').select('*').eq('lang',lang).eq('disponivel',true).order('created_at',{ascending:false});
+          if(!data||data.length===0)return;
+          const avulsos_db=data.filter(c=>c.tipo==='avulso');
+          const treinamentos_db=data.filter(c=>c.tipo==='treinamento');
+          const toItem=d=>({id:d.id,titulo:d.titulo,descricao:d.descricao||'',thumb:d.thumbnail||'🎬',duracao:d.duracao||'',creditos:d.creditos_custo||3,url:d.url_video,premium_only:d.premium_only||false,cor:d.cor||'#d4a847'});
+          const merge=(local,db)=>{const m=[...local];db.forEach(d=>{const i=m.findIndex(l=>l.id===d.id);if(i>=0)m[i]={...m[i],...toItem(d)};else m.push(toItem(d));});return m;};
+          setConteudo(prev=>({...prev,avulsos:merge(prev.avulsos||[],avulsos_db),treinamentos:merge(prev.treinamentos||[],treinamentos_db)}));
+        }catch(e){}
+      };
+      fetchConteudo();
+    },[lang]);
+    const handlePlay=(item,custo)=>{const key=`${lang}_${item.id}`;if(desbloqueados[key]){setItemPlayer(item);setView('player');return;}if(creditos<custo){setShowInsuf(true);setTimeout(()=>setShowInsuf(false),3000);return;}onGastarCreditos(custo,item.id,()=>{setItemPlayer(item);setView('player');});};
+    if(view==='player'&&itemPlayer)return(<div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}><button onClick={()=>setView(serieSel?'serie':'home')} style={{background:'transparent',border:'none',cursor:'pointer',color:'#d4a847',fontSize:14,fontWeight:600,marginBottom:20,display:'flex',alignItems:'center',gap:6}}>{t.voltar}</button><div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#e8d4c8',marginBottom:4}}>{t.playerTitle}</div><div style={{fontSize:14,color:'#7a5545',marginBottom:20}}>{itemPlayer.titulo}</div>{itemPlayer.url?(<video controls style={{width:'100%',borderRadius:16,background:'#000'}} src={itemPlayer.url.startsWith('http')?itemPlayer.url:`${R2_BASE}/${itemPlayer.url}`}/>):(<div style={{background:'#1a1008',borderRadius:16,border:'1px solid rgba(212,168,71,0.2)',padding:'40px 24px',textAlign:'center'}}><div style={{fontSize:48,marginBottom:16}}>🎬</div><div style={{fontSize:15,color:'#c8a090',lineHeight:1.7}}>{t.videoIndisponivel}</div></div>)}</div>);
+    if(view==='serie'&&serieSel){const serie=conteudo.series.find(s=>s.id===serieSel);if(!serie)return null;return(<div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}><button onClick={()=>setView('home')} style={{background:'transparent',border:'none',cursor:'pointer',color:'#d4a847',fontSize:14,fontWeight:600,marginBottom:20,display:'flex',alignItems:'center',gap:6}}>{t.voltar}</button><div style={{background:'linear-gradient(135deg,#2d1a05,#1a0f05)',borderRadius:20,border:`1px solid ${serie.cor}40`,padding:'20px',marginBottom:20}}><div style={{fontSize:36,marginBottom:12}}>{serie.thumb}</div><div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8',marginBottom:6}}>{serie.titulo}</div><div style={{fontSize:13,color:'#7a5545',lineHeight:1.6,marginBottom:8}}>{serie.descricao}</div><div style={{fontSize:11,color:serie.cor,fontWeight:700}}>{serie.episodios} {t.episodiosLabel}</div></div>{serie.eps.map(ep=>{const key=`${lang}_${ep.id}`;const desbloqueado=desbloqueados[key];const temVideo=!!(ep.url);return(<div key={ep.id} style={{background:'#1a1008',borderRadius:14,border:`1px solid ${desbloqueado?'rgba(92,186,125,0.3)':temVideo?'rgba(212,168,71,0.08)':'rgba(255,255,255,0.04)'}`,padding:'14px 16px',marginBottom:10,display:'flex',alignItems:'center',gap:14,opacity:temVideo?1:0.6}}><div style={{width:40,height:40,borderRadius:10,background:desbloqueado?'rgba(92,186,125,0.15)':'rgba(212,168,71,0.08)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><span style={{fontSize:14,fontWeight:700,color:desbloqueado?'#5cba7d':'#d4a847'}}>{ep.num}</span></div><div style={{flex:1}}><div style={{fontSize:14,fontWeight:600,color:'#c8a090'}}>{ep.titulo}</div><div style={{fontSize:11,color:'#5a3525',marginTop:2}}>{temVideo?`⏱ ${ep.duracao} · 🪙 ${ep.creditos} ${t.creditosLabel}`:'🔜 Em breve'}</div></div><button onClick={()=>temVideo?handlePlay(ep,ep.creditos):null} disabled={!temVideo} style={{background:!temVideo?'rgba(255,255,255,0.04)':desbloqueado?'rgba(92,186,125,0.15)':'rgba(212,168,71,0.1)',border:`1px solid ${!temVideo?'rgba(255,255,255,0.08)':desbloqueado?'rgba(92,186,125,0.3)':'rgba(212,168,71,0.25)'}`,borderRadius:10,padding:'8px 14px',color:!temVideo?'#5a3525':desbloqueado?'#5cba7d':'#d4a847',fontSize:12,fontWeight:700,cursor:temVideo?'pointer':'default',whiteSpace:'nowrap'}}>{!temVideo?'Em breve':desbloqueado?t.desbloqueado:t.bloquear}</button></div>);})}</div>);}
+    return(<div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}>
+      {showInsuf&&(<div style={{position:'fixed',top:70,left:'50%',transform:'translateX(-50%)',zIndex:999,background:'rgba(212,71,71,0.95)',borderRadius:14,padding:'12px 20px',color:'white',fontWeight:700,fontSize:14,animation:'slideUp 0.3s ease',whiteSpace:'nowrap'}}>🪙 {t.creditosInsuf}</div>)}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+        <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,color:'#e8d4c8'}}>{t.historiasTitle}</div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <div style={{display:'flex',alignItems:'center',gap:6,background:'rgba(212,168,71,0.1)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:20,padding:'6px 14px'}}>
+            <span style={{fontSize:16}}>🪙</span><span style={{fontWeight:700,color:'#d4a847',fontSize:15}}>{creditos||0}</span>
+          </div>
+          <button onClick={onOpenLoja} style={{background:'rgba(212,168,71,0.1)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:20,padding:'6px 12px',color:'#d4a847',fontSize:12,fontWeight:700,cursor:'pointer'}}>🛍️</button>
+        </div>
+      </div>
+      <div style={{background:'linear-gradient(135deg,#1a1008,#0f0806)',borderRadius:16,border:'1px solid rgba(212,168,71,0.15)',padding:'14px 16px',marginBottom:20}}>
+        <div style={{fontSize:12,fontWeight:700,color:'#d4a847',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em'}}>{t.creditosTitulo}</div>
+        <div style={{fontSize:13,color:'#c8a090',lineHeight:1.6,marginBottom:10}}>{t.creditosDesc}</div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <div style={{background:'rgba(212,168,71,0.08)',borderRadius:10,padding:'8px 12px',fontSize:11,color:'#d4a847'}}>🌟 Login: <strong>+2/dia</strong></div>
+          <div style={{background:'rgba(212,168,71,0.08)',borderRadius:10,padding:'8px 12px',fontSize:11,color:'#d4a847'}}>🔥 7 dias: <strong>+10</strong></div>
+          <button onClick={onOpenLoja} style={{background:'rgba(212,168,71,0.15)',border:'1px solid rgba(212,168,71,0.3)',borderRadius:10,padding:'8px 14px',fontSize:11,color:'#d4a847',fontWeight:700,cursor:'pointer'}}>🛍️ Comprar créditos</button>
+        </div>
+      </div>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8',marginBottom:14}}>{t.seriesTitle}</div>
+      <div style={{display:'flex',gap:12,overflowX:'auto',paddingBottom:8,marginBottom:20}}>
+        {conteudo.series.map(serie=>(<div key={serie.id} onClick={()=>{setSerieSel(serie.id);setView('serie');}} style={{flexShrink:0,width:180,background:'linear-gradient(135deg,#2d1a05,#1a0f05)',borderRadius:16,border:`1px solid ${serie.cor}40`,padding:'16px',cursor:'pointer'}}><div style={{fontSize:36,marginBottom:10}}>{serie.thumb}</div><div style={{fontSize:14,fontWeight:700,color:'#e8d4c8',marginBottom:4,lineHeight:1.3}}>{serie.titulo}</div><div style={{fontSize:11,color:'#7a5545',marginBottom:8}}>{serie.episodios} {t.episodiosLabel}</div><div style={{fontSize:11,color:serie.cor,fontWeight:700}}>▶ {t.verEpisodios}</div></div>))}
+      </div>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8',marginBottom:14}}>{t.avulsosTitle}</div>
+      {conteudo.avulsos.map(av=>{const key=`${lang}_${av.id}`;const desbloqueado=desbloqueados[key];const temVideo=!!(av.url);return(<div key={av.id} style={{background:'#1a1008',borderRadius:14,border:`1px solid ${desbloqueado?'rgba(92,186,125,0.25)':temVideo?'rgba(212,168,71,0.08)':'rgba(255,255,255,0.04)'}`,padding:'14px 16px',marginBottom:10,display:'flex',alignItems:'center',gap:14,opacity:temVideo?1:0.6}}><div style={{fontSize:32,flexShrink:0}}>{av.thumb}</div><div style={{flex:1}}><div style={{fontSize:14,fontWeight:600,color:'#c8a090',lineHeight:1.3}}>{av.titulo}</div><div style={{fontSize:11,color:'#5a3525',marginTop:4}}>{temVideo?`⏱ ${av.duracao} · 🪙 ${av.creditos} ${t.creditosLabel}`:'🔜 Em breve'}</div></div><button onClick={()=>temVideo?handlePlay(av,av.creditos):null} disabled={!temVideo} style={{background:!temVideo?'rgba(255,255,255,0.04)':desbloqueado?'rgba(92,186,125,0.15)':'rgba(212,168,71,0.1)',border:`1px solid ${!temVideo?'rgba(255,255,255,0.08)':desbloqueado?'rgba(92,186,125,0.3)':'rgba(212,168,71,0.25)'}`,borderRadius:10,padding:'8px 12px',color:!temVideo?'#5a3525':desbloqueado?'#5cba7d':'#d4a847',fontSize:12,fontWeight:700,cursor:temVideo?'pointer':'default',whiteSpace:'nowrap',flexShrink:0}}>{!temVideo?'Em breve':desbloqueado?t.desbloqueado:t.bloquear}</button></div>);})}
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#e8d4c8',marginBottom:14,marginTop:8}}>{t.treinamentosTitle}</div>
+      {conteudo.treinamentos.map(tr=>{const key=`${lang}_${tr.id}`;const desbloqueado=desbloqueados[key];const temVideo=!!(tr.url);return(<div key={tr.id} style={{background:'#1a1008',borderRadius:14,border:`1px solid ${desbloqueado?'rgba(92,186,125,0.25)':temVideo?'rgba(212,168,71,0.08)':'rgba(255,255,255,0.04)'}`,padding:'14px 16px',marginBottom:10,display:'flex',alignItems:'center',gap:14,opacity:temVideo?1:0.6}}><div style={{fontSize:28,flexShrink:0}}>{tr.thumb}</div><div style={{flex:1}}><div style={{fontSize:14,fontWeight:600,color:'#c8a090',lineHeight:1.3}}>{tr.titulo}</div><div style={{fontSize:11,color:'#5a3525',marginTop:4}}>{temVideo?`⏱ ${tr.duracao} · 🪙 ${tr.creditos} ${t.creditosLabel}`:'🔜 Em breve'}</div></div><button onClick={()=>temVideo?handlePlay(tr,tr.creditos):null} disabled={!temVideo} style={{background:!temVideo?'rgba(255,255,255,0.04)':desbloqueado?'rgba(92,186,125,0.15)':'rgba(212,168,71,0.1)',border:`1px solid ${!temVideo?'rgba(255,255,255,0.08)':desbloqueado?'rgba(92,186,125,0.3)':'rgba(212,168,71,0.25)'}`,borderRadius:10,padding:'8px 12px',color:!temVideo?'#5a3525':desbloqueado?'#5cba7d':'#d4a847',fontSize:12,fontWeight:700,cursor:temVideo?'pointer':'default',whiteSpace:'nowrap',flexShrink:0}}>{!temVideo?'Em breve':desbloqueado?t.desbloqueado:t.bloquear}</button></div>);})}
+    </div>);
+  };
+
+  /* ============================================================ CONSELHEIRO SCREEN ============================================================ */
+  const ConselheiroScreen=({isPremium,onUpgrade,profile})=>{
+    const {t,preco}=useLang();const nomePrimeiro=profile?.nome?.split(' ')[0]||'😊';
+    const [msgs,setMsgs]=useState([{role:'assistant',text:t.sofiaHello(nomePrimeiro)}]);const [input,setInput]=useState('');const [loading,setLoading]=useState(false);const bottomRef=useRef(null);
+    useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:'smooth'});},[msgs]);useEffect(()=>{setMsgs([{role:'assistant',text:t.sofiaHello(nomePrimeiro)}]);},[t]);
+    const enviar=async()=>{if(!input.trim()||loading)return;if(!isPremium){onUpgrade();return;}const pergunta=input.trim();setInput('');setMsgs(m=>[...m,{role:'user',text:pergunta}]);setLoading(true);try{const historico=msgs.slice(-8).map(m=>({role:m.role==='assistant'?'assistant':'user',content:m.text}));historico.push({role:'user',content:pergunta});const mensagens=[{role:'system',content:t.sofiaSystem},...historico];const res=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'openai',messages:mensagens,private:true})});const data=await res.json();const resposta=data.choices?.[0]?.message?.content||t.sofiaErro;setMsgs(m=>[...m,{role:'assistant',text:resposta}]);}catch(e){setMsgs(m=>[...m,{role:'assistant',text:t.sofiaErro}]);}setLoading(false);};
+    if(!isPremium)return(<div style={{padding:'24px',textAlign:'center'}}><div style={{fontSize:'48px',marginBottom:'16px'}}>🤖</div><h2 style={{fontFamily:'Playfair Display',color:'#e8c4a0',fontSize:'20px',marginBottom:'12px'}}>{t.sofiaTitle.replace('🤖 ','')}</h2><p style={{color:'#a08070',fontSize:'14px',marginBottom:'24px',lineHeight:'1.6'}}>{t.sofiaTitle} — {t.sofiaSub}</p><button onClick={onUpgrade} style={{background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:'14px',padding:'14px 32px',fontSize:'15px',fontWeight:'700',cursor:'pointer'}}>{t.assinarBtn(preco)}</button></div>);
+    return(<div style={{display:'flex',flexDirection:'column',height:'calc(100vh - 120px)'}}><div style={{padding:'16px',borderBottom:'1px solid #2a1810'}}><h2 style={{fontFamily:'Playfair Display',color:'#d4a847',fontSize:'18px'}}>{t.sofiaTitle}</h2><p style={{color:'#a08070',fontSize:'12px'}}>{t.sofiaSub}</p></div><div style={{flex:1,overflowY:'auto',padding:'16px',display:'flex',flexDirection:'column',gap:'12px'}}>{msgs.map((m,i)=>(<div key={i} style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start'}}><div style={{maxWidth:'80%',padding:'12px 16px',borderRadius:m.role==='user'?'18px 18px 4px 18px':'18px 18px 18px 4px',background:m.role==='user'?'linear-gradient(135deg,#c8784a,#a05830)':'#1a1210',border:m.role==='assistant'?'1px solid #3a2820':'none',color:m.role==='user'?'white':'#c8a090',fontSize:'14px',lineHeight:'1.6'}}>{m.role==='assistant'&&<span style={{fontSize:'16px',marginRight:'6px'}}>🌸</span>}{m.text}</div></div>))}{loading&&(<div style={{display:'flex',justifyContent:'flex-start'}}><div style={{background:'#1a1210',border:'1px solid #3a2820',borderRadius:'18px 18px 18px 4px',padding:'12px 16px',color:'#a08070',fontSize:'14px'}}>🌸 {t.sofiaPensando}</div></div>)}<div ref={bottomRef}/></div><div style={{padding:'12px 16px',borderTop:'1px solid #2a1810',display:'flex',gap:'8px',background:'#0f0a08'}}><input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&enviar()} placeholder={t.sofiaInput} style={{flex:1,background:'#1a1210',border:'1px solid #3a2820',borderRadius:'24px',padding:'12px 16px',color:'#e8c4a0',fontSize:'14px',outline:'none'}}/><button onClick={enviar} disabled={loading} style={{background:'linear-gradient(135deg,#d4a847,#c49030)',border:'none',borderRadius:'50%',width:'44px',height:'44px',color:'#0f0a08',fontSize:'20px',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>➤</button></div></div>);
+  };
+
+  /* ============================================================ PERFIL SCREEN ============================================================ */
+  const PerfilScreen=({profile,isPremium,onLogout,onUpgrade,onActivatePremium,creditos,sequencia,onOpenLoja})=>{
+    const {lang,t,preco}=useLang();
+    const [showCodigo,setShowCodigo]=useState(false);const [codigo,setCodigo]=useState('');const [ativando,setAtivando]=useState(false);const [msg,setMsg]=useState('');const [loggingOut,setLoggingOut]=useState(false);
+    const handleAtivacao=async()=>{if(!codigo.trim())return;setAtivando(true);setMsg('');const ok=await onActivatePremium(codigo.trim().toUpperCase());setMsg(ok?t.codigoOk:t.codigoErro);setAtivando(false);if(ok){setCodigo('');setShowCodigo(false);}};
+    const handleLogout=async()=>{setLoggingOut(true);await onLogout();};
+    const ytData=YT_CHANNELS[lang];const linkIndicacao=`https://licaodemulher.com.br?ref=${profile?.id?.slice(0,8)||'amiga'}`;
+    /* Links de redes sociais separados por idioma */
+    const SOCIAL_BY_LANG={
+      pt:[
+        {label:'YouTube',desc:'@LicaoDeMulher',url:'https://www.youtube.com/channel/UCP5RlDgEe-tjAEx1MyhBRHA',bg:'#FF0000',border:'rgba(255,0,0,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>},
+        {label:'Instagram',desc:'@licaodemulher',url:'https://www.instagram.com/licaodemulher/',bg:'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',border:'rgba(220,39,67,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>},
+        {label:'TikTok',desc:'@licaodemulher.oficial',url:'https://www.tiktok.com/@licaodemulher.oficial',bg:'#010101',border:'rgba(105,201,208,0.3)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>},
+        {label:'Blog',desc:'licaodemulher.blogspot.com',url:'https://licaodemulher.blogspot.com/',bg:'linear-gradient(135deg,#ff6d00,#ff8f00)',border:'rgba(255,109,0,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM9 8h6a1 1 0 010 2H9a1 1 0 010-2zm0 4h6a1 1 0 010 2H9a1 1 0 010-2zm0 4h4a1 1 0 010 2H9a1 1 0 010-2z"/></svg>},
+        {label:'Suporte',desc:'licaodemulherchannel@gmail.com',url:'mailto:licaodemulherchannel@gmail.com',bg:'linear-gradient(135deg,#d4a847,#a07030)',border:'rgba(212,168,71,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>},
+      ],
+      en:[
+        {label:'YouTube',desc:'@WomansLesson',url:'https://www.youtube.com/channel/UCNzffAv7SwVIOCzgyLRy3Tg',bg:'#FF0000',border:'rgba(255,0,0,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>},
+        {label:'Support',desc:'licaodemulherchannel@gmail.com',url:'mailto:licaodemulherchannel@gmail.com',bg:'linear-gradient(135deg,#d4a847,#a07030)',border:'rgba(212,168,71,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>},
+      ],
+      fr:[
+        {label:'YouTube',desc:'@LaLecondelaFemme',url:'https://www.youtube.com/channel/UClxiR39Mv1PT-AI2nY9sFiA',bg:'#FF0000',border:'rgba(255,0,0,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>},
+        {label:'Support',desc:'licaodemulherchannel@gmail.com',url:'mailto:licaodemulherchannel@gmail.com',bg:'linear-gradient(135deg,#d4a847,#a07030)',border:'rgba(212,168,71,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>},
+      ],
+      es:[
+        {label:'YouTube',desc:'@LeccionDeMujer',url:'https://www.youtube.com/channel/UC4GtpsswfqhY7WzLFPVgeKw',bg:'#FF0000',border:'rgba(255,0,0,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>},
+        {label:'Soporte',desc:'licaodemulherchannel@gmail.com',url:'mailto:licaodemulherchannel@gmail.com',bg:'linear-gradient(135deg,#d4a847,#a07030)',border:'rgba(212,168,71,0.25)',icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>},
+      ],
+    };
+    const socialLinks=SOCIAL_BY_LANG[lang]||SOCIAL_BY_LANG.pt;
+    return(<div style={{padding:'20px 16px 100px',animation:'fadeIn 0.3s ease'}}>
+      <div style={{textAlign:'center',marginBottom:24}}>
+        <div style={{width:80,height:80,borderRadius:'50%',background:'linear-gradient(135deg,#d4a847,#8b5e14)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,fontWeight:700,color:'#0f0a08',margin:'0 auto 14px',boxShadow:'0 0 30px rgba(212,168,71,0.2)'}}>{(profile?.nome||'M')[0].toUpperCase()}</div>
+        <div style={{fontFamily:"'Playfair Display',serif",fontSize:20,color:'#e8d4c8'}}>{profile?.nome||'Usuária'}</div>
+        <div style={{fontSize:13,color:'#5a3525',marginTop:3}}>{profile?.email}</div>
+        {isPremium&&(<div style={{display:'inline-flex',alignItems:'center',gap:5,background:'rgba(212,168,71,0.12)',border:'1px solid rgba(212,168,71,0.3)',borderRadius:20,padding:'5px 14px',marginTop:10}}><Icon n="star" s={13} c="#d4a847" filled/><span style={{fontSize:12,color:'#d4a847',fontWeight:700}}>{t.premiumAtivo}</span></div>)}
+      </div>
+      <div style={{background:'linear-gradient(135deg,#1a1008,#0f0806)',borderRadius:18,border:'1px solid rgba(212,168,71,0.2)',padding:'16px',marginBottom:16,display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:0}}>
+        <div style={{textAlign:'center',borderRight:'1px solid rgba(212,168,71,0.1)',paddingRight:8}}><div style={{fontSize:22,fontWeight:700,color:'#d4a847'}}>{creditos||0}</div><div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em'}}>🪙 {t.seusCreditos}</div></div>
+        <div style={{textAlign:'center',borderRight:'1px solid rgba(212,168,71,0.1)',padding:'0 8px'}}><div style={{fontSize:22,fontWeight:700,color:sequencia>=7?'#d44747':'#c8a090'}}>{sequencia||0}</div><div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em'}}>🔥 {t.sequencia}</div></div>
+        <div style={{textAlign:'center',paddingLeft:8}}><div style={{fontSize:22,fontWeight:700,color:'#5cba7d'}}>{isPremium?'⭐':'🌱'}</div><div style={{fontSize:10,color:'#7a5545',textTransform:'uppercase',letterSpacing:'0.05em'}}>{isPremium?'Premium':'Free'}</div></div>
+      </div>
+      <button onClick={onOpenLoja} style={{width:'100%',background:'linear-gradient(135deg,#2d1a05,#1a0f05)',border:'1px solid rgba(212,168,71,0.25)',borderRadius:14,padding:'14px 16px',marginBottom:16,display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}><span style={{fontSize:22}}>🛍️</span><div style={{textAlign:'left'}}><div style={{fontSize:13,fontWeight:700,color:'#d4a847'}}>{t.lojaTitle}</div><div style={{fontSize:11,color:'#7a5545',marginTop:1}}>Compre créditos para mais histórias</div></div></div>
+        <Icon n="plus" s={16} c="#d4a847"/>
+      </button>
+      <div style={{background:'#1a1008',borderRadius:16,border:'1px solid rgba(212,168,71,0.15)',padding:'14px 16px',marginBottom:16}}>
+        <div style={{fontSize:13,fontWeight:700,color:'#d4a847',marginBottom:4}}>👥 {t.indicar}</div>
+        <div style={{fontSize:12,color:'#7a5545',marginBottom:10,lineHeight:1.6}}>{t.indicarDesc}</div>
+        <div style={{background:'rgba(0,0,0,0.3)',borderRadius:10,padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <span style={{fontSize:12,color:'#c8a090',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{linkIndicacao}</span>
+          <button onClick={()=>navigator.clipboard?.writeText(linkIndicacao)} style={{background:'rgba(212,168,71,0.15)',border:'1px solid rgba(212,168,71,0.3)',borderRadius:8,padding:'6px 12px',color:'#d4a847',fontSize:11,fontWeight:700,cursor:'pointer',flexShrink:0,marginLeft:8}}>📋 Copiar</button>
+        </div>
+      </div>
+      {!isPremium&&(<div style={{background:'linear-gradient(135deg,#2d1a05,#1a0f05)',borderRadius:20,border:'1px solid rgba(212,168,71,0.25)',padding:'20px',marginBottom:20}}><div style={{fontFamily:"'Playfair Display',serif",fontSize:18,color:'#d4a847',marginBottom:8}}>{t.sejaPremium}</div><div style={{fontSize:13,color:'#7a5545',lineHeight:1.7,marginBottom:18}}>{t.premiumDesc(preco)}</div><button onClick={onUpgrade} style={{width:'100%',background:'linear-gradient(135deg,#d4a847,#c49030)',color:'#0f0a08',border:'none',borderRadius:14,padding:'13px',fontSize:15,fontWeight:700,cursor:'pointer',marginBottom:10,display:'flex',alignItems:'center',justifyContent:'center',gap:8}}><Icon n="star" s={16} c="#0f0a08" filled/>{t.assinarPremium}</button><button onClick={()=>setShowCodigo(!showCodigo)} style={{width:'100%',background:'transparent',border:'1px solid rgba(212,168,71,0.15)',borderRadius:12,padding:'10px',fontSize:13,color:'#7a5545',cursor:'pointer'}}>{t.jaPaguei}</button>{showCodigo&&(<div style={{marginTop:14,animation:'slideUp 0.25s ease'}}><input style={{width:'100%',background:'rgba(0,0,0,0.3)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:12,padding:'12px 14px',color:'#e8d4c8',fontSize:15,outline:'none',marginBottom:10,letterSpacing:'2px',textAlign:'center',textTransform:'uppercase'}} placeholder={t.codigoPh} value={codigo} onChange={e=>setCodigo(e.target.value)}/><button onClick={handleAtivacao} disabled={ativando} style={{width:'100%',background:'rgba(212,168,71,0.15)',border:'1px solid rgba(212,168,71,0.3)',borderRadius:12,padding:'11px',color:'#d4a847',fontSize:14,fontWeight:600,cursor:'pointer'}}>{ativando?t.ativando:t.ativar}</button>{msg&&<div style={{fontSize:13,marginTop:8,color:msg.includes('✅')?'#5cba7d':'#d44747',textAlign:'center'}}>{msg}</div>}</div>)}</div>)}
+      <div style={{marginBottom:10}}><div style={{fontSize:11,color:'#5a3525',textTransform:'uppercase',letterSpacing:'0.07em',fontWeight:700,marginBottom:10}}>{t.sigaNas}</div>{socialLinks.map((item,i)=>(<a key={i} href={item.url} target="_blank" rel="noopener noreferrer" style={{display:'flex',alignItems:'center',gap:14,background:'#1a1008',borderRadius:14,border:`1px solid ${item.border}`,padding:'13px 16px',marginBottom:8,textDecoration:'none'}}><div style={{width:40,height:40,borderRadius:12,background:item.bg,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,boxShadow:`0 4px 12px ${item.border}`}}>{item.icon}</div><div style={{flex:1}}><div style={{fontSize:14,fontWeight:700,color:'#e8c4a0'}}>{item.label}</div><div style={{fontSize:11,color:'#7a5545'}}>{item.desc}</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5a3525" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>))}</div>
+      <div style={{margin:'20px 0',textAlign:'center',fontSize:12,color:'#5a3525',fontStyle:'italic',lineHeight:1.7}}>{t.citaPerfil}</div>
+      <button onClick={handleLogout} disabled={loggingOut} style={{width:'100%',background:'transparent',border:'1px solid rgba(212,71,71,0.2)',borderRadius:14,padding:'13px',fontSize:14,color:'rgba(212,71,71,0.7)',cursor:'pointer',fontWeight:600}}>{loggingOut?t.saindo:t.sair}</button>
+      <div style={{textAlign:'center',fontSize:11,color:'#3d2010',marginTop:16}}>Versão 2.6 · Lição de Mulher · Finanças + Histórias</div>
+    </div>);
+  };
+
+  /* ============================================================ MAIN APP ============================================================ */
+  const App=()=>{
+    const [lang,setLangState]=useState(()=>{const s=localStorage.getItem('ldm_lang');return(s&&LANGS[s])?s:'pt';});
+    const [langChosen,setLangChosen]=useState(()=>!!localStorage.getItem('ldm_lang_chosen'));
+    const [showLangModal,setShowLangModal]=useState(false);
+    const setLang=key=>{if(!LANGS[key])return;setLangState(key);localStorage.setItem('ldm_lang',key);setLangChosen(true);localStorage.setItem('ldm_lang_chosen','1');if(user?.id)sb.from('profiles').update({lang:key}).eq('id',user.id).then(()=>{});};
+    const t=LANGS[lang];
+    const [user,setUser]=useState(null);const [profile,setProfile]=useState(null);const [tab,setTab]=useState('home');
+    const [transacoes,setTransacoes]=useState([]);const [metas,setMetas]=useState([]);const [envelopes,setEnvelopes]=useState([]);const [dividas,setDividas]=useState([]);
+    const [loading,setLoading]=useState(true);const [deferredPrompt,setDeferredPrompt]=useState(null);const [showInstall,setShowInstall]=useState(false);
+    const [recoveryMode,setRecoveryMode]=useState(false);const [novaSenha,setNovaSenha]=useState('');const [novaSenhaMsg,setNovaSenhaMsg]=useState('');const [novaSenhaErro,setNovaSenhaErro]=useState('');const [novaSenhaLoading,setNovaSenhaLoading]=useState(false);const [showSenha,setShowSenha]=useState(false);
+    const [creditos,setCreditos]=useState(0);const [sequencia,setSequencia]=useState(0);const [desbloqueados,setDesbloqueados]=useState({});const [creditosToast,setCreditosToast]=useState(null);
+    const [showLoja,setShowLoja]=useState(false);const [showMemoria,setShowMemoria]=useState(false);
+    const isPremium=profile?.is_premium||false;
+
+    useEffect(()=>{const h=e=>{e.preventDefault();setDeferredPrompt(e);setShowInstall(true);};window.addEventListener('beforeinstallprompt',h);return()=>window.removeEventListener('beforeinstallprompt',h);},[]);
+    const handleInstall=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();const{outcome}=await deferredPrompt.userChoice;if(outcome==='accepted')setShowInstall(false);setDeferredPrompt(null);};
+    const handleAtualizarSenha=async()=>{setNovaSenhaErro('');setNovaSenhaMsg('');if(!novaSenha||novaSenha.length<6){setNovaSenhaErro(t.senhaMinErro);return;}setNovaSenhaLoading(true);try{const{error}=await sb.auth.updateUser({password:novaSenha});if(error)throw error;setNovaSenhaMsg(t.senhaOk);setTimeout(()=>{setRecoveryMode(false);sb.auth.signOut();},2000);}catch(e){setNovaSenhaErro(t.senhaErro);}setNovaSenhaLoading(false);};
+
+    /* Créditos */
+    const darCreditos=async(uid,qtd,motivo)=>{try{const{data:p}=await sb.from('profiles').select('creditos').eq('id',uid).maybeSingle();const atual=(p?.creditos||0);await sb.from('profiles').update({creditos:atual+qtd}).eq('id',uid);setCreditos(atual+qtd);setCreditosToast(t.creditosGanhos(qtd,motivo));}catch(e){}};
+    const verificarLoginDiario=async(uid,perfilData)=>{
+      try{
+        /* Busca dados frescos do banco para evitar estado desatualizado */
+        const{data:p}=await sb.from('profiles').select('creditos,ultimo_login_credito,sequencia_login').eq('id',uid).maybeSingle();
+        const dados=p||perfilData||{};
+        const hojeStr=hoje();
+        const ultimoLogin=(dados.ultimo_login_credito||'').slice(0,10);
+        if(ultimoLogin===hojeStr)return; /* já ganhou hoje */
+        const ontem=new Date();ontem.setDate(ontem.getDate()-1);
+        const ontemStr=ontem.toISOString().slice(0,10);
+        let seq=(dados.sequencia_login||0);
+        if(ultimoLogin===ontemStr){seq++;}else{seq=1;} /* se pulou um dia, reinicia */
+        let bonus=CREDITOS_CONFIG.login_diario;
+        let motivo=t.loginDiario||'Login diário';
+        if(seq===7){bonus+=CREDITOS_CONFIG.sequencia_7;motivo=t.streakBonus7||'🎉 7 dias seguidos!';}
+        if(seq===30){bonus+=CREDITOS_CONFIG.sequencia_30;motivo=t.streakBonus30||'🏆 30 dias!';}
+        const novosCred=(dados.creditos||0)+bonus;
+        await sb.from('profiles').update({creditos:novosCred,ultimo_login_credito:hojeStr,sequencia_login:seq}).eq('id',uid);
+        setCreditos(novosCred);setSequencia(seq);
+        setCreditosToast(t.creditosGanhos(bonus,motivo));
+      }catch(e){console.error('verificarLoginDiario:',e);}
+    };
+    const gastarCreditos=async(custo,itemId,callback)=>{if(creditos<custo)return;const novos=creditos-custo;const key=`${lang}_${itemId}`;const novosDesbloqueados={...desbloqueados,[key]:true};setCreditos(novos);setDesbloqueados(novosDesbloqueados);if(user?.id){await sb.from('profiles').update({creditos:novos,desbloqueados:novosDesbloqueados}).eq('id',user.id);}if(callback)callback();};
+
+    useEffect(()=>{sb.auth.getSession().then(({data})=>{if(data.session?.user){setUser(data.session.user);loadAll(data.session.user.id);}else setLoading(false);});const{data:listener}=sb.auth.onAuthStateChange((ev,session)=>{if(ev==='PASSWORD_RECOVERY'){setRecoveryMode(true);setLoading(false);return;}if(session?.user){setUser(session.user);loadAll(session.user.id);}else{setUser(null);setProfile(null);setLoading(false);}});return()=>listener.subscription.unsubscribe();},[]);
+
+    const loadAll=async(uid)=>{
+      try{
+        const[p,tx,mt,env,div]=await Promise.all([
+          sb.from('profiles').select('*').eq('id',uid).maybeSingle(),
+          sb.from('transacoes').select('*').eq('user_id',uid).order('data',{ascending:false}).order('created_at',{ascending:false}),
+          sb.from('metas').select('*').eq('user_id',uid).order('created_at',{ascending:false}),
+          sb.from('envelopes').select('*').eq('user_id',uid).eq('mes_ano',mesAtual()).order('created_at',{ascending:false}),
+          sb.from('dividas').select('*').eq('user_id',uid).eq('quitada',false).order('created_at',{ascending:false}),
+        ]);
+        let perfilData=p.data;
+        if(!perfilData){const{data:sess}=await sb.auth.getSession();const u=sess?.session?.user;const nome=u?.user_metadata?.nome||u?.email?.split('@')[0]||'Usuária';const userLang=u?.user_metadata?.lang||lang;const{data:newP}=await sb.from('profiles').insert({id:uid,nome,email:u?.email||'',lang:userLang,creditos:CREDITOS_CONFIG.boas_vindas,sequencia_login:1,ultimo_login_credito:hoje()}).select().maybeSingle();if(newP){setProfile(newP);setLang(userLang);setCreditos(newP.creditos||CREDITOS_CONFIG.boas_vindas);setCreditosToast(t.creditosGanhos(CREDITOS_CONFIG.boas_vindas,t.boasBoas));perfilData=newP;}}else{setProfile(perfilData);if(perfilData.lang&&LANGS[perfilData.lang])setLang(perfilData.lang);setCreditos(perfilData.creditos||0);setSequencia(perfilData.sequencia_login||0);setDesbloqueados(perfilData.desbloqueados||{});if(perfilData.is_premium){const ultimoPremium=perfilData.ultimo_credito_premium||'';if(!ultimoPremium.startsWith(mesAtual())){const novosCred=(perfilData.creditos||0)+CREDITOS_CONFIG.premium_mensal;await sb.from('profiles').update({creditos:novosCred,ultimo_credito_premium:hoje()}).eq('id',uid);setCreditos(novosCred);setCreditosToast(t.creditosGanhos(CREDITOS_CONFIG.premium_mensal,'Premium mensal 🌟'));}}setTimeout(()=>verificarLoginDiario(uid,perfilData),1500);}
+        setTransacoes(tx.data||[]);setMetas(mt.data||[]);setEnvelopes(env.data||[]);
+        setDividas(div.data||[]);
+      }catch(e){console.error('loadAll',e);}
+      setLoading(false);
+    };
+
+    const handleLogout=async()=>{await sb.auth.signOut();setUser(null);setProfile(null);setTransacoes([]);setMetas([]);setEnvelopes([]);setDividas([]);setCreditos(0);setSequencia(0);};
+    const handleUpgrade=()=>window.open(lang!=='pt'?STRIPE_LINK_INTL:STRIPE_LINK,'_blank');
+    const handleActivatePremium=async(cod)=>{const{data}=await sb.from('codigos_premium').select('*').eq('codigo',cod).eq('usado',false).maybeSingle();if(data){await sb.from('codigos_premium').update({usado:true,usado_por:user.id,usado_em:new Date().toISOString()}).eq('id',data.id);await sb.from('profiles').update({is_premium:true,premium_since:new Date().toISOString()}).eq('id',user.id);setProfile(p=>({...p,is_premium:true}));return true;}return false;};
+
+    /* CRUD */
+    const addTransacao=async(tx)=>{const{data}=await sb.from('transacoes').insert({...tx,user_id:user.id}).select().single();if(data)setTransacoes(p=>[data,...p]);};
+    const delTransacao=async(id)=>{await sb.from('transacoes').delete().eq('id',id);setTransacoes(p=>p.filter(tx=>tx.id!==id));};
+    const editTransacao=async(id,dados)=>{const{data}=await sb.from('transacoes').update(dados).eq('id',id).select().single();if(data)setTransacoes(p=>p.map(tx=>tx.id===id?data:tx));};
+    const addMeta=async(m)=>{const{data}=await sb.from('metas').insert({...m,user_id:user.id}).select().single();if(data)setMetas(p=>[data,...p]);};
+    const updMeta=async(id,valor_atual)=>{await sb.from('metas').update({valor_atual}).eq('id',id);setMetas(p=>p.map(m=>m.id===id?{...m,valor_atual}:m));};
+    const delMeta=async(id)=>{await sb.from('metas').delete().eq('id',id);setMetas(p=>p.filter(m=>m.id!==id));};
+    const addEnvelope=async(e)=>{const{data}=await sb.from('envelopes').insert({...e,user_id:user.id}).select().single();if(data)setEnvelopes(p=>[data,...p]);};
+    const updEnvelope=async(id,valor_gasto)=>{await sb.from('envelopes').update({valor_gasto}).eq('id',id);setEnvelopes(p=>p.map(e=>e.id===id?{...e,valor_gasto}:e));};
+    const delEnvelope=async(id)=>{await sb.from('envelopes').delete().eq('id',id);setEnvelopes(p=>p.filter(e=>e.id!==id));};
+    /* Dívidas */
+    const addDivida=async(d)=>{const{data}=await sb.from('dividas').insert({...d,user_id:user.id}).select().single();if(data)setDividas(p=>[data,...p]);};
+    const delDivida=async(id)=>{await sb.from('dividas').delete().eq('id',id);setDividas(p=>p.filter(d=>d.id!==id));};
+    const quitarDivida=async(id)=>{
+      const divida=dividas.find(d=>d.id===id);if(!divida)return;
+      const novasPagas=divida.parcelas_pagas+1;
+      const quitada=divida.total_parcelas?novasPagas>=divida.total_parcelas:false;
+      await sb.from('dividas').update({parcelas_pagas:novasPagas,quitada}).eq('id',id);
+      setDividas(p=>p.map(d=>d.id===id?{...d,parcelas_pagas:novasPagas,quitada}:d));
+      if(quitada){setDividas(p=>p.filter(d=>d.id!==id));setCreditosToast('🎉 Dívida quitada!');}
+    };
+
+    const navItems=[
+      {id:'home',icon:'home',label:t.navInicio},
+      {id:'gastos',icon:'gastos',label:t.navGastos},
+      {id:'metas',icon:'target',label:t.navMetas},
+      {id:'envelopes',icon:'envelope2',label:t.navEnvelopes},
+      {id:'historias',icon:'film',label:t.navHistorias},
+      {id:'conselheiro',icon:'star',label:t.navSofia},
+      {id:'perfil',icon:'user',label:t.navPerfil},
+    ];
+    const ctxValue={lang,t,setLang,preco:lang!=='pt'?PRECO_INTL:PRECO,stripeLink:lang!=='pt'?STRIPE_LINK_INTL:STRIPE_LINK};
+
+    if(loading)return(<LangCtx.Provider value={ctxValue}><Loading/></LangCtx.Provider>);
+
+    if(recoveryMode)return(<LangCtx.Provider value={ctxValue}><div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px',background:'#0f0a08'}}><div style={{width:'100%',maxWidth:'400px',background:'#1a1210',borderRadius:'20px',padding:'32px',border:'1px solid #3a2820'}}><div style={{textAlign:'center',marginBottom:'28px'}}><div style={{fontSize:'40px',marginBottom:'12px'}}>🔐</div><h2 style={{fontFamily:'Playfair Display',color:'#e8c4a0',fontSize:'22px',marginBottom:'8px'}}>{t.novaSenhaTitle}</h2><p style={{color:'#a08070',fontSize:'14px'}}>{t.novaSenhaSub}</p></div><div style={{position:'relative',marginBottom:'16px'}}><input type={showSenha?'text':'password'} placeholder={t.novaSenhaPh} value={novaSenha} onChange={e=>setNovaSenha(e.target.value)} style={{width:'100%',padding:'14px 44px 14px 16px',background:'#251815',border:'1px solid #3a2820',borderRadius:'12px',color:'#e8c4a0',fontSize:'16px',outline:'none'}}/><button onClick={()=>setShowSenha(s=>!s)} type="button" style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'18px',padding:'4px'}}>{showSenha?'🙈':'👁️'}</button></div>{novaSenhaErro&&<p style={{color:'#e07070',fontSize:'13px',marginBottom:'12px',textAlign:'center'}}>{novaSenhaErro}</p>}{novaSenhaMsg&&<p style={{color:'#70c070',fontSize:'13px',marginBottom:'12px',textAlign:'center'}}>{novaSenhaMsg}</p>}<button onClick={handleAtualizarSenha} disabled={novaSenhaLoading} style={{width:'100%',padding:'14px',background:'linear-gradient(135deg,#c8784a,#a05830)',border:'none',borderRadius:'12px',color:'white',fontSize:'16px',fontWeight:'700',cursor:'pointer'}}>{novaSenhaLoading?t.salvandoSenha:t.salvarSenha}</button></div></div></LangCtx.Provider>);
+
+    if(!user)return(<LangCtx.Provider value={ctxValue}>{showLangModal&&<LangPickerModal onClose={()=>setShowLangModal(false)}/>}<AuthScreen onLogin={u=>{setUser(u);loadAll(u.id);}} onOpenLang={()=>setShowLangModal(true)} langChosen={langChosen}/></LangCtx.Provider>);
+
+    return(<LangCtx.Provider value={ctxValue}>
+      <div style={{background:'#0f0a08',minHeight:'100vh'}}>
+        {creditosToast&&<CreditosToast msg={creditosToast} onClose={()=>setCreditosToast(null)}/>}
+        {showLoja&&<LojaCreditos onClose={()=>setShowLoja(false)} lang={lang}/>}
+        {showMemoria&&<MemoriaMes transacoes={transacoes} dividas={dividas} onClose={()=>setShowMemoria(false)}/>}
+
+        {/* Top bar */}
+        <div style={{position:'sticky',top:0,zIndex:50,background:'rgba(15,10,8,0.95)',backdropFilter:'blur(10px)',borderBottom:'1px solid rgba(212,168,71,0.08)',padding:'10px 16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:16,color:'#d4a847'}}>Lição de Mulher</div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <button onClick={()=>setShowLoja(true)} style={{display:'flex',alignItems:'center',gap:4,background:'rgba(212,168,71,0.08)',border:'1px solid rgba(212,168,71,0.2)',borderRadius:20,padding:'3px 10px',cursor:'pointer'}}>
+              <span style={{fontSize:13}}>🪙</span><span style={{fontWeight:700,color:'#d4a847',fontSize:13}}>{creditos||0}</span>
+            </button>
+            <div style={{fontSize:11,color:isPremium?'#d4a847':'#5a3525',background:isPremium?'rgba(212,168,71,0.1)':'rgba(90,53,37,0.15)',border:`1px solid ${isPremium?'rgba(212,168,71,0.2)':'rgba(90,53,37,0.2)'}`,borderRadius:20,padding:'3px 10px',fontWeight:700}}>
+              {isPremium?t.premium:t.gratuito}
+            </div>
+          </div>
+        </div>
+
+        {tab==='home'&&<Dashboard profile={profile} transacoes={transacoes} dividas={dividas} onAdd={()=>setTab('gastos')} creditos={creditos} sequencia={sequencia} onOpenLoja={()=>setShowLoja(true)} onOpenMemoria={()=>setShowMemoria(true)}/>}
+        {tab==='gastos'&&<GastosScreen transacoes={transacoes} dividas={dividas} onAdd={addTransacao} onDelete={delTransacao} onEdit={editTransacao} onAddDivida={addDivida} onDeleteDivida={delDivida} onQuitarDivida={quitarDivida}/>}
+        {tab==='metas'&&<MetasScreen metas={metas} onAdd={addMeta} onUpdate={updMeta} onDelete={delMeta} isPremium={isPremium} onUpgrade={handleUpgrade}/>}
+        {tab==='envelopes'&&<EnvelopesScreen envelopes={envelopes} onAdd={addEnvelope} onUpdate={updEnvelope} onDelete={delEnvelope} isPremium={isPremium} onUpgrade={handleUpgrade}/>}
+        {tab==='historias'&&<HistoriasScreen creditos={creditos} onGastarCreditos={gastarCreditos} desbloqueados={desbloqueados} onOpenLoja={()=>setShowLoja(true)}/>}
+        {tab==='conselheiro'&&<ConselheiroScreen isPremium={isPremium} onUpgrade={handleUpgrade} profile={profile}/>}
+        {tab==='perfil'&&<PerfilScreen profile={profile} isPremium={isPremium} onLogout={handleLogout} onUpgrade={handleUpgrade} onActivatePremium={handleActivatePremium} creditos={creditos} sequencia={sequencia} onOpenLoja={()=>setShowLoja(true)}/>}
+
+        {showInstall&&(<div style={{position:'fixed',top:0,left:0,right:0,zIndex:9999,background:'linear-gradient(135deg,#2a1810,#1a1008)',borderBottom:'1px solid #d4a847',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}}><div style={{display:'flex',alignItems:'center',gap:'10px'}}><div style={{fontSize:'28px'}}>🌸</div><div><div style={{color:'#e8c4a0',fontSize:'13px',fontWeight:'700'}}>{t.instalarTitle}</div><div style={{color:'#7a5545',fontSize:'11px'}}>{t.instalarSub}</div></div></div><div style={{display:'flex',gap:'8px'}}><button onClick={()=>setShowInstall(false)} style={{background:'transparent',border:'1px solid #3a2820',borderRadius:'8px',color:'#7a5545',padding:'6px 10px',fontSize:'12px',cursor:'pointer'}}>{t.agoraNao}</button><button onClick={handleInstall} style={{background:'linear-gradient(135deg,#d4a847,#c49030)',border:'none',borderRadius:'8px',color:'#0f0a08',padding:'6px 12px',fontSize:'12px',fontWeight:'700',cursor:'pointer'}}>{t.instalarBtn}</button></div></div>)}
+
+        {/* Bottom nav */}
+        <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:480,background:'#0d0905',borderTop:'1.5px solid rgba(212,168,71,0.22)',display:'flex',padding:'6px 0 max(10px, env(safe-area-inset-bottom))',zIndex:100,boxShadow:'0 -6px 24px rgba(0,0,0,0.7)'}}>
+          {navItems.map(item=>{const ativo=tab===item.id;return(<button key={item.id} onClick={()=>setTab(item.id)} style={{flex:1,background:'none',border:'none',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:2,padding:'2px 0',position:'relative'}}>{ativo&&<div style={{position:'absolute',top:-7,left:'50%',transform:'translateX(-50%)',width:24,height:2.5,background:'#d4a847',borderRadius:'0 0 3px 3px'}}/>}<div style={{width:36,height:30,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:10,background:ativo?'rgba(212,168,71,0.16)':'transparent',transition:'all 0.2s'}}><Icon n={item.icon} s={20} c={ativo?'#d4a847':'#8a6040'}/></div><span style={{fontSize:9,color:ativo?'#d4a847':'#8a6040',fontWeight:ativo?700:500,letterSpacing:'-0.2px'}}>{item.label}</span></button>);})}
+        </div>
+      </div>
+    </LangCtx.Provider>);
+  };
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
