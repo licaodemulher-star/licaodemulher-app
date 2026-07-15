@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tres frasquitos</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Nunito+Sans:wght@0,300;0,400;0,600;0,700&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1e130d;color:#f7eddd;font-family:'Nunito Sans',system-ui,sans-serif;font-size:22px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:#e6bd77}
+.cd{position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#38230f,#5a3a18,#38230f);border-bottom:1px solid rgba(224,180,106,.45);color:#f7eddd;text-align:center;padding:11px 16px;font-size:clamp(14px,3.4vw,17px);font-weight:700}
+main{max-width:820px;margin:0 auto;padding:0 24px;background:radial-gradient(120% 80% at 50% -10%, rgba(224,180,106,0.14), rgba(30,19,13,0) 60%)}
+.hero{min-height:92svh;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:40px 0 48px}
+.eye{font-size:16px;letter-spacing:.32em;text-transform:uppercase;color:#e0b46a;font-weight:700;margin-bottom:24px}
+h1{font-family:'Libre Baskerville',Georgia,serif;font-weight:700;font-size:clamp(42px,8vw,70px);line-height:1.12;margin:0 0 22px;color:#fbf2e4;text-wrap:balance}
+.hook{font-family:'Libre Baskerville',serif;font-style:italic;font-size:clamp(22px,4vw,29px);line-height:1.45;color:#f0dcbd;max-width:640px;margin:0 auto 30px}
+.price{display:flex;align-items:baseline;gap:14px;justify-content:center;margin-bottom:16px}
+.from{font-size:22px;color:#b39a7c;text-decoration:line-through}
+.now{font-family:'Libre Baskerville',serif;font-size:42px;font-weight:700;color:#f0cf8f}
+.cta{display:inline-block;background:#e6bd77;color:#2a1206;font-weight:700;font-size:24px;text-decoration:none;padding:22px 46px;border-radius:14px;box-shadow:0 12px 32px rgba(224,180,106,.3);border:1px solid #f0d199}
+.subcta{font-size:18px;color:#c1aa8c;margin:14px 0 0}
+.rule{height:1px;background:linear-gradient(90deg,rgba(224,180,106,0),rgba(224,180,106,.35),rgba(224,180,106,0));margin:16px 0}
+section{padding:54px 0}
+h2{font-family:'Libre Baskerville',serif;font-weight:700;font-size:clamp(28px,5.5vw,40px);text-align:center;margin:0 0 12px;color:#f2e4d0}
+.lead{text-align:center;color:#c1aa8c;font-size:20px;margin:0 auto 40px;max-width:520px}
+.jars{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.jar{background:#2b1c13;border:1px solid rgba(224,180,106,.22);border-radius:18px;padding:30px 26px}
+.jar .n{font-family:'Libre Baskerville',serif;font-size:30px;color:#e9c988;margin-bottom:12px}
+.jar h3{font-family:'Libre Baskerville',serif;font-weight:700;font-size:23px;margin:0 0 10px;color:#f2e4d0}
+.jar p{margin:0;color:#d0bb9d;font-size:19px;line-height:1.6}
+.story{background:#281a12;border:1px solid rgba(224,180,106,.18);border-radius:22px;padding:clamp(30px,6vw,54px)}
+.story .lbl{font-size:14px;letter-spacing:.28em;text-transform:uppercase;color:#c99a5c;font-weight:700;margin-bottom:18px}
+.story .q{font-family:'Libre Baskerville',serif;font-style:italic;font-size:clamp(22px,4vw,29px);line-height:1.5;color:#f0e2ce;margin:0 0 22px}
+.story p{font-size:21px;color:#d5c1a4;margin:0}
+ul.find{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
+ul.find li{display:flex;gap:16px;align-items:flex-start}
+ul.find .ck{flex:none;color:#e9c988;font-size:22px}
+ul.find span.t{font-size:21px;line-height:1.6;color:#e3d3ba}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.two .c{background:#2b1c13;border:1px solid rgba(224,180,106,.3);border-radius:18px;padding:32px 30px}
+.two .c.no{background:#241812;border-color:rgba(180,150,120,.2)}
+.two h3{font-family:'Libre Baskerville',serif;font-weight:700;font-size:23px;margin:0 0 14px;color:#e9c988}
+.two .c.no h3{color:#b79c7d}
+.two p{margin:0;font-size:20px;line-height:1.7;color:#e0cfb3}
+.guar{display:flex;align-items:center;gap:30px;background:#281a12;border:1px solid rgba(224,180,106,.28);border-radius:22px;padding:clamp(28px,5vw,42px);flex-wrap:wrap;justify-content:center;text-align:center}
+.seal{flex:none;width:128px;height:128px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#33230f,#241609);border:2px solid #e9c988;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.seal .d{font-family:'Libre Baskerville',serif;font-size:46px;font-weight:700;color:#f0cf8f;line-height:1}
+.seal .u{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#e9c988;font-weight:700;margin-top:4px}
+.guar h3{font-family:'Libre Baskerville',serif;font-weight:700;font-size:24px;margin:0 0 10px;color:#f2e4d0}
+.guar p{margin:0;font-size:20px;color:#dcc9ac}
+.final{text-align:center;padding:54px 0 40px}
+.final h2{margin-bottom:26px}
+footer{padding:30px 0 90px;border-top:1px solid rgba(224,180,106,.14);margin-top:24px}
+footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-width:620px;margin:0 auto}
+</style></head>
+<body>
+<!-- CHECKOUT: trocar os href="https://pay.hotmart.com/I106752811S" pelo link do produto no Hotmart quando existir -->
+<div class="cd">&#9203; Precio de lanzamiento <b style="color:#f0cf8f">$149</b> &#8212; <span id="clk">60:00</span></div>
+<main>
+  <header class="hero">
+    <div class="eye">Lección de Mujer</div>
+    <h1>Tres frasquitos</h1>
+    <p class="hook">Para el día 20, la quincena ya se fue — y te preguntas a dónde.</p>
+    <div class="price"><span class="from">$299</span><span class="now">$149</span></div>
+    <a class="cta" href="https://pay.hotmart.com/I106752811S">Quiero empezar — $149</a>
+    <p class="subcta">Una guía honesta, sin milagros. El Método de los Tres Frascos.</p>
+  </header>
+  <div class="rule"></div>
+  <section>
+    <h2>Los tres frascos</h2><p class="lead">Así de sencillo. Tres frasquitos, tres casas para tu dinero.</p>
+    <div class="jars">
+      <div class="jar"><div class="n">1</div><h3>El frasco Ahora</h3><p>Las cuentas que ya sabes que vienen.</p></div>
+      <div class="jar"><div class="n">2</div><h3>El frasco Paz</h3><p>La bardita que detiene una emergencia. Tu guardadito.</p></div>
+      <div class="jar"><div class="n">3</div><h3>El frasco Sueño</h3><p>El poquito que hace que ahorrar valga la pena.</p></div>
+    </div>
+  </section>
+  <section><div class="story"><div class="lbl">La historia</div><p class="q">Doña Lupita tenía 52 años y nunca había podido ahorrar — no por floja, sino por falta de método.</p><p>Hasta el día que vio tres frasquitos en la cocina de su comadre y preguntó qué eran. La respuesta le cambió la vida.</p></div></section>
+  <section>
+    <h2>Lo que vas a encontrar</h2>
+    <ul class="find">
+      <li><span class="ck">&#10003;</span><span class="t">Por qué ahorrar siempre pareció imposible — y por qué nunca fue tu culpa.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">El método de los tres frascos, sin hojas de cálculo.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">La diferencia entre ahorrar con miedo y ahorrar con propósito.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">Qué cambia en los primeros 90 días.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">Cómo Lupita salió de números rojos sin ganar un peso más.</span></li>
+    </ul>
+  </section>
+  <section><div class="two">
+    <div class="c"><h3>Para quién es</h3><p>Para la mujer que, el día 20, se pregunta a dónde se fue la quincena.</p></div>
+    <div class="c no"><h3>Para quién no es</h3><p>Para quien quiere hacerse rico rápido. Esto no es un curso de inversión ni fórmula mágica.</p></div>
+  </div></section>
+  <section><div class="guar">
+    <div class="seal"><span class="d">7</span><span class="u">días</span></div>
+    <div style="max-width:460px"><h3>Garantía de 7 días — el riesgo es nuestro</h3><p>Léelo, aplícalo y, si no es para ti, te devolvemos cada centavo. Solo pide dentro de 7 días. Sin preguntas.</p></div>
+  </div></section>
+  <section class="final">
+    <h2>Empieza hoy, con lo poquito que tienes.</h2>
+    <div class="price"><span class="from">$299</span><span class="now">$149</span></div>
+    <a class="cta" href="https://pay.hotmart.com/I106752811S">Quiero mi guía — $149</a>
+  </section>
+  <footer><p>Guía de organización personal basada en experiencias de vida. No es asesoría financiera profesional. Los resultados varían. Historias inspiradas en experiencias reales de mujeres comunes.</p></footer>
+</main>
+<script>(function(){var el=document.getElementById('clk');if(!el)return;var end=Date.now()+3600000;function t(){var ms=end-Date.now();if(ms<=0){end=Date.now()+3600000;ms=3600000;}var s=Math.floor(ms/1000),m=Math.floor(s/60),ss=s%60;el.textContent=(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;}t();setInterval(t,1000);})();</script>
+</body></html>

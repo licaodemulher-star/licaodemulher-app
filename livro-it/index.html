@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="it"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tre piccoli barattoli</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Nunito+Sans:wght@0,300;0,400;0,600;0,700&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1e130d;color:#f7eddd;font-family:'Nunito Sans',system-ui,sans-serif;font-size:22px;line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:#e6bd77}
+.cd{position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#38230f,#5a3a18,#38230f);border-bottom:1px solid rgba(224,180,106,.45);color:#f7eddd;text-align:center;padding:11px 16px;font-size:clamp(14px,3.4vw,17px);font-weight:700}
+main{max-width:820px;margin:0 auto;padding:0 24px;background:radial-gradient(120% 80% at 50% -10%, rgba(224,180,106,0.14), rgba(30,19,13,0) 60%)}
+.hero{min-height:92svh;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:40px 0 48px}
+.eye{font-size:16px;letter-spacing:.32em;text-transform:uppercase;color:#e0b46a;font-weight:700;margin-bottom:24px}
+h1{font-family:'Libre Baskerville',Georgia,serif;font-weight:700;font-size:clamp(42px,8vw,70px);line-height:1.12;margin:0 0 22px;color:#fbf2e4;text-wrap:balance}
+.hook{font-family:'Libre Baskerville',serif;font-style:italic;font-size:clamp(22px,4vw,29px);line-height:1.45;color:#f0dcbd;max-width:640px;margin:0 auto 30px}
+.price{display:flex;align-items:baseline;gap:14px;justify-content:center;margin-bottom:16px}
+.from{font-size:22px;color:#b39a7c;text-decoration:line-through}
+.now{font-family:'Libre Baskerville',serif;font-size:42px;font-weight:700;color:#f0cf8f}
+.cta{display:inline-block;background:#e6bd77;color:#2a1206;font-weight:700;font-size:24px;text-decoration:none;padding:22px 46px;border-radius:14px;box-shadow:0 12px 32px rgba(224,180,106,.3);border:1px solid #f0d199}
+.subcta{font-size:18px;color:#c1aa8c;margin:14px 0 0}
+.rule{height:1px;background:linear-gradient(90deg,rgba(224,180,106,0),rgba(224,180,106,.35),rgba(224,180,106,0));margin:16px 0}
+section{padding:54px 0}
+h2{font-family:'Libre Baskerville',serif;font-weight:700;font-size:clamp(28px,5.5vw,40px);text-align:center;margin:0 0 12px;color:#f2e4d0}
+.lead{text-align:center;color:#c1aa8c;font-size:20px;margin:0 auto 40px;max-width:520px}
+.jars{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.jar{background:#2b1c13;border:1px solid rgba(224,180,106,.22);border-radius:18px;padding:30px 26px}
+.jar .n{font-family:'Libre Baskerville',serif;font-size:30px;color:#e9c988;margin-bottom:12px}
+.jar h3{font-family:'Libre Baskerville',serif;font-weight:700;font-size:23px;margin:0 0 10px;color:#f2e4d0}
+.jar p{margin:0;color:#d0bb9d;font-size:19px;line-height:1.6}
+.story{background:#281a12;border:1px solid rgba(224,180,106,.18);border-radius:22px;padding:clamp(30px,6vw,54px)}
+.story .lbl{font-size:14px;letter-spacing:.28em;text-transform:uppercase;color:#c99a5c;font-weight:700;margin-bottom:18px}
+.story .q{font-family:'Libre Baskerville',serif;font-style:italic;font-size:clamp(22px,4vw,29px);line-height:1.5;color:#f0e2ce;margin:0 0 22px}
+.story p{font-size:21px;color:#d5c1a4;margin:0}
+ul.find{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:20px}
+ul.find li{display:flex;gap:16px;align-items:flex-start}
+ul.find .ck{flex:none;color:#e9c988;font-size:22px}
+ul.find span.t{font-size:21px;line-height:1.6;color:#e3d3ba}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.two .c{background:#2b1c13;border:1px solid rgba(224,180,106,.3);border-radius:18px;padding:32px 30px}
+.two .c.no{background:#241812;border-color:rgba(180,150,120,.2)}
+.two h3{font-family:'Libre Baskerville',serif;font-weight:700;font-size:23px;margin:0 0 14px;color:#e9c988}
+.two .c.no h3{color:#b79c7d}
+.two p{margin:0;font-size:20px;line-height:1.7;color:#e0cfb3}
+.guar{display:flex;align-items:center;gap:30px;background:#281a12;border:1px solid rgba(224,180,106,.28);border-radius:22px;padding:clamp(28px,5vw,42px);flex-wrap:wrap;justify-content:center;text-align:center}
+.seal{flex:none;width:128px;height:128px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#33230f,#241609);border:2px solid #e9c988;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.seal .d{font-family:'Libre Baskerville',serif;font-size:46px;font-weight:700;color:#f0cf8f;line-height:1}
+.seal .u{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#e9c988;font-weight:700;margin-top:4px}
+.guar h3{font-family:'Libre Baskerville',serif;font-weight:700;font-size:24px;margin:0 0 10px;color:#f2e4d0}
+.guar p{margin:0;font-size:20px;color:#dcc9ac}
+.final{text-align:center;padding:54px 0 40px}
+.final h2{margin-bottom:26px}
+footer{padding:30px 0 90px;border-top:1px solid rgba(224,180,106,.14);margin-top:24px}
+footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-width:620px;margin:0 auto}
+</style></head>
+<body>
+<!-- CHECKOUT: trocar os href="https://pay.hotmart.com/X106753197U" pelo link do produto no Hotmart quando existir -->
+<div class="cd">&#9203; Prezzo di lancio <b style="color:#f0cf8f">9,90 €</b> &#8212; <span id="clk">60:00</span></div>
+<main>
+  <header class="hero">
+    <div class="eye">Lezione di Donna</div>
+    <h1>Tre piccoli barattoli</h1>
+    <p class="hook">Verso il 20, lo stipendio è già sparito — e ti chiedi dove sia finito.</p>
+    <div class="price"><span class="from">19 €</span><span class="now">9,90 €</span></div>
+    <a class="cta" href="https://pay.hotmart.com/X106753197U">Voglio iniziare — 9,90 €</a>
+    <p class="subcta">Una guida onesta, senza miracoli. Il Metodo dei Tre Barattoli.</p>
+  </header>
+  <div class="rule"></div>
+  <section>
+    <h2>I tre barattoli</h2><p class="lead">Semplice così. Tre piccoli barattoli, tre case per i tuoi soldi.</p>
+    <div class="jars">
+      <div class="jar"><div class="n">1</div><h3>Il barattolo Adesso</h3><p>Le bollette che già sai che arrivano.</p></div>
+      <div class="jar"><div class="n">2</div><h3>Il barattolo Pace</h3><p>Il piccolo muro che tiene lontana un'emergenza.</p></div>
+      <div class="jar"><div class="n">3</div><h3>Il barattolo Sogno</h3><p>Il poco che rende il risparmio degno.</p></div>
+    </div>
+  </section>
+  <section><div class="story"><div class="lbl">La storia</div><p class="q">Marta aveva 53 anni e non era mai riuscita a risparmiare — non per mancanza di volontà, ma di metodo.</p><p>Finché un giorno vide tre barattoli sul piano di un'amica e chiese cosa fossero. La risposta le cambiò la vita.</p></div></section>
+  <section>
+    <h2>Cosa troverai dentro</h2>
+    <ul class="find">
+      <li><span class="ck">&#10003;</span><span class="t">Perché risparmiare è sempre sembrato impossibile — e perché non è mai stata colpa tua.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">Il metodo dei tre barattoli, senza fogli di calcolo.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">La differenza tra risparmiare per paura e risparmiare con uno scopo.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">Cosa cambia nei primi 90 giorni.</span></li>
+      <li><span class="ck">&#10003;</span><span class="t">Come Marta è uscita dal rosso senza guadagnare un euro in più.</span></li>
+    </ul>
+  </section>
+  <section><div class="two">
+    <div class="c"><h3>Per chi è</h3><p>Per la donna che, verso il 20, si chiede dove sia finito lo stipendio.</p></div>
+    <div class="c no"><h3>Per chi non è</h3><p>Per chi vuole arricchirsi in fretta. Non è un corso di investimenti né una formula magica.</p></div>
+  </div></section>
+  <section><div class="guar">
+    <div class="seal"><span class="d">7</span><span class="u">giorni</span></div>
+    <div style="max-width:460px"><h3>Garanzia 7 giorni — il rischio è tutto nostro</h3><p>Leggilo, applicalo e, se non fa per te, ti restituiamo ogni centesimo. Basta chiedere entro 7 giorni. Senza domande.</p></div>
+  </div></section>
+  <section class="final">
+    <h2>Comincia oggi, con il poco che hai.</h2>
+    <div class="price"><span class="from">19 €</span><span class="now">9,90 €</span></div>
+    <a class="cta" href="https://pay.hotmart.com/X106753197U">Voglio la mia guida — 9,90 €</a>
+  </section>
+  <footer><p>Guida di organizzazione personale basata su esperienze di vita. Non è una consulenza finanziaria professionale. I risultati variano. Storie ispirate a esperienze reali di donne comuni.</p></footer>
+</main>
+<script>(function(){var el=document.getElementById('clk');if(!el)return;var end=Date.now()+3600000;function t(){var ms=end-Date.now();if(ms<=0){end=Date.now()+3600000;ms=3600000;}var s=Math.floor(ms/1000),m=Math.floor(s/60),ss=s%60;el.textContent=(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;}t();setInterval(t,1000);})();</script>
+</body></html>
