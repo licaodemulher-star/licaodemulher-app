@@ -6,7 +6,7 @@
 <style>x-dc{display:block}helmet{display:none}</style>
 </head>
 <body>
-<div id="lm-countdown" style="position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#38230f,#5a3a18,#38230f);border-bottom:1px solid rgba(224,180,106,0.45);color:#f7eddd;text-align:center;padding:11px 16px;font-size:clamp(14px,3.4vw,17px);font-weight:700;line-height:1.4;">&#9203; Pre&#231;o de lan&#231;amento <b style="color:#f0cf8f;">R$ 19,90</b> &#8212; acaba em <span id="lm-clock" style="font-variant-numeric:tabular-nums;color:#f0cf8f;">60:00</span></div>
+<div id="lm-countdown" style="position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#38230f,#5a3a18,#38230f);border-bottom:1px solid rgba(224,180,106,0.45);color:#f7eddd;text-align:center;padding:11px 16px;font-size:clamp(14px,3.4vw,17px);font-weight:700;line-height:1.4;">&#9203; Pre&#231;o de lan&#231;amento <b style="color:#f0cf8f;">R$ 19,90</b> &#8212; acaba em <span id="lm-clock" style="font-variant-numeric:tabular-nums;color:#f0cf8f;">7d 00:00:00</span></div>
 <x-dc>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -224,14 +224,19 @@
 </script>
 <script>
 (function(){
-  var DUR=3600000, el=document.getElementById('lm-clock');
+  var el=document.getElementById('lm-clock');
   if(!el) return;
-  var end=Date.now()+DUR; // zera a cada abertura da pagina (sem guardar) — imediatismo
+  var KEY='lm_deadline_v1', WIN=604800000; // 7 dias por visitante, guardado no proprio navegador
+  var end=parseInt(localStorage.getItem(KEY)||'0',10);
+  if(!end||isNaN(end)||end<Date.now()){ end=Date.now()+WIN; localStorage.setItem(KEY,String(end)); }
+  function p(n){ return (n<10?'0':'')+n; }
   function tick(){
-    var ms=end-Date.now();
-    if(ms<=0){ end=Date.now()+DUR; ms=DUR; } // se chegar a zero, reinicia (nunca mostra morto)
-    var t=Math.floor(ms/1000), m=Math.floor(t/60), s=t%60;
-    el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    var ms=end-Date.now(); if(ms<0) ms=0;
+    var d=Math.floor(ms/86400000); ms-=d*86400000;
+    var h=Math.floor(ms/3600000); ms-=h*3600000;
+    var m=Math.floor(ms/60000); ms-=m*60000;
+    var s=Math.floor(ms/1000);
+    el.textContent=(d>0?d+'d ':'')+p(h)+':'+p(m)+':'+p(s);
   }
   tick(); setInterval(tick,1000);
 })();

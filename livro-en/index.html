@@ -55,7 +55,7 @@ footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-widt
 </style></head>
 <body>
 <!-- CHECKOUT: trocar os href="https://pay.hotmart.com/B106752465L" pelo link do produto no Hotmart quando existir -->
-<div class="cd">&#9203; Launch price <b style="color:#f0cf8f">$9.90</b> &#8212; <span id="clk">60:00</span></div>
+<div class="cd">&#9203; Launch price <b style="color:#f0cf8f">$9.90</b> &#8212; ends in <span id="clk">7d 00:00:00</span></div>
 <main>
   <header class="hero">
     <div class="eye">A Woman's Lesson</div>
@@ -100,6 +100,6 @@ footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-widt
   </section>
   <footer><p>A personal-organization guide based on life experiences. Not professional financial advice. Results vary. Stories inspired by the real experiences of ordinary women.</p></footer>
 </main>
-<script>(function(){var el=document.getElementById('clk');if(!el)return;var end=Date.now()+3600000;function t(){var ms=end-Date.now();if(ms<=0){end=Date.now()+3600000;ms=3600000;}var s=Math.floor(ms/1000),m=Math.floor(s/60),ss=s%60;el.textContent=(m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;}t();setInterval(t,1000);})();</script>
+<script>(function(){var el=document.getElementById('clk');if(!el)return;var K='lm_deadline_v1',W=604800000,end=parseInt(localStorage.getItem(K)||'0',10);if(!end||isNaN(end)||end<Date.now()){end=Date.now()+W;localStorage.setItem(K,String(end));}function p(n){return(n<10?'0':'')+n;}function t(){var ms=end-Date.now();if(ms<0)ms=0;var d=Math.floor(ms/86400000);ms-=d*86400000;var h=Math.floor(ms/3600000);ms-=h*3600000;var m=Math.floor(ms/60000);ms-=m*60000;var s=Math.floor(ms/1000);el.textContent=(d>0?d+'d ':'')+p(h)+':'+p(m)+':'+p(s);}t();setInterval(t,1000);})();</script>
 <script>(function(){try{var q=new URLSearchParams(location.search),d={path:location.pathname,lang:"en",ref:document.referrer,utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")},u="https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/hit",j=JSON.stringify(d);if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([j],{type:"application/json"}))}else{fetch(u,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:j})}}catch(e){}})();</script>
 </body></html>
