@@ -6,6 +6,7 @@
 <style>x-dc{display:block}helmet{display:none}</style>
 </head>
 <body>
+<div id="lm-countdown" style="position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#38230f,#5a3a18,#38230f);border-bottom:1px solid rgba(224,180,106,0.45);color:#f7eddd;text-align:center;padding:11px 16px;font-size:clamp(14px,3.4vw,17px);font-weight:700;line-height:1.4;">&#9203; Pre&#231;o de lan&#231;amento <b style="color:#f0cf8f;">R$ 19,90</b> &#8212; acaba em <span id="lm-clock" style="font-variant-numeric:tabular-nums;color:#f0cf8f;">60:00</span></div>
 <x-dc>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -219,6 +220,21 @@
   bar.style.transition='transform .35s ease';
   function upd(){var y=window.scrollY||document.documentElement.scrollTop;bar.style.transform=y>600?'translateY(0)':'translateY(120%)';}
   window.addEventListener('scroll',upd,{passive:true});upd();
+})();
+</script>
+<script>
+(function(){
+  var KEY='lm_livro_deadline', DUR=3600000, el=document.getElementById('lm-clock');
+  if(!el) return;
+  var d=parseInt(localStorage.getItem(KEY)||'0',10);
+  if(!d || d-Date.now()<=0){ d=Date.now()+DUR; localStorage.setItem(KEY,String(d)); }
+  function tick(){
+    var ms=d-Date.now();
+    if(ms<=0){ d=Date.now()+DUR; localStorage.setItem(KEY,String(d)); ms=DUR; }
+    var t=Math.floor(ms/1000), m=Math.floor(t/60), s=t%60;
+    el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  }
+  tick(); setInterval(tick,1000);
 })();
 </script>
 </body></html>
