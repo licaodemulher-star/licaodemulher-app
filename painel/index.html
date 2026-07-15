@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel de Vendas — Lição de Mulher</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Nunito+Sans:wght@400;600;700;900&display=swap">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#1a110b;color:#f2e6d3;font-family:'Nunito Sans',system-ui,sans-serif;font-size:16px;line-height:1.5;padding:20px;max-width:980px;margin:0 auto}
+  h1{font-family:'Libre Baskerville',serif;font-size:clamp(24px,5vw,34px);color:#f7ecda;margin-bottom:4px}
+  .sub{color:#b39a7c;font-size:14px;margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:26px}
+  .card{background:#271a12;border:1px solid rgba(224,180,106,0.22);border-radius:16px;padding:20px}
+  .card .lbl{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:#c99a5c;font-weight:700;margin-bottom:8px}
+  .card .big{font-family:'Libre Baskerville',serif;font-size:30px;color:#f0cf8f;font-variant-numeric:tabular-nums}
+  .card .small{font-size:13px;color:#b39a7c;margin-top:4px}
+  h2{font-family:'Libre Baskerville',serif;font-size:20px;color:#f2e4d0;margin:26px 0 12px}
+  table{width:100%;border-collapse:collapse;background:#231710;border:1px solid rgba(224,180,106,0.18);border-radius:14px;overflow:hidden}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid rgba(224,180,106,0.1);font-size:15px}
+  th{background:#2d1e14;color:#e0b46a;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:none}
+  .empty{color:#8f7a5f;padding:18px 4px;font-style:italic}
+  .box{background:#271a12;border:1px solid rgba(224,180,106,0.3);border-radius:16px;padding:28px;max-width:420px;margin:60px auto;text-align:center}
+  .box input{width:100%;padding:12px;border-radius:10px;border:1px solid #6b543a;background:#1a110b;color:#f2e6d3;font-size:15px;margin:14px 0}
+  .box button,#reload{background:#e6bd77;color:#2a1206;border:none;font-weight:700;font-size:15px;padding:12px 22px;border-radius:10px;cursor:pointer}
+  .topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+  a.pay{color:#e6bd77}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var FN="https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/painel";
+var app=document.getElementById('app');
+function getToken(){ return (location.hash&&location.hash.slice(1))||sessionStorage.getItem('lm_painel_tk')||''; }
+function brl(cent,moeda){ var v=(cent||0)/100; if(moeda&&moeda!=='BRL'){return (moeda+' '+v.toFixed(2));} return 'R$ '+v.toFixed(2).replace('.',','); }
+function quando(iso){ try{var d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}catch(e){return iso;} }
+
+function ask(){
+  app.innerHTML='<div class="box"><h1>Painel de Vendas</h1><p class="sub">Cole o código de acesso do painel.</p><input id="tk" type="password" placeholder="código do painel"><button onclick="setTk()">Entrar</button></div>';
+}
+function setTk(){ var t=document.getElementById('tk').value.trim(); if(t){sessionStorage.setItem('lm_painel_tk',t); location.hash=''; load();} }
+
+function linhas(arr){
+  if(!arr||!arr.length) return '<tr><td colspan="3" class="empty">Ainda sem vendas aqui.</td></tr>';
+  return arr.map(function(r){return '<tr><td>'+(r.chave||'')+'</td><td class="num">'+r.vendas+'</td><td class="num">'+brl(r.receita_cent)+'</td></tr>';}).join('');
+}
+
+function render(d){
+  var ult=(d.ultimas&&d.ultimas.length)? d.ultimas.map(function(r){return '<tr><td>'+quando(r.quando)+'</td><td>'+(r.produto||'-')+'</td><td>'+(r.fonte||'-')+'</td><td>'+(r.canal||'-')+'</td><td class="num">'+brl(r.valor_cent,r.moeda)+'</td></tr>';}).join('') : '<tr><td colspan="5" class="empty">Nenhuma venda ainda. Assim que cair a 1ª, aparece aqui na hora.</td></tr>';
+  app.innerHTML=''+
+  '<div class="topbar"><div><h1>Painel de Vendas</h1><p class="sub">Lição de Mulher · atualizado '+quando(d.atualizado_em)+'</p></div><button id="reload" onclick="load()">Atualizar</button></div>'+
+  '<div class="grid">'+
+    '<div class="card"><div class="lbl">Receita total</div><div class="big">'+brl(d.receita_total_cent)+'</div><div class="small">'+d.vendas_aprovadas+' vendas aprovadas</div></div>'+
+    '<div class="card"><div class="lbl">Hoje</div><div class="big">'+brl(d.hoje.receita_cent)+'</div><div class="small">'+d.hoje.vendas+' vendas</div></div>'+
+    '<div class="card"><div class="lbl">7 dias</div><div class="big">'+brl(d.semana.receita_cent)+'</div><div class="small">'+d.semana.vendas+' vendas</div></div>'+
+    '<div class="card"><div class="lbl">Eventos recebidos</div><div class="big">'+d.total_eventos+'</div><div class="small">tudo que o webhook capturou</div></div>'+
+  '</div>'+
+  '<h2>Por canal (de onde veio a venda)</h2><table><thead><tr><th>Canal (utm_source)</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_canal)+'</tbody></table>'+
+  '<h2>Por origem</h2><table><thead><tr><th>Fonte</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_fonte)+'</tbody></table>'+
+  '<h2>Últimas vendas</h2><table><thead><tr><th>Quando</th><th>Produto</th><th>Fonte</th><th>Canal</th><th class="num">Valor</th></tr></thead><tbody>'+ult+'</tbody></table>'+
+  '<p class="sub" style="margin-top:24px">🔒 Página privada. Não compartilhe este link.</p>';
+}
+
+function load(){
+  var t=getToken(); if(!t){ ask(); return; }
+  sessionStorage.setItem('lm_painel_tk',t); if(location.hash) location.hash='';
+  app.innerHTML='<p class="sub" style="margin-top:40px">Carregando o painel…</p>';
+  fetch(FN+'?token='+encodeURIComponent(t)).then(function(r){ if(r.status===403){throw new Error('403');} return r.json(); })
+   .then(render).catch(function(e){ if((''+e).indexOf('403')>-1){ sessionStorage.removeItem('lm_painel_tk'); app.innerHTML='<div class="box"><h1>Código inválido</h1><p class="sub">Esse código não confere.</p><button onclick="ask()">Tentar de novo</button></div>'; } else { app.innerHTML='<div class="box"><h1>Ops</h1><p class="sub">Não consegui carregar agora. Tenta de novo.</p><button onclick="load()">Recarregar</button></div>'; } });
+}
+load();
+setInterval(function(){ if(getToken()||sessionStorage.getItem('lm_painel_tk')) load(); }, 45000);
+</script>
+</body></html>
