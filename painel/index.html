@@ -27,6 +27,13 @@
   .box button,#reload{background:#e6bd77;color:#2a1206;border:none;font-weight:700;font-size:15px;padding:12px 22px;border-radius:10px;cursor:pointer}
   .topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
   a.pay{color:#e6bd77}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.two{grid-template-columns:1fr}}
+  .bars{display:flex;align-items:flex-end;gap:3px;height:150px;background:#231710;border:1px solid rgba(224,180,106,0.18);border-radius:14px;padding:14px 10px 6px}
+  .bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+  .barfill{width:72%;min-height:2px;background:linear-gradient(#f0cf8f,#c99a5c);border-radius:4px 4px 0 0}
+  .barfill.hasv{background:linear-gradient(#8fd48f,#4e9a4e)}
+  .bar .barlab{font-size:10px;color:#8f7a5f;margin-top:5px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -48,7 +55,19 @@ function linhas(arr){
   return arr.map(function(r){return '<tr><td>'+(r.chave||'')+'</td><td class="num">'+r.vendas+'</td><td class="num">'+brl(r.receita_cent)+'</td></tr>';}).join('');
 }
 
+function pctTxt(p){ return (p===null||p===undefined)?'—':(p+'%'); }
+function linhasConv(arr,labelKey){
+  if(!arr||!arr.length) return '<tr><td colspan="5" class="empty">Ainda sem visitas aqui.</td></tr>';
+  return arr.map(function(r){return '<tr><td>'+(r[labelKey]||'-')+'</td><td class="num">'+r.visitas+'</td><td class="num">'+r.vendas+'</td><td class="num">'+pctTxt(r.conversao_pct)+'</td><td class="num">'+brl(r.receita_cent)+'</td></tr>';}).join('');
+}
+function barras(arr,labFn){
+  var max=1; (arr||[]).forEach(function(r){ if(r.visitas>max) max=r.visitas; });
+  return '<div class="bars">'+(arr||[]).map(function(r){var h=Math.round(100*r.visitas/max); var vend=(r.vendas||0); return '<div class="bar"><div class="barfill'+(vend>0?' hasv':'')+'" style="height:'+h+'%" title="'+r.visitas+' visita(s)'+(vend?(' · '+vend+' venda(s)'):'')+'"></div><div class="barlab">'+labFn(r)+'</div></div>';}).join('')+'</div>';
+}
+function dispLinhas(o){ o=o||{}; var ks=Object.keys(o); if(!ks.length) return '<tr><td colspan="2" class="empty">Sem dados.</td></tr>'; return ks.map(function(k){return '<tr><td>'+k+'</td><td class="num">'+o[k]+'</td></tr>';}).join(''); }
+function paisLinhas(arr){ if(!arr||!arr.length) return '<tr><td colspan="2" class="empty">Sem dados.</td></tr>'; return arr.map(function(r){return '<tr><td>'+r.pais+'</td><td class="num">'+r.visitas+'</td></tr>';}).join(''); }
 function render(d){
+  d.hoje=d.hoje||{}; d.semana=d.semana||{}; d.visitas=d.visitas||{};
   var ult=(d.ultimas&&d.ultimas.length)? d.ultimas.map(function(r){return '<tr><td>'+quando(r.quando)+'</td><td>'+(r.produto||'-')+'</td><td>'+(r.fonte||'-')+'</td><td>'+(r.canal||'-')+'</td><td class="num">'+brl(r.valor_cent,r.moeda)+'</td></tr>';}).join('') : '<tr><td colspan="5" class="empty">Nenhuma venda ainda. Assim que cair a 1ª, aparece aqui na hora.</td></tr>';
   app.innerHTML=''+
   '<div class="topbar"><div><h1>Painel de Vendas</h1><p class="sub">Lição de Mulher · atualizado '+quando(d.atualizado_em)+'</p></div><button id="reload" onclick="load()">Atualizar</button></div>'+
@@ -56,10 +75,15 @@ function render(d){
     '<div class="card"><div class="lbl">Receita total</div><div class="big">'+brl(d.receita_total_cent)+'</div><div class="small">'+d.vendas_aprovadas+' vendas aprovadas</div></div>'+
     '<div class="card"><div class="lbl">Hoje</div><div class="big">'+brl(d.hoje.receita_cent)+'</div><div class="small">'+d.hoje.vendas+' vendas</div></div>'+
     '<div class="card"><div class="lbl">7 dias</div><div class="big">'+brl(d.semana.receita_cent)+'</div><div class="small">'+d.semana.vendas+' vendas</div></div>'+
-    '<div class="card"><div class="lbl">Eventos recebidos</div><div class="big">'+d.total_eventos+'</div><div class="small">tudo que o webhook capturou</div></div>'+
+    '<div class="card"><div class="lbl">Visitas (7 dias)</div><div class="big">'+(d.semana.visitas||0)+'</div><div class="small">'+(d.visitas.total||0)+' no total</div></div>'+
+    '<div class="card"><div class="lbl">Conversão (7 dias)</div><div class="big">'+pctTxt(d.semana.conversao_pct)+'</div><div class="small">de visita para venda</div></div>'+
   '</div>'+
   '<h2>Por canal (de onde veio a venda)</h2><table><thead><tr><th>Canal (utm_source)</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_canal)+'</tbody></table>'+
   '<h2>Por origem</h2><table><thead><tr><th>Fonte</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_fonte)+'</tbody></table>'+
+  '<h2>Conversão por canal (clique → venda)</h2><table><thead><tr><th>Canal</th><th class="num">Visitas</th><th class="num">Vendas</th><th class="num">Conv.</th><th class="num">Receita</th></tr></thead><tbody>'+linhasConv(d.por_canal_conv,'canal')+'</tbody></table>'+
+  '<h2>Por idioma</h2><table><thead><tr><th>Idioma</th><th class="num">Visitas</th><th class="num">Vendas</th><th class="num">Conv.</th><th class="num">Receita</th></tr></thead><tbody>'+linhasConv(d.por_idioma,'idioma')+'</tbody></table>'+
+  '<h2>Picos de demanda</h2><div class="two"><div><p class="sub">Visitas por dia (14 dias) — barra verde = teve venda</p>'+barras(d.picos_dia,function(r){return r.dia.slice(8,10)+'/'+r.dia.slice(5,7);})+'</div><div><p class="sub">Visitas por hora (últimas 24h)</p>'+barras(d.picos_hora,function(r){return r.hora.slice(11,13)+'h';})+'</div></div>'+
+  '<h2>Dispositivo & País</h2><div class="two"><table><thead><tr><th>Dispositivo</th><th class="num">Visitas</th></tr></thead><tbody>'+dispLinhas(d.dispositivo)+'</tbody></table><table><thead><tr><th>País</th><th class="num">Visitas</th></tr></thead><tbody>'+paisLinhas(d.por_pais)+'</tbody></table></div>'+
   '<h2>Últimas vendas</h2><table><thead><tr><th>Quando</th><th>Produto</th><th>Fonte</th><th>Canal</th><th class="num">Valor</th></tr></thead><tbody>'+ult+'</tbody></table>'+
   '<p class="sub" style="margin-top:24px">🔒 Página privada. Não compartilhe este link.</p>';
 }
