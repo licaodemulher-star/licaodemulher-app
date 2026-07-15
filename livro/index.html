@@ -224,13 +224,12 @@
 </script>
 <script>
 (function(){
-  var KEY='lm_livro_deadline', DUR=3600000, el=document.getElementById('lm-clock');
+  var DUR=3600000, el=document.getElementById('lm-clock');
   if(!el) return;
-  var d=parseInt(localStorage.getItem(KEY)||'0',10);
-  if(!d || d-Date.now()<=0){ d=Date.now()+DUR; localStorage.setItem(KEY,String(d)); }
+  var end=Date.now()+DUR; // zera a cada abertura da pagina (sem guardar) — imediatismo
   function tick(){
-    var ms=d-Date.now();
-    if(ms<=0){ d=Date.now()+DUR; localStorage.setItem(KEY,String(d)); ms=DUR; }
+    var ms=end-Date.now();
+    if(ms<=0){ end=Date.now()+DUR; ms=DUR; } // se chegar a zero, reinicia (nunca mostra morto)
     var t=Math.floor(ms/1000), m=Math.floor(t/60), s=t%60;
     el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
   }
