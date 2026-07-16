@@ -241,5 +241,5 @@
   tick(); setInterval(tick,1000);
 })();
 </script>
-<script>(function(){try{var q=new URLSearchParams(location.search),d={path:location.pathname,lang:"pt",ref:document.referrer,utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")},u="https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/hit",j=JSON.stringify(d);if(navigator.sendBeacon){navigator.sendBeacon(u,new Blob([j],{type:"application/json"}))}else{fetch(u,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:j})}}catch(e){}})();</script>
+<script>(function(){try{var q=new URLSearchParams(location.search),v=q.get("v");if(v){document.querySelectorAll('a[href*="pay.kiwify.com.br"]').forEach(function(a){try{var u=new URL(a.href);if(!u.searchParams.get("src"))u.searchParams.set("src",v);a.href=u.toString();}catch(e){}})}var d={path:location.pathname,lang:"pt",ref:document.referrer,video:v,utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")},U="https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/hit",j=JSON.stringify(d);if(navigator.sendBeacon){navigator.sendBeacon(U,new Blob([j],{type:"application/json"}))}else{fetch(U,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:j})}}catch(e){}})();</script>
 </body></html>
