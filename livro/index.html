@@ -241,5 +241,17 @@
   tick(); setInterval(tick,1000);
 })();
 </script>
+<section id="isca-kit" style="max-width:640px;margin:30px auto;padding:26px 28px;background:#fff8ec;border:1px solid #e6bd77;border-radius:16px;font-family:Georgia,serif;color:#2a1206;text-align:center;">
+<div style="font-size:21px;font-weight:bold;margin-bottom:6px;">Ainda nao e a hora de comprar?</div>
+<p style="font-size:16px;margin:0 0 16px;">Leve de graca o <b>Kit das 3 Latas</b> &mdash; as etiquetas pra imprimir e o primeiro passo pra comecar a guardar esta semana.</p>
+<form id="form-kit" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+<input id="kit-email" type="email" required placeholder="Seu melhor e-mail" style="flex:1;min-width:220px;padding:14px 16px;border:1px solid #dcc9a8;border-radius:10px;font-size:16px;">
+<button type="submit" style="background:#c68a3e;color:#fff;font-weight:bold;font-size:16px;border:none;border-radius:10px;padding:14px 22px;cursor:pointer;">Quero o Kit gratis</button>
+</form>
+<div id="kit-msg" style="font-size:14px;margin-top:10px;color:#6b4a2a;"></div>
+<p style="font-size:11px;color:#8a7350;margin:12px 0 0;">So o e-mail. Sem spam. Voce pode sair quando quiser.</p>
+</section>
+<script>(function(){var f=document.getElementById("form-kit");if(!f)return;f.addEventListener("submit",function(e){e.preventDefault();var q=new URLSearchParams(location.search),email=document.getElementById("kit-email").value.trim(),msg=document.getElementById("kit-msg");if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent="Confere o e-mail, por favor.";return;}msg.textContent="Enviando...";fetch("https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email,origem:"livro-br",isca:"kit-3-latas",v:q.get("v"),utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")})}).then(function(r){return r.json()}).then(function(j){if(j&&j.ok){document.getElementById("isca-kit").innerHTML='<div style="font-size:21px;font-weight:bold;margin-bottom:8px;">Pronto! &#128153;</div><p style="font-size:16px;margin:0 0 16px;">Seu Kit das 3 Latas esta aqui. Abra, imprima e comece esta semana.</p><a href="/kit-3-latas" target="_blank" style="display:inline-block;background:#2a1206;color:#e6bd77;font-weight:bold;font-size:17px;text-decoration:none;padding:14px 28px;border-radius:12px;">Abrir o Kit das 3 Latas</a>';}else{msg.textContent="Ops, tenta de novo em instantes.";}}).catch(function(){msg.textContent="Ops, tenta de novo em instantes.";});});})();</script>
+
 <script>(function(){try{var q=new URLSearchParams(location.search),v=q.get("v");if(v){document.querySelectorAll('a[href*="pay.kiwify.com.br"]').forEach(function(a){try{var u=new URL(a.href);if(!u.searchParams.get("src"))u.searchParams.set("src",v);a.href=u.toString();}catch(e){}})}var d={path:location.pathname,lang:"pt",ref:document.referrer,video:v,utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")},U="https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/hit",j=JSON.stringify(d);if(navigator.sendBeacon){navigator.sendBeacon(U,new Blob([j],{type:"application/json"}))}else{fetch(U,{method:"POST",keepalive:true,headers:{"Content-Type":"application/json"},body:j})}}catch(e){}})();</script>
 </body></html>
