@@ -6,34 +6,53 @@
 <title>Painel de Vendas — Lição de Mulher</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Nunito+Sans:wght@400;600;700;900&display=swap">
 <style>
+  /* paleta de séries validada (dataviz, modo escuro): dourado / aqua / laranja */
+  :root{
+    --s-visitas:#c98500; --s-leads:#199e70; --s-vendas:#d95926;
+    --surface:#271a12; --ink:#f2e6d3; --ink-2:#b39a7c; --ink-3:#8f7a5f; --gold:#e0b46a;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#1a110b;color:#f2e6d3;font-family:'Nunito Sans',system-ui,sans-serif;font-size:16px;line-height:1.5;padding:20px;max-width:980px;margin:0 auto}
+  body{background:#1a110b;color:var(--ink);font-family:'Nunito Sans',system-ui,sans-serif;font-size:16px;line-height:1.5;padding:20px;max-width:1080px;margin:0 auto}
   h1{font-family:'Libre Baskerville',serif;font-size:clamp(24px,5vw,34px);color:#f7ecda;margin-bottom:4px}
-  .sub{color:#b39a7c;font-size:14px;margin-bottom:24px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:26px}
-  .card{background:#271a12;border:1px solid rgba(224,180,106,0.22);border-radius:16px;padding:20px}
+  .sub{color:var(--ink-2);font-size:14px;margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px}
+  .card{background:var(--surface);border:1px solid rgba(224,180,106,0.22);border-radius:16px;padding:20px}
   .card .lbl{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:#c99a5c;font-weight:700;margin-bottom:8px}
   .card .big{font-family:'Libre Baskerville',serif;font-size:30px;color:#f0cf8f;font-variant-numeric:tabular-nums}
-  .card .small{font-size:13px;color:#b39a7c;margin-top:4px}
-  h2{font-family:'Libre Baskerville',serif;font-size:20px;color:#f2e4d0;margin:26px 0 12px}
+  .card .small{font-size:13px;color:var(--ink-2);margin-top:4px}
+  h2{font-family:'Libre Baskerville',serif;font-size:20px;color:#f2e4d0;margin:30px 0 6px}
+  .nota{color:var(--ink-3);font-size:13px;margin-bottom:12px}
   table{width:100%;border-collapse:collapse;background:#231710;border:1px solid rgba(224,180,106,0.18);border-radius:14px;overflow:hidden}
-  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid rgba(224,180,106,0.1);font-size:15px}
-  th{background:#2d1e14;color:#e0b46a;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(224,180,106,0.1);font-size:15px}
+  th{background:#2d1e14;color:var(--gold);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   tr:last-child td{border-bottom:none}
-  .empty{color:#8f7a5f;padding:18px 4px;font-style:italic}
-  .box{background:#271a12;border:1px solid rgba(224,180,106,0.3);border-radius:16px;padding:28px;max-width:420px;margin:60px auto;text-align:center}
-  .box input{width:100%;padding:12px;border-radius:10px;border:1px solid #6b543a;background:#1a110b;color:#f2e6d3;font-size:15px;margin:14px 0}
+  .empty{color:var(--ink-3);padding:18px 4px;font-style:italic}
+  .box{background:var(--surface);border:1px solid rgba(224,180,106,0.3);border-radius:16px;padding:28px;max-width:420px;margin:60px auto;text-align:center}
+  .box input{width:100%;padding:12px;border-radius:10px;border:1px solid #6b543a;background:#1a110b;color:var(--ink);font-size:15px;margin:14px 0}
   .box button,#reload{background:#e6bd77;color:#2a1206;border:none;font-weight:700;font-size:15px;padding:12px 22px;border-radius:10px;cursor:pointer}
   .topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-  a.pay{color:#e6bd77}
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:640px){.two{grid-template-columns:1fr}}
-  .bars{display:flex;align-items:flex-end;gap:3px;height:150px;background:#231710;border:1px solid rgba(224,180,106,0.18);border-radius:14px;padding:14px 10px 6px}
-  .bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
-  .barfill{width:72%;min-height:2px;background:linear-gradient(#f0cf8f,#c99a5c);border-radius:4px 4px 0 0}
-  .barfill.hasv{background:linear-gradient(#8fd48f,#4e9a4e)}
-  .bar .barlab{font-size:10px;color:#8f7a5f;margin-top:5px;white-space:nowrap}
+  a{color:#e6bd77;text-decoration:none} a:hover{text-decoration:underline}
+  .wrap{overflow-x:auto}
+  /* aviso do estágio do projeto */
+  .aviso{background:rgba(25,158,112,.10);border:1px solid rgba(25,158,112,.38);border-radius:14px;padding:14px 16px;font-size:14px;color:#cfe8dd;margin-bottom:6px}
+  .aviso b{color:#8fd9bd}
+  /* small multiples: uma série por gráfico, escala própria (nunca 2 eixos) */
+  .mults{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .mult{background:var(--surface);border:1px solid rgba(224,180,106,0.18);border-radius:14px;padding:16px 16px 10px}
+  .mult h3{font-size:13px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:8px;color:var(--ink-2)}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .mult .tot{font-family:'Libre Baskerville',serif;font-size:22px;color:#f0cf8f;font-variant-numeric:tabular-nums;margin-bottom:10px}
+  .bars{display:flex;align-items:flex-end;gap:2px;height:78px;border-bottom:1px solid rgba(224,180,106,.16)}
+  .bar{flex:1;position:relative;min-height:2px;border-radius:4px 4px 0 0;background:var(--c);opacity:.92}
+  .bar.zero{background:rgba(224,180,106,.13);border-radius:2px 2px 0 0}
+  .bar:hover{opacity:1;outline:2px solid var(--surface);outline-offset:-1px}
+  .bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+    background:#12100e;color:var(--ink);border:1px solid rgba(224,180,106,.35);border-radius:8px;padding:6px 9px;
+    font-size:12px;white-space:nowrap;z-index:5;pointer-events:none;font-variant-numeric:tabular-nums}
+  .eixo{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin-top:6px}
+  .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(224,180,106,.14);color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+  .lead-sim{color:#8fd9bd;font-weight:700}
 </style>
 </head>
 <body>
@@ -44,6 +63,9 @@ var app=document.getElementById('app');
 function getToken(){ return (location.hash&&location.hash.slice(1))||sessionStorage.getItem('lm_painel_tk')||''; }
 function brl(cent,moeda){ var v=(cent||0)/100; if(moeda&&moeda!=='BRL'){return (moeda+' '+v.toFixed(2));} return 'R$ '+v.toFixed(2).replace('.',','); }
 function quando(iso){ try{var d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}catch(e){return iso;} }
+function dia(iso){ try{var p=iso.split('-'); return p[2]+'/'+p[1];}catch(e){return iso;} }
+function pc(v){ return (v===null||v===undefined)?'—':(''+v).replace('.',',')+'%'; }
+function esc(s){ return (''+(s==null?'':s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
 function ask(){
   app.innerHTML='<div class="box"><h1>Painel de Vendas</h1><p class="sub">Cole o código de acesso do painel.</p><input id="tk" type="password" placeholder="código do painel"><button onclick="setTk()">Entrar</button></div>';
@@ -52,40 +74,110 @@ function setTk(){ var t=document.getElementById('tk').value.trim(); if(t){sessio
 
 function linhas(arr){
   if(!arr||!arr.length) return '<tr><td colspan="3" class="empty">Ainda sem vendas aqui.</td></tr>';
-  return arr.map(function(r){return '<tr><td>'+(r.chave||'')+'</td><td class="num">'+r.vendas+'</td><td class="num">'+brl(r.receita_cent)+'</td></tr>';}).join('');
+  return arr.map(function(r){return '<tr><td>'+esc(r.chave)+'</td><td class="num">'+r.vendas+'</td><td class="num">'+brl(r.receita_cent)+'</td></tr>';}).join('');
 }
 
-function pctTxt(p){ return (p===null||p===undefined)?'—':(p+'%'); }
-function linhasConv(arr,labelKey){
-  if(!arr||!arr.length) return '<tr><td colspan="5" class="empty">Ainda sem visitas aqui.</td></tr>';
-  return arr.map(function(r){return '<tr><td>'+(r[labelKey]||'-')+'</td><td class="num">'+r.visitas+'</td><td class="num">'+r.vendas+'</td><td class="num">'+pctTxt(r.conversao_pct)+'</td><td class="num">'+brl(r.receita_cent)+'</td></tr>';}).join('');
+function rotHora(d){ try{return d.hora.slice(11,13)+'h';}catch(e){return ''+d.hora;} }
+
+// um gráfico = uma série = uma escala própria. Nunca dois eixos no mesmo gráfico.
+function mult(titulo, cor, chave, dados, rodape, rotulo){
+  rotulo=rotulo||function(d){return dia(d.dia);};
+  var max=Math.max.apply(null,dados.map(function(d){return d[chave]||0;}).concat([1]));
+  var total=dados.reduce(function(a,d){return a+(d[chave]||0);},0);
+  var barras=dados.map(function(d){
+    var v=d[chave]||0, h=v?Math.max(4,Math.round(74*v/max)):3;
+    return '<div class="bar'+(v?'':' zero')+'" style="height:'+h+'px" data-tip="'+rotulo(d)+': '+v+'"></div>';
+  }).join('');
+  return '<div class="mult" style="--c:'+cor+'">'+
+    '<h3><span class="dot" style="background:'+cor+'"></span>'+titulo+'</h3>'+
+    '<div class="tot">'+total+' <span style="font-size:12px;color:var(--ink-3);font-family:Nunito Sans">'+rodape+'</span></div>'+
+    '<div class="bars">'+barras+'</div>'+
+    '<div class="eixo"><span>'+rotulo(dados[0])+'</span><span>'+rotulo(dados[dados.length-1])+'</span></div></div>';
 }
-function barras(arr,labFn){
-  var max=1; (arr||[]).forEach(function(r){ if(r.visitas>max) max=r.visitas; });
-  return '<div class="bars">'+(arr||[]).map(function(r){var h=Math.round(100*r.visitas/max); var vend=(r.vendas||0); return '<div class="bar"><div class="barfill'+(vend>0?' hasv':'')+'" style="height:'+h+'%" title="'+r.visitas+' visita(s)'+(vend?(' · '+vend+' venda(s)'):'')+'"></div><div class="barlab">'+labFn(r)+'</div></div>';}).join('')+'</div>';
+
+function tabelaVideos(arr){
+  if(!arr||!arr.length) return '<tr><td colspan="7" class="empty">Nenhuma visita com vídeo identificado ainda.</td></tr>';
+  return arr.map(function(r){
+    var taxa=(r.leads>r.visitas)?'—':pc(r.visita_para_lead_pct);
+    return '<tr>'+
+      '<td><a href="https://youtu.be/'+esc(r.video)+'" target="_blank" rel="noopener">'+esc(r.video)+'</a></td>'+
+      '<td><span class="pill">'+esc(r.lang)+'</span></td>'+
+      '<td class="num">'+r.visitas+'</td>'+
+      '<td class="num'+(r.leads?' lead-sim':'')+'">'+r.leads+'</td>'+
+      '<td class="num">'+taxa+'</td>'+
+      '<td class="num">'+r.vendas+'</td>'+
+      '<td class="num">'+(r.receita_cent?brl(r.receita_cent):'—')+'</td></tr>';
+  }).join('');
 }
-function dispLinhas(o){ o=o||{}; var ks=Object.keys(o); if(!ks.length) return '<tr><td colspan="2" class="empty">Sem dados.</td></tr>'; return ks.map(function(k){return '<tr><td>'+k+'</td><td class="num">'+o[k]+'</td></tr>';}).join(''); }
-function paisLinhas(arr){ if(!arr||!arr.length) return '<tr><td colspan="2" class="empty">Sem dados.</td></tr>'; return arr.map(function(r){return '<tr><td>'+r.pais+'</td><td class="num">'+r.visitas+'</td></tr>';}).join(''); }
+
 function render(d){
-  d.hoje=d.hoje||{}; d.semana=d.semana||{}; d.visitas=d.visitas||{};
-  var ult=(d.ultimas&&d.ultimas.length)? d.ultimas.map(function(r){return '<tr><td>'+quando(r.quando)+'</td><td>'+(r.produto||'-')+'</td><td>'+(r.fonte||'-')+'</td><td>'+(r.canal||'-')+'</td><td class="num">'+brl(r.valor_cent,r.moeda)+'</td></tr>';}).join('') : '<tr><td colspan="5" class="empty">Nenhuma venda ainda. Assim que cair a 1ª, aparece aqui na hora.</td></tr>';
+  var ult=(d.ultimas&&d.ultimas.length)? d.ultimas.map(function(r){return '<tr><td>'+quando(r.quando)+'</td><td>'+esc(r.produto)+'</td><td>'+esc(r.fonte||'-')+'</td><td>'+esc(r.canal||'-')+'</td><td>'+(r.video?'<a href="https://youtu.be/'+esc(r.video)+'" target="_blank" rel="noopener">'+esc(r.video)+'</a>':'—')+'</td><td class="num">'+brl(r.valor_cent,r.moeda)+'</td></tr>';}).join('') : '<tr><td colspan="6" class="empty">Nenhuma venda ainda. Assim que cair a 1ª, aparece aqui na hora — já com o vídeo que a trouxe.</td></tr>';
+
+  var vid=d.visitas||{}, lds=d.leads||{};
+  var aviso = d.vendas_aprovadas ? '' :
+    '<div class="aviso">🌱 <b>Sem venda ainda — e o painel já está medindo.</b> O rastreio por vídeo está no ar: '+
+    (vid.com_video||0)+' de '+(vid.total||0)+' visitas já chegam com o ID do vídeo que as trouxe ('+(vid.videos_distintos||0)+' vídeos diferentes), '+
+    'e '+(lds.total||0)+' leads já entraram. Quando a 1ª venda cair, ela aparece amarrada ao vídeo que vendeu.</div>';
+
+  var pais=(d.por_pais&&d.por_pais.length)? d.por_pais.map(function(r){return '<tr><td>'+esc(r.pais)+'</td><td class="num">'+r.visitas+'</td></tr>';}).join('') : '<tr><td colspan="2" class="empty">Sem dados.</td></tr>';
+  var disp=Object.keys(d.dispositivo||{}).map(function(k){return '<tr><td>'+esc(k)+'</td><td class="num">'+d.dispositivo[k]+'</td></tr>';}).join('')||'<tr><td colspan="2" class="empty">Sem dados.</td></tr>';
+  var idi=(d.por_idioma&&d.por_idioma.length)? d.por_idioma.map(function(r){return '<tr><td><span class="pill">'+esc(r.idioma)+'</span></td><td class="num">'+r.visitas+'</td><td class="num">'+r.vendas+'</td><td class="num">'+pc(r.conversao_pct)+'</td><td class="num">'+(r.receita_cent?brl(r.receita_cent):'—')+'</td></tr>';}).join('') : '<tr><td colspan="5" class="empty">Sem dados.</td></tr>';
+  var lorig=(lds.por_origem&&lds.por_origem.length)? lds.por_origem.map(function(r){return '<tr><td>'+esc(r.origem)+'</td><td class="num">'+r.leads+'</td></tr>';}).join('') : '<tr><td colspan="2" class="empty">Sem leads ainda.</td></tr>';
+  var cnv=(d.por_canal_conv&&d.por_canal_conv.length)? d.por_canal_conv.map(function(r){return '<tr><td>'+esc(r.canal)+'</td><td class="num">'+r.visitas+'</td><td class="num">'+r.vendas+'</td><td class="num">'+pc(r.conversao_pct)+'</td></tr>';}).join('') : '<tr><td colspan="4" class="empty">Sem dados.</td></tr>';
+
   app.innerHTML=''+
   '<div class="topbar"><div><h1>Painel de Vendas</h1><p class="sub">Lição de Mulher · atualizado '+quando(d.atualizado_em)+'</p></div><button id="reload" onclick="load()">Atualizar</button></div>'+
-  '<div class="grid">'+
+  aviso+
+  '<div class="grid" style="margin-top:16px">'+
     '<div class="card"><div class="lbl">Receita total</div><div class="big">'+brl(d.receita_total_cent)+'</div><div class="small">'+d.vendas_aprovadas+' vendas aprovadas</div></div>'+
-    '<div class="card"><div class="lbl">Hoje</div><div class="big">'+brl(d.hoje.receita_cent)+'</div><div class="small">'+d.hoje.vendas+' vendas</div></div>'+
-    '<div class="card"><div class="lbl">7 dias</div><div class="big">'+brl(d.semana.receita_cent)+'</div><div class="small">'+d.semana.vendas+' vendas</div></div>'+
-    '<div class="card"><div class="lbl">Visitas (7 dias)</div><div class="big">'+(d.semana.visitas||0)+'</div><div class="small">'+(d.visitas.total||0)+' no total</div></div>'+
-    '<div class="card"><div class="lbl">Conversão (7 dias)</div><div class="big">'+pctTxt(d.semana.conversao_pct)+'</div><div class="small">de visita para venda</div></div>'+
+    '<div class="card"><div class="lbl">Leads</div><div class="big">'+(lds.total||0)+'</div><div class="small">'+(lds.hoje||0)+' hoje · '+(lds.semana||0)+' na semana</div></div>'+
+    '<div class="card"><div class="lbl">Visitas</div><div class="big">'+(vid.total||0)+'</div><div class="small">'+(vid.hoje||0)+' hoje · '+(vid.semana||0)+' na semana</div></div>'+
+    '<div class="card"><div class="lbl">Vídeos rastreados</div><div class="big">'+(vid.videos_distintos||0)+'</div><div class="small">'+(vid.com_video||0)+' de '+(vid.total||0)+' visitas com vídeo</div></div>'+
+    '<div class="card"><div class="lbl">Visita → Lead</div><div class="big">'+pc(lds.visita_para_lead_pct)+'</div><div class="small">na última semana</div></div>'+
+    '<div class="card"><div class="lbl">Visita → Venda</div><div class="big">'+pc(d.conversao_geral_pct)+'</div><div class="small">geral, desde o início</div></div>'+
   '</div>'+
-  '<h2>Por canal (de onde veio a venda)</h2><table><thead><tr><th>Canal (utm_source)</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_canal)+'</tbody></table>'+
-  '<h2>Por origem</h2><table><thead><tr><th>Fonte</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_fonte)+'</tbody></table>'+
-  '<h2>Conversão por canal (clique → venda)</h2><table><thead><tr><th>Canal</th><th class="num">Visitas</th><th class="num">Vendas</th><th class="num">Conv.</th><th class="num">Receita</th></tr></thead><tbody>'+linhasConv(d.por_canal_conv,'canal')+'</tbody></table>'+
-  '<h2>Por idioma</h2><table><thead><tr><th>Idioma</th><th class="num">Visitas</th><th class="num">Vendas</th><th class="num">Conv.</th><th class="num">Receita</th></tr></thead><tbody>'+linhasConv(d.por_idioma,'idioma')+'</tbody></table>'+
-  '<h2>Picos de demanda</h2><div class="two"><div><p class="sub">Visitas por dia (14 dias) — barra verde = teve venda</p>'+barras(d.picos_dia,function(r){return r.dia.slice(8,10)+'/'+r.dia.slice(5,7);})+'</div><div><p class="sub">Visitas por hora (últimas 24h)</p>'+barras(d.picos_hora,function(r){return r.hora.slice(11,13)+'h';})+'</div></div>'+
-  '<h2>Dispositivo & País</h2><div class="two"><table><thead><tr><th>Dispositivo</th><th class="num">Visitas</th></tr></thead><tbody>'+dispLinhas(d.dispositivo)+'</tbody></table><table><thead><tr><th>País</th><th class="num">Visitas</th></tr></thead><tbody>'+paisLinhas(d.por_pais)+'</tbody></table></div>'+
-  '<h2>Últimas vendas</h2><table><thead><tr><th>Quando</th><th>Produto</th><th>Fonte</th><th>Canal</th><th class="num">Valor</th></tr></thead><tbody>'+ult+'</tbody></table>'+
-  '<p class="sub" style="margin-top:24px">🔒 Página privada. Não compartilhe este link.</p>';
+
+  '<h2>🎬 Por vídeo — quem traz gente e lead</h2>'+
+  '<p class="nota">Cada descrição leva <code>&amp;v=ID</code>, então dá para saber qual vídeo trouxe a visita, o lead e (quando houver) a venda. Clique no ID para abrir o vídeo. Ordem: receita → leads → visitas.</p>'+
+  '<div class="wrap"><table><thead><tr><th>Vídeo</th><th>Idioma</th><th class="num">Visitas</th><th class="num">Leads</th><th class="num">Visita→Lead</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+tabelaVideos(d.por_video)+'</tbody></table></div>'+
+
+  '<h2>📈 Últimos 14 dias</h2>'+
+  '<p class="nota">Três gráficos separados de propósito: as escalas são muito diferentes, e juntas esconderiam o lead e a venda. Passe o mouse nas barras.</p>'+
+  '<div class="mults">'+
+    mult('Visitas','var(--s-visitas)','visitas',d.picos_dia,'em 14 dias')+
+    mult('Leads','var(--s-leads)','leads',d.picos_dia,'em 14 dias')+
+    mult('Vendas','var(--s-vendas)','vendas',d.picos_dia,'em 14 dias')+
+  '</div>'+
+
+  '<h2>🕐 Visitas por hora — últimas 24h</h2>'+
+  '<p class="nota">Mostra a que horas a audiência chega na página. Serve para escolher horário de publicação e de envio de e-mail.</p>'+
+  '<div class="mults" style="grid-template-columns:1fr">'+
+    mult('Visitas por hora','var(--s-visitas)','visitas',d.picos_hora,'nas últimas 24h',rotHora)+
+  '</div>'+
+
+  '<h2>🌍 Por idioma</h2>'+
+  '<div class="wrap"><table><thead><tr><th>Idioma</th><th class="num">Visitas</th><th class="num">Vendas</th><th class="num">Conversão</th><th class="num">Receita</th></tr></thead><tbody>'+idi+'</tbody></table></div>'+
+
+  '<h2>📥 Leads por origem</h2>'+
+  '<div class="wrap"><table><thead><tr><th>Origem (página)</th><th class="num">Leads</th></tr></thead><tbody>'+lorig+'</tbody></table></div>'+
+
+  '<h2>🔗 Por canal — visita até venda</h2>'+
+  '<div class="wrap"><table><thead><tr><th>Canal (utm_source)</th><th class="num">Visitas</th><th class="num">Vendas</th><th class="num">Conversão</th></tr></thead><tbody>'+cnv+'</tbody></table></div>'+
+
+  '<div class="grid" style="margin-top:26px">'+
+    '<div><h2 style="margin-top:0">🌎 Países</h2><div class="wrap"><table><thead><tr><th>País</th><th class="num">Visitas</th></tr></thead><tbody>'+pais+'</tbody></table></div></div>'+
+    '<div><h2 style="margin-top:0">📱 Dispositivo</h2><div class="wrap"><table><thead><tr><th>Tipo</th><th class="num">Visitas</th></tr></thead><tbody>'+disp+'</tbody></table></div></div>'+
+  '</div>'+
+
+  '<h2>💰 Vendas por canal e origem</h2>'+
+  '<div class="wrap"><table><thead><tr><th>Canal (utm_source)</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_canal)+'</tbody></table></div>'+
+  '<div class="wrap" style="margin-top:14px"><table><thead><tr><th>Fonte</th><th class="num">Vendas</th><th class="num">Receita</th></tr></thead><tbody>'+linhas(d.por_fonte)+'</tbody></table></div>'+
+
+  '<h2>🧾 Últimas vendas</h2>'+
+  '<div class="wrap"><table><thead><tr><th>Quando</th><th>Produto</th><th>Fonte</th><th>Canal</th><th>Vídeo</th><th class="num">Valor</th></tr></thead><tbody>'+ult+'</tbody></table></div>'+
+
+  '<p class="sub" style="margin-top:26px">🔒 Página privada. Não compartilhe este link.<br>'+
+  '<span style="color:var(--ink-3);font-size:12px">Visitas passaram a ser gravadas em 25/07/2026 e os leads em 16/07 — por isso um lead pode aparecer sem a visita correspondente (a taxa fica como “—”).</span></p>';
 }
 
 function load(){
