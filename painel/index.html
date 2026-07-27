@@ -113,11 +113,16 @@ function tabelaVideos(arr){
 function render(d){
   var ult=(d.ultimas&&d.ultimas.length)? d.ultimas.map(function(r){return '<tr><td>'+quando(r.quando)+'</td><td>'+esc(r.produto)+'</td><td>'+esc(r.fonte||'-')+'</td><td>'+esc(r.canal||'-')+'</td><td>'+(r.video?'<a href="https://youtu.be/'+esc(r.video)+'" target="_blank" rel="noopener">'+esc(r.video)+'</a>':'—')+'</td><td class="num">'+brl(r.valor_cent,r.moeda)+'</td></tr>';}).join('') : '<tr><td colspan="6" class="empty">Nenhuma venda ainda. Assim que cair a 1ª, aparece aqui na hora — já com o vídeo que a trouxe.</td></tr>';
 
-  var vid=d.visitas||{}, lds=d.leads||{};
+  var vid=d.visitas||{}, lds=d.leads||{}, rb=d.robo||{};
   var aviso = d.vendas_aprovadas ? '' :
     '<div class="aviso">🌱 <b>Sem venda ainda — e o painel já está medindo.</b> O rastreio por vídeo está no ar: '+
-    (vid.com_video||0)+' de '+(vid.total||0)+' visitas já chegam com o ID do vídeo que as trouxe ('+(vid.videos_distintos||0)+' vídeos diferentes), '+
+    (vid.com_video||0)+' de '+(vid.total||0)+' visitas de gente chegam com o ID do vídeo que as trouxe ('+(vid.videos_distintos||0)+' vídeos diferentes), '+
     'e '+(lds.total||0)+' leads já entraram. Quando a 1ª venda cair, ela aparece amarrada ao vídeo que vendeu.</div>';
+  var avisoRobo = (rb.descartadas>0) ?
+    '<div class="aviso" style="background:rgba(217,89,38,.10);border-color:rgba(217,89,38,.40);color:#f0cdbb">🤖 <b>'+rb.descartadas+
+    ' de '+rb.brutas+' visitas eram NOSSOS ROBÔS e foram descartadas</b> ('+Math.round(100*rb.descartadas/rb.brutas)+
+    '% do bruto). O vigia de link abre a página de vários vídeos no mesmo minuto — isso não é audiência. '+
+    'Todo número desta tela é só de <b>gente</b>. Minutos descartados: '+(rb.minutos||[]).map(function(m){return m.slice(11)+' UTC';}).join(' · ')+'.</div>' : '';
 
   var pais=(d.por_pais&&d.por_pais.length)? d.por_pais.map(function(r){return '<tr><td>'+esc(r.pais)+'</td><td class="num">'+r.visitas+'</td></tr>';}).join('') : '<tr><td colspan="2" class="empty">Sem dados.</td></tr>';
   var disp=Object.keys(d.dispositivo||{}).map(function(k){return '<tr><td>'+esc(k)+'</td><td class="num">'+d.dispositivo[k]+'</td></tr>';}).join('')||'<tr><td colspan="2" class="empty">Sem dados.</td></tr>';
@@ -127,11 +132,11 @@ function render(d){
 
   app.innerHTML=''+
   '<div class="topbar"><div><h1>Painel de Vendas</h1><p class="sub">Lição de Mulher · atualizado '+quando(d.atualizado_em)+'</p></div><button id="reload" onclick="load()">Atualizar</button></div>'+
-  aviso+
+  aviso+avisoRobo+
   '<div class="grid" style="margin-top:16px">'+
     '<div class="card"><div class="lbl">Receita total</div><div class="big">'+brl(d.receita_total_cent)+'</div><div class="small">'+d.vendas_aprovadas+' vendas aprovadas</div></div>'+
     '<div class="card"><div class="lbl">Leads</div><div class="big">'+(lds.total||0)+'</div><div class="small">'+(lds.hoje||0)+' hoje · '+(lds.semana||0)+' na semana</div></div>'+
-    '<div class="card"><div class="lbl">Visitas</div><div class="big">'+(vid.total||0)+'</div><div class="small">'+(vid.hoje||0)+' hoje · '+(vid.semana||0)+' na semana</div></div>'+
+    '<div class="card"><div class="lbl">Visitas de gente</div><div class="big">'+(vid.total||0)+'</div><div class="small">'+(vid.hoje||0)+' hoje · robô já fora</div></div>'+
     '<div class="card"><div class="lbl">Vídeos rastreados</div><div class="big">'+(vid.videos_distintos||0)+'</div><div class="small">'+(vid.com_video||0)+' de '+(vid.total||0)+' visitas com vídeo</div></div>'+
     '<div class="card"><div class="lbl">Visita → Lead</div><div class="big">'+pc(lds.visita_para_lead_pct)+'</div><div class="small">na última semana</div></div>'+
     '<div class="card"><div class="lbl">Visita → Venda</div><div class="big">'+pc(d.conversao_geral_pct)+'</div><div class="small">geral, desde o início</div></div>'+
@@ -150,7 +155,7 @@ function render(d){
   '</div>'+
 
   '<h2>🕐 Visitas por hora — últimas 24h</h2>'+
-  '<p class="nota">Mostra a que horas a audiência chega na página. Serve para escolher horário de publicação e de envio de e-mail.</p>'+
+  '<p class="nota">Só gente (rajada de robô já descartada). ⛔ Com este volume ainda <b>não serve para escolher horário</b> de publicar nem de e-mail — a base é pequena demais. Vira decisão quando houver 30 dias de coleta limpa.</p>'+
   '<div class="mults" style="grid-template-columns:1fr">'+
     mult('Visitas por hora','var(--s-visitas)','visitas',d.picos_hora,'nas últimas 24h',rotHora)+
   '</div>'+
