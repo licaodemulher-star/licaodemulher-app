@@ -717,6 +717,7 @@ const LANGS = {
     aguarde: 'Aguarde...',
     btnEntrar: 'Entrar',
     btnCriar: 'Criar minha conta',
+    aceiteEmail: 'Quero receber por e-mail o Kit das 3 Latas e as novidades da Lição de Mulher (opcional)',
     quote: '"Plante suas sementes no silêncio, confie no\ntempo de Deus e transforme sua dor em sabedoria."',
     emailSent: e => `Enviamos um link para ${e}. Verifique sua caixa de entrada!`,
     contaCriada: 'Conta criada! Verifique seu e-mail.',
@@ -1012,6 +1013,7 @@ const LANGS = {
     aguarde: 'Please wait...',
     btnEntrar: 'Sign In',
     btnCriar: 'Create my account',
+    aceiteEmail: 'I want to receive the Three Jars Kit and news from Lição de Mulher by e-mail (optional)',
     quote: '"Plant your seeds in silence, trust in God\'s\ntiming and turn your pain into wisdom."',
     emailSent: e => `We sent a link to ${e}. Check your inbox!`,
     contaCriada: 'Account created! Check your email.',
@@ -1303,6 +1305,7 @@ const LANGS = {
     aguarde: 'Patientez...',
     btnEntrar: 'Se connecter',
     btnCriar: 'Créer mon compte',
+    aceiteEmail: 'Je souhaite recevoir le Kit des 3 Bocaux et les nouveautés de Lição de Mulher par e-mail (facultatif)',
     quote: '"Semez en silence, faites confiance au temps\nde Dieu et transformez votre douleur en sagesse."',
     emailSent: e => `Lien envoyé à ${e}.`,
     contaCriada: 'Compte créé! Vérifiez votre e-mail.',
@@ -1594,6 +1597,7 @@ const LANGS = {
     aguarde: 'Espere...',
     btnEntrar: 'Entrar',
     btnCriar: 'Crear mi cuenta',
+    aceiteEmail: 'Quiero recibir por correo el Kit de los 3 Frascos y las novedades de Lição de Mulher (opcional)',
     quote: '"Siembra en silencio, confía en el tiempo de\nDios y convierte tu dolor en sabiduría."',
     emailSent: e => `Enlace enviado a ${e}.`,
     contaCriada: '¡Cuenta creada! Revisa tu correo.',
@@ -1885,6 +1889,7 @@ const LANGS = {
     aguarde: 'Attendi...',
     btnEntrar: 'Accedi',
     btnCriar: 'Crea il mio account',
+    aceiteEmail: 'Voglio ricevere via e-mail il Kit dei 3 Barattoli e le novità di Lição de Mulher (facoltativo)',
     quote: '"Semina in silenzio, confida nel tempo\ndi Dio e trasforma il tuo dolore in saggezza."',
     emailSent: e => `Link inviato a ${e}.`,
     contaCriada: 'Account creato! Controlla la tua e-mail.',
@@ -3295,6 +3300,7 @@ const AuthScreen = ({
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
   const [showSenha, setShowSenha] = useState(false);
+  const [aceite, setAceite] = useState(false);
   const handleEsqueciSenha = async () => {
     setErro('');
     setMsg('');
@@ -3343,7 +3349,8 @@ const AuthScreen = ({
           options: {
             data: {
               nome: nome.trim(),
-              lang
+              lang,
+              aceite_email: aceite
             }
           }
         });
@@ -3647,7 +3654,30 @@ const AuthScreen = ({
       minHeight: 44,
       padding: '0 4px'
     }
-  }, t.esqueciSenha)), React.createElement("button", {
+  }, t.esqueciSenha)), modo === 'cadastro' && React.createElement("label", {
+    style: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 9,
+      marginBottom: 16,
+      cursor: 'pointer',
+      fontSize: 12,
+      color: '#a8876a',
+      lineHeight: 1.5
+    }
+  }, React.createElement("input", {
+    type: "checkbox",
+    checked: aceite,
+    onChange: e => setAceite(e.target.checked),
+    style: {
+      marginTop: 2,
+      width: 17,
+      height: 17,
+      accentColor: '#d4a847',
+      flexShrink: 0,
+      cursor: 'pointer'
+    }
+  }), React.createElement("span", null, t.aceiteEmail)), React.createElement("button", {
     onClick: handleAuth,
     disabled: loading,
     style: {
