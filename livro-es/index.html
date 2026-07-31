@@ -31,7 +31,7 @@ body{background:#1e130d;color:#f7eddd;font-family:'Nunito Sans',system-ui,sans-s
 a{color:#e6bd77}
 
 main{max-width:820px;margin:0 auto;padding:0 24px;background:radial-gradient(120% 80% at 50% -10%, rgba(224,180,106,0.14), rgba(30,19,13,0) 60%)}
-.hero{min-height:92svh;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:40px 0 48px}
+.hero{min-height:auto;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:40px 0 48px}
 .eye{font-size:16px;letter-spacing:.32em;text-transform:uppercase;color:#e0b46a;font-weight:700;margin-bottom:24px}
 h1{font-family:'Libre Baskerville',Georgia,serif;font-weight:700;font-size:clamp(42px,8vw,70px);line-height:1.12;margin:0 0 22px;color:#fbf2e4;text-wrap:balance}
 .hook{font-family:'Libre Baskerville',serif;font-style:italic;font-size:clamp(22px,4vw,29px);line-height:1.45;color:#f0dcbd;max-width:640px;margin:0 auto 30px}
@@ -73,7 +73,31 @@ ul.find span.t{font-size:21px;line-height:1.6;color:#e3d3ba}
 .final h2{margin-bottom:26px}
 footer{padding:30px 0 90px;border-top:1px solid rgba(224,180,106,.14);margin-top:24px}
 footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-width:620px;margin:0 auto}
-</style></head>
+</style>
+<style id="lm-topo-celular">
+/* Celular: encolhe SO o topo, para o convite gratuito caber na primeira tela.
+   Medido em 31/07/2026: sem isto, o convite ficava a 1,2 tela de rolagem. */
+@media (max-width:480px){
+  header{min-height:auto!important;padding-top:20px!important;padding-bottom:22px!important}
+  header h1{font-size:clamp(29px,8.2vw,42px)!important;margin-bottom:12px!important}
+  header .hook,header>p{font-size:18px!important;line-height:1.4!important;margin-bottom:16px!important}
+  header .eye,header>div:first-child{font-size:13px!important;margin-bottom:14px!important}
+  header .cta{font-size:18px!important;padding:15px 22px!important}
+  header .now{font-size:31px!important}
+  header .from{font-size:16px!important}
+  header .subcta{font-size:14px!important;margin-top:10px!important}
+  /* a pagina em portugues escreve os tamanhos direto na tag; pega pelo proprio valor */
+  header [style*="font-size:42px"]{font-size:31px!important}
+  header [style*="font-size:25px"]{font-size:18px!important;padding:15px 22px!important}
+  header [style*="font-size:22px"]{font-size:16px!important}
+  header [style*="font-size:18px"]{font-size:14px!important}
+  header [style*="font-size:16px"]{font-size:13px!important}
+  #lm-gratis{font-size:15px!important;padding:10px 14px!important;margin-top:12px!important}
+  #lm-countdown{padding:8px 12px!important;font-size:13px!important}
+  #isca-kit{margin-top:14px!important;padding:20px 18px!important}
+}
+</style>
+</head>
 <body>
 <div id="lm-oferta" style="position:sticky;top:0;z-index:60;background:linear-gradient(90deg,#38230f,#5a3a18,#38230f);border-bottom:1px solid rgba(224,180,106,0.45);color:#f7eddd;text-align:center;padding:11px 16px;font-size:clamp(14px,3.4vw,17px);font-weight:700;line-height:1.4;">&#127793; Oferta de lanzamiento: <b style="color:#f0cf8f;">$149</b> (antes $299) &#183; garantía de 7 días</div>
 <!-- CHECKOUT: trocar os href="https://pay.hotmart.com/I106752811S" pelo link do produto no Hotmart quando existir -->
@@ -85,7 +109,12 @@ footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-widt
     <div class="price"><span class="from">$299</span><span class="now">$149</span></div>
     <a class="cta" href="https://pay.hotmart.com/I106752811S">Quiero empezar — $149</a>
     <p class="subcta">Una guía honesta, sin milagros. El Método de los Tres Frascos.</p>
+  
+    <a href="#isca-kit" id="lm-gratis" style="display:inline-block;margin:18px auto 0;padding:12px 20px;border:1px dashed rgba(224,180,106,.55);border-radius:12px;color:#f0dcbd;text-decoration:none;font-size:17px;line-height:1.45;max-width:520px;background:rgba(224,180,106,.07)">&iquest;Vienes del video? Ll&eacute;vate primero el <b>Kit de los 3 Frascos</b> &mdash; gratis &darr;</a>
   </header>
+
+<section id="isca-kit" style="max-width:640px;margin:30px auto;padding:26px 28px;background:#fff8ec;border:1px solid #e6bd77;border-radius:16px;font-family:Georgia,serif;color:#2a1206;text-align:center;"><div style="font-size:21px;font-weight:bold;margin-bottom:6px;">Empieza gratis, esta semana &#128155;</div><p style="font-size:16px;margin:0 0 16px;">Ll&eacute;vate el <b>Kit de los 3 Frascos</b> &mdash; las etiquetas para imprimir y el primer paso para empezar a guardar. Es gratis y llega a tu correo ahora.</p><form id="form-kit" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;"><input id="kit-email" type="email" required inputmode="email" autocomplete="email" enterkeyhint="go" autocapitalize="off" spellcheck="false" placeholder="Tu mejor correo" style="flex:1;min-width:220px;padding:14px 16px;border:1px solid #dcc9a8;border-radius:10px;font-size:16px;"><button type="submit" style="background:#c68a3e;color:#241203;font-weight:bold;font-size:16px;border:none;border-radius:10px;padding:14px 22px;cursor:pointer;">Quiero el Kit gratis</button></form><div id="kit-msg" style="font-size:14px;margin-top:10px;color:#6b4a2a;"></div><p style="font-size:11px;color:#6e5a3d;margin:12px 0 0;">Solo tu correo. Sin spam. Puedes salir cuando quieras.</p></section>
+
   <div class="rule"></div>
   <section>
     <h2>Los tres frascos</h2><p class="lead">Así de sencillo. Tres frasquitos, tres casas para tu dinero.</p>
@@ -121,7 +150,13 @@ footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-widt
   </section>
   <footer><p>Guía de organización personal basada en experiencias de vida. No es asesoría financiera profesional. Los resultados varían. Historias inspiradas en experiencias reales de mujeres comunes.</p></footer>
 </main>
-<section id="isca-kit" style="max-width:640px;margin:30px auto;padding:26px 28px;background:#fff8ec;border:1px solid #e6bd77;border-radius:16px;font-family:Georgia,serif;color:#2a1206;text-align:center;"><div style="font-size:21px;font-weight:bold;margin-bottom:6px;">¿Aún no es momento de comprar?</div><p style="font-size:16px;margin:0 0 16px;">Recibe gratis el <b>Kit de los 3 Frascos</b>: las etiquetas para imprimir y el primer paso para empezar a guardar esta semana.</p><form id="form-kit" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;"><input id="kit-email" type="email" required placeholder="Tu mejor correo" style="flex:1;min-width:220px;padding:14px 16px;border:1px solid #dcc9a8;border-radius:10px;font-size:16px;"><button type="submit" style="background:#c68a3e;color:#241203;font-weight:bold;font-size:16px;border:none;border-radius:10px;padding:14px 22px;cursor:pointer;">Quiero el Kit gratis</button></form><div id="kit-msg" style="font-size:14px;margin-top:10px;color:#6b4a2a;"></div><p style="font-size:11px;color:#6e5a3d;margin:12px 0 0;">Solo tu correo. Sin spam. Puedes salir cuando quieras.</p></section><script>window.LMVID=function(){try{var k="lm_vid",v=localStorage.getItem(k);if(!v){v=(Date.now().toString(36)+Math.random().toString(36).slice(2,10)).replace(/[^A-Za-z0-9]/g,"");localStorage.setItem(k,v)}return v}catch(e){return null}};</script><script>(function(){var f=document.getElementById("form-kit");if(!f)return;f.addEventListener("submit",function(e){e.preventDefault();var q=new URLSearchParams(location.search),email=document.getElementById("kit-email").value.trim(),msg=document.getElementById("kit-msg");if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent="Revisa tu correo, por favor.";return;}msg.textContent="Enviando...";fetch("https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({visitante:LMVID(),email:email,origem:"livro-es",isca:"kit-3-latas",v:q.get("v"),utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")})}).then(function(r){return r.json()}).then(function(j){if(j&&j.ok){document.getElementById("isca-kit").innerHTML='<div style="font-size:21px;font-weight:bold;margin-bottom:8px;">¡Listo! &#128153;</div><p style="font-size:16px;margin:0 0 16px;">Tu Kit de los 3 Frascos está aquí. Ábrelo, imprímelo y empieza esta semana.</p><a href="/kit-es" target="_blank" style="display:inline-block;background:#2a1206;color:#e6bd77;font-weight:bold;font-size:17px;text-decoration:none;padding:14px 28px;border-radius:12px;">Abrir el Kit de los 3 Frascos</a>';}else{msg.textContent="Ups, inténtalo de nuevo en un momento.";}}).catch(function(){msg.textContent="Ups, inténtalo de nuevo en un momento.";});});})();</script>
+<script>window.LMVID=function(){try{var k="lm_vid",v=localStorage.getItem(k);if(!v){v=(Date.now().toString(36)+Math.random().toString(36).slice(2,10)).replace(/[^A-Za-z0-9]/g,"");localStorage.setItem(k,v)}return v}catch(e){return null}};</script><script>(function(){var f=document.getElementById("form-kit");if(!f)return;f.addEventListener("submit",function(e){e.preventDefault();var q=new URLSearchParams(location.search),email=document.getElementById("kit-email").value.trim(),msg=document.getElementById("kit-msg");if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent="Revisa tu correo, por favor.";return;}msg.textContent="Enviando...";fetch("https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/lead",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({visitante:LMVID(),email:email,origem:"livro-es",isca:"kit-3-latas",v:q.get("v"),utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")})}).then(function(r){return r.json()}).then(function(j){if(j&&j.ok){document.getElementById("isca-kit").innerHTML='<div style="font-size:21px;font-weight:bold;margin-bottom:8px;">¡Listo! &#128155;</div><p style="font-size:16px;margin:0 0 16px;">Tu Kit de los 3 Frascos está aquí. Ábrelo, imprímelo y empieza esta semana.</p><a href="/kit-es" target="_blank" style="display:inline-block;background:#2a1206;color:#e6bd77;font-weight:bold;font-size:17px;text-decoration:none;padding:14px 28px;border-radius:12px;">Abrir el Kit de los 3 Frascos</a>';}else{msg.textContent="Ups, inténtalo de nuevo en un momento.";}}).catch(function(){msg.textContent="Ups, inténtalo de nuevo en un momento.";});});})();</script>
 <section id="app-section" style="max-width:640px;margin:22px auto;padding:24px 28px;background:#2a1206;color:#fbefd8;border-radius:16px;font-family:Georgia,serif;text-align:center;"><div style="font-size:20px;font-weight:bold;margin-bottom:8px;color:#e6bd77;">Y hay más: la app, gratis 💛</div><p style="font-size:15px;margin:0 0 16px;line-height:1.5;">La app <b>Lição de Mulher</b> organiza tu día a día: gastos, metas, sobres digitales y <b>Sofía</b>, tu consejera de IA. Es gratis. El <b>Premium</b> desbloquea todo.</p><a href="/" style="display:inline-block;background:#e6bd77;color:#2a1206;font-weight:bold;font-size:16px;text-decoration:none;padding:13px 26px;border-radius:11px;">Abrir la app gratis</a></section>
 <script>(function(){try{var q=new URLSearchParams(location.search),v=q.get("v");var C=LMVID();document.querySelectorAll('a[href*="pay.kiwify.com.br"],a[href*="pay.hotmart.com"]').forEach(function(a){try{var u=new URL(a.href);if(v&&!u.searchParams.get("src"))u.searchParams.set("src",v);if(C&&!u.searchParams.get("sck"))u.searchParams.set("sck",C);a.href=u.toString();}catch(e){}});var d={visitante:LMVID(),path:location.pathname,tz:(function(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||null}catch(e){return null}})(),idioma:navigator.language||null,lang:"es",ref:document.referrer,video:v,utm_source:q.get("utm_source"),utm_medium:q.get("utm_medium"),utm_campaign:q.get("utm_campaign")},U="https://emvgejbbusrbawohyfeu.supabase.co/functions/v1/hit",j=JSON.stringify(d);if(navigator.sendBeacon){navigator.sendBeacon(U,new Blob([j],{type:"text/plain"}))}else{fetch(U,{method:"POST",keepalive:true,headers:{"Content-Type":"text/plain"},body:j})}}catch(e){}})();</script>
+<script>
+(function(){var a=document.getElementById('lm-gratis');if(!a)return;
+a.addEventListener('click',function(e){e.preventDefault();var k=document.getElementById('isca-kit');if(!k)return;
+k.scrollIntoView({behavior:'smooth',block:'center'});
+setTimeout(function(){var i=document.getElementById('kit-email');if(i)i.focus({preventScroll:true});},520);});})();
+</script>
 </body></html>
