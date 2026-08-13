@@ -33,7 +33,7 @@
     background:var(--escuro2);border:1px solid rgba(233,201,136,.28);
     border-radius:16px;padding:26px 24px;margin:30px 0
   }
-  .entrega{border-left:4px solid var(--ouro2)}
+  .entrega{border:1px solid var(--ouro2)}
   .oferta{border:1px solid rgba(233,201,136,.55)}
   .risco{color:var(--creme2);text-decoration:line-through;opacity:.75}
   .preco{font-family:'Libre Baskerville',serif;font-size:34px;color:var(--ouro);display:block;margin:6px 0 2px}
@@ -49,6 +49,18 @@
   li{margin-bottom:9px}
   .peq{font-size:14px;color:var(--creme2)}
   hr{border:0;border-top:1px solid rgba(233,201,136,.2);margin:36px 0}
+
+/* 13/08/2026 — curadoria: quem navega pelo TECLADO precisa ver onde está
+   (nenhuma página do site tinha indicação de foco), e quem pediu "reduzir
+   movimento" no celular/Windows não deve receber animação. */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  /* fundo marrom nesta pagina: o contorno usa o oposto pra nao sumir.
+     (box-shadow nao serve aqui — os botoes ja tem o deles e um anula o outro) */
+  outline:3px solid #f7eddd;outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
 </style>
 </head>
 <body>

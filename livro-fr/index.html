@@ -96,6 +96,18 @@ footer p{font-size:16px;line-height:1.6;color:#9c8567;text-align:center;max-widt
   #lm-countdown{padding:8px 12px!important;font-size:13px!important}
   #isca-kit{margin-top:14px!important;padding:20px 18px!important}
 }
+
+/* 13/08/2026 — curadoria: quem navega pelo TECLADO precisa ver onde está
+   (nenhuma página do site tinha indicação de foco), e quem pediu "reduzir
+   movimento" no celular/Windows não deve receber animação. */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  /* fundo marrom nesta pagina: o contorno usa o oposto pra nao sumir.
+     (box-shadow nao serve aqui — os botoes ja tem o deles e um anula o outro) */
+  outline:3px solid #f7eddd;outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
 </style>
 </head>
 <body>

@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html><head>
+<html lang="pt-BR"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 13/08/2026: esta pagina NAO tinha <title> nenhum (a tag nem existia) — a aba do
+     navegador ficava sem nome e a busca do Google mostrava o que queria. Todas as
+     outras linguas (livro-en/es/fr/it) tinham. Texto igual ao og:title da propria pagina. -->
+<title>O Método das 3 Latas — Lição de Mulher</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Nunito+Sans:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&display=swap">
 <style>x-dc{display:block}helmet{display:none}</style>
 
@@ -124,7 +128,19 @@
     a { color: #e6bd77; }
     a:hover { color: #f0d199; }
     ::selection { background: #e0b46a; color: #241009; }
-  </style>
+  
+/* 13/08/2026 — curadoria: quem navega pelo TECLADO precisa ver onde está
+   (nenhuma página do site tinha indicação de foco), e quem pediu "reduzir
+   movimento" no celular/Windows não deve receber animação. */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  /* fundo marrom nesta pagina: o contorno usa o oposto pra nao sumir.
+     (box-shadow nao serve aqui — os botoes ja tem o deles e um anula o outro) */
+  outline:3px solid #f7eddd;outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
+</style>
 </helmet>
 
 

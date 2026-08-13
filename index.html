@@ -115,6 +115,13 @@
     #carregando .marca { font-family: 'Libre Baskerville', Georgia, serif; font-size: 22px; color: #d4a847; letter-spacing: 0.01em; }
     #carregando .anel { width: 34px; height: 34px; border: 3px solid rgba(212,168,71,0.18); border-top-color: #d4a847; border-radius: 50%; animation: spin 0.9s linear infinite; }
     #root:not(:empty) + #carregando { display: none; }
+
+    /* 13/08/2026 — curadoria: o app não mostrava NADA quando a usuária navegava
+       pelo teclado (Tab). Quem usa teclado, leitor de tela ou tem dificuldade
+       motora ficava perdida: dá pra mexer, mas não dá pra ver onde está. */
+    :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+      outline: 3px solid #d4a847; outline-offset: 3px; border-radius: 8px;
+    }
   </style>
   <noscript>
     <style>body{background:#0f0a08;color:#c8a090;font-family:sans-serif;text-align:center;padding:40px 20px;}</style>

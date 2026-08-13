@@ -45,6 +45,18 @@
   .cta a{ color:var(--ambar); font-weight:bold; text-decoration:none; }
   .aviso{ font-size:11px; color:#6e5a3d; margin-top:24px; border-top:1px solid var(--linha); padding-top:12px; }
   @media print{ body{ background:#fff; } .folha{ box-shadow:none; border:none; margin:0; } }
+
+/* 13/08/2026 — curadoria: quem navega pelo TECLADO precisa ver onde está
+   (nenhuma página do site tinha indicação de foco), e quem pediu "reduzir
+   movimento" no celular/Windows não deve receber animação. */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  /* fundo creme nesta pagina: o contorno usa o oposto pra nao sumir.
+     (box-shadow nao serve aqui — os botoes ja tem o deles e um anula o outro) */
+  outline:3px solid #1e130d;outline-offset:3px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
 </style>
 </head>
 <body>
